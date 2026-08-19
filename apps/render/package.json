@@ -1,5 +1,5 @@
 {
-  "name": "render",
+  "name": "@captionly/render",
   "module": "src/index.ts",
   "devDependencies": {
     "@types/bun": "latest",
@@ -16,6 +16,6 @@
   "dependencies": {
     "canvas": "^3.2.3",
     "fabric": "5.3.0",
-    "engine": "workspace:*"
+    "@captionly/engine": "workspace:*"
   }
 }

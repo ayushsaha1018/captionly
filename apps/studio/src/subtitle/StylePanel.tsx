@@ -1,4 +1,4 @@
-import type { SubtitleStyle, SafeZonePreset } from "engine";
+import type { SubtitleStyle, SafeZonePreset } from "@captionly/engine";
 
 type Props = {
   style: SubtitleStyle;

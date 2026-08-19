@@ -12,7 +12,7 @@ import {
   type FlapBoardOptions,
   type TickerOptions,
   type DigitalMatrixOptions,
-} from "engine";
+} from "@captionly/engine";
 
 type Props = {
   animation: AnimationConfig;

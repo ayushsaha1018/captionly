@@ -1,5 +1,5 @@
 {
-  "name": "studio",
+  "name": "@captionly/studio",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -12,6 +12,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@captionly/engine": "workspace:*",
     "@cloudflare/vite-plugin": "^1.25.5",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
@@ -50,7 +51,6 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
-    "engine": "workspace:*",
     "fabric": "5.3.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.575.0",

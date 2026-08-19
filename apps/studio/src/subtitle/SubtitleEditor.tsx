@@ -11,7 +11,7 @@ import {
   type SubtitleStyle,
   type SafeZonePreset,
   type AnimationConfig,
-} from "engine";
+} from "@captionly/engine";
 import { SafeZones } from "./SafeZones";
 import { StylePanel } from "./StylePanel";
 import { AnimationPanel } from "./AnimationPanel";
