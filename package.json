@@ -11,7 +11,9 @@
   },
   "scripts": {
     "dev": "turbo run dev",
+    "dev:frontend": "turbo run dev --filter=caption-canvas",
     "build": "turbo run build",
+    "build:frontend": "turbo run build --filter=caption-canvas",
     "lint": "turbo run lint"
   }
 }
