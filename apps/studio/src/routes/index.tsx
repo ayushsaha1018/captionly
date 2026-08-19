@@ -6,7 +6,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Fabric Subtitle Editor — Animated Caption Preview" },
-      { name: "description", content: "Modern word-by-word animated subtitle editor built with React, TypeScript and Fabric.js." },
+      {
+        name: "description",
+        content:
+          "Modern word-by-word animated subtitle editor built with React, TypeScript and Fabric.js.",
+      },
     ],
   }),
 });
@@ -20,7 +24,9 @@ function Index() {
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[hsl(45_100%_55%)] to-[hsl(15_100%_55%)] shadow-lg" />
             <div>
               <h1 className="text-base font-semibold leading-none">Caption Studio</h1>
-              <p className="text-xs text-muted-foreground mt-1">Word-level animated subtitle editor</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Word-level animated subtitle editor
+              </p>
             </div>
           </div>
           <div className="text-xs text-muted-foreground hidden md:block">
