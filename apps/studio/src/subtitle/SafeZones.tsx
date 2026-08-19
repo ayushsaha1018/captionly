@@ -1,6 +1,9 @@
 import type { SafeZonePreset } from "@captionly/engine";
 
-const ZONES: Record<Exclude<SafeZonePreset, "none">, { label: string; insetX: number; insetY: number; ratio?: string }> = {
+const ZONES: Record<
+  Exclude<SafeZonePreset, "none">,
+  { label: string; insetX: number; insetY: number; ratio?: string }
+> = {
   instagram: { label: "Instagram 9:16", insetX: 6, insetY: 14 },
   tiktok: { label: "TikTok 9:16", insetX: 6, insetY: 18 },
   youtube: { label: "YouTube 16:9", insetX: 5, insetY: 10 },

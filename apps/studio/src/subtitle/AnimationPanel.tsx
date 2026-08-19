@@ -109,7 +109,10 @@ export function AnimationPanel({ animation, onChange }: Props) {
           </Row>
           <Row label={`Blink rate (${animation.options.blinkRate.toFixed(1)} Hz)`}>
             <input
-              type="range" min={0} max={4} step={0.1}
+              type="range"
+              min={0}
+              max={4}
+              step={0.1}
               value={animation.options.blinkRate}
               onChange={(e) =>
                 setOptions<TypewriterOptions>({
@@ -122,7 +125,10 @@ export function AnimationPanel({ animation, onChange }: Props) {
           </Row>
           <Row label={`Max speed cap (${animation.options.maxCps} chars/s)`}>
             <input
-              type="range" min={10} max={80} step={1}
+              type="range"
+              min={10}
+              max={80}
+              step={1}
               value={animation.options.maxCps}
               onChange={(e) =>
                 setOptions<TypewriterOptions>({
@@ -140,7 +146,10 @@ export function AnimationPanel({ animation, onChange }: Props) {
         <>
           <Row label={`Line limit (${animation.options.lineLimit})`}>
             <input
-              type="range" min={1} max={5} step={1}
+              type="range"
+              min={1}
+              max={5}
+              step={1}
               value={animation.options.lineLimit}
               onChange={(e) =>
                 setOptions<RollUpOptions>({
@@ -168,7 +177,10 @@ export function AnimationPanel({ animation, onChange }: Props) {
           </Row>
           <Row label={`Line spacing (${animation.options.lineSpacing}px)`}>
             <input
-              type="range" min={0} max={64} step={2}
+              type="range"
+              min={0}
+              max={64}
+              step={2}
               value={animation.options.lineSpacing}
               onChange={(e) =>
                 setOptions<RollUpOptions>({
@@ -201,7 +213,10 @@ export function AnimationPanel({ animation, onChange }: Props) {
           </Row>
           <Row label={`Max speed cap (${animation.options.maxCps} chars/s)`}>
             <input
-              type="range" min={10} max={80} step={1}
+              type="range"
+              min={10}
+              max={80}
+              step={1}
               value={animation.options.maxCps}
               onChange={(e) =>
                 setOptions<PaintOnOptions>({
@@ -219,7 +234,10 @@ export function AnimationPanel({ animation, onChange }: Props) {
         <>
           <Row label={`Pop scale (${animation.options.popScale.toFixed(2)}x)`}>
             <input
-              type="range" min={1} max={1.6} step={0.01}
+              type="range"
+              min={1}
+              max={1.6}
+              step={0.01}
               value={animation.options.popScale}
               onChange={(e) =>
                 setOptions<PopOnOptions>({
@@ -232,7 +250,10 @@ export function AnimationPanel({ animation, onChange }: Props) {
           </Row>
           <Row label={`Pop duration (${animation.options.popDuration.toFixed(2)}s)`}>
             <input
-              type="range" min={0.05} max={0.8} step={0.01}
+              type="range"
+              min={0.05}
+              max={0.8}
+              step={0.01}
               value={animation.options.popDuration}
               onChange={(e) =>
                 setOptions<PopOnOptions>({
@@ -269,7 +290,10 @@ export function AnimationPanel({ animation, onChange }: Props) {
         <>
           <Row label={`Flap duration (${animation.options.flapDuration.toFixed(2)}s)`}>
             <input
-              type="range" min={0.1} max={2} step={0.05}
+              type="range"
+              min={0.1}
+              max={2}
+              step={0.05}
               value={animation.options.flapDuration}
               onChange={(e) =>
                 setOptions<FlapBoardOptions>({
@@ -282,7 +306,10 @@ export function AnimationPanel({ animation, onChange }: Props) {
           </Row>
           <Row label={`Cycles per char (${animation.options.cyclesPerChar})`}>
             <input
-              type="range" min={2} max={20} step={1}
+              type="range"
+              min={2}
+              max={20}
+              step={1}
               value={animation.options.cyclesPerChar}
               onChange={(e) =>
                 setOptions<FlapBoardOptions>({
@@ -300,7 +327,10 @@ export function AnimationPanel({ animation, onChange }: Props) {
         <>
           <Row label={`Scroll speed (${animation.options.speed} px/s)`}>
             <input
-              type="range" min={50} max={600} step={10}
+              type="range"
+              min={50}
+              max={600}
+              step={10}
               value={animation.options.speed}
               onChange={(e) =>
                 setOptions<TickerOptions>({
@@ -313,7 +343,10 @@ export function AnimationPanel({ animation, onChange }: Props) {
           </Row>
           <Row label={`Gap (${animation.options.gap}px)`}>
             <input
-              type="range" min={0} max={400} step={10}
+              type="range"
+              min={0}
+              max={400}
+              step={10}
               value={animation.options.gap}
               onChange={(e) =>
                 setOptions<TickerOptions>({
@@ -331,7 +364,10 @@ export function AnimationPanel({ animation, onChange }: Props) {
         <>
           <Row label={`Glow intensity (${animation.options.glowIntensity.toFixed(2)})`}>
             <input
-              type="range" min={0} max={1} step={0.05}
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
               value={animation.options.glowIntensity}
               onChange={(e) =>
                 setOptions<DigitalMatrixOptions>({
@@ -344,7 +380,10 @@ export function AnimationPanel({ animation, onChange }: Props) {
           </Row>
           <Row label={`Glitch jitter (${animation.options.glitchAmplitude}px)`}>
             <input
-              type="range" min={0} max={12} step={1}
+              type="range"
+              min={0}
+              max={12}
+              step={1}
               value={animation.options.glitchAmplitude}
               onChange={(e) =>
                 setOptions<DigitalMatrixOptions>({

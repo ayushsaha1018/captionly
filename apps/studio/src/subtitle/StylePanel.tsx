@@ -66,7 +66,10 @@ export function StylePanel({ style, onStyleChange, safeZone, onSafeZoneChange }:
         </Row>
         <Row label={`Size (${style.fontSize}px)`}>
           <input
-            type="range" min={32} max={160} step={2}
+            type="range"
+            min={32}
+            max={160}
+            step={2}
             value={style.fontSize}
             onChange={(e) => set("fontSize", +e.target.value)}
             className="w-full accent-[hsl(var(--primary))]"
@@ -95,7 +98,10 @@ export function StylePanel({ style, onStyleChange, safeZone, onSafeZoneChange }:
 
       <Row label={`Stroke width (${style.strokeWidth}px)`}>
         <input
-          type="range" min={0} max={20} step={1}
+          type="range"
+          min={0}
+          max={20}
+          step={1}
           value={style.strokeWidth}
           onChange={(e) => set("strokeWidth", +e.target.value)}
           className="w-full accent-[hsl(var(--primary))]"
@@ -104,7 +110,10 @@ export function StylePanel({ style, onStyleChange, safeZone, onSafeZoneChange }:
 
       <Row label={`Active scale (${style.activeScale.toFixed(2)}x)`}>
         <input
-          type="range" min={1} max={2} step={0.05}
+          type="range"
+          min={1}
+          max={2}
+          step={0.05}
           value={style.activeScale}
           onChange={(e) => set("activeScale", +e.target.value)}
           className="w-full accent-[hsl(var(--primary))]"
@@ -113,7 +122,10 @@ export function StylePanel({ style, onStyleChange, safeZone, onSafeZoneChange }:
 
       <Row label={`Shadow blur (${style.shadowBlur}px)`}>
         <input
-          type="range" min={0} max={64} step={2}
+          type="range"
+          min={0}
+          max={64}
+          step={2}
           value={style.shadowBlur}
           onChange={(e) => set("shadowBlur", +e.target.value)}
           className="w-full accent-[hsl(var(--primary))]"
@@ -123,7 +135,10 @@ export function StylePanel({ style, onStyleChange, safeZone, onSafeZoneChange }:
       <div className="border-t border-border pt-4 flex flex-col gap-4">
         <Row label={`Box width (${style.boxWidth}px)`}>
           <input
-            type="range" min={300} max={1900} step={20}
+            type="range"
+            min={300}
+            max={1900}
+            step={20}
             value={style.boxWidth}
             onChange={(e) => set("boxWidth", +e.target.value)}
             className="w-full accent-[hsl(var(--primary))]"
@@ -157,7 +172,10 @@ export function StylePanel({ style, onStyleChange, safeZone, onSafeZoneChange }:
           </Row>
           <Row label={`Opacity (${style.bgOpacity.toFixed(2)})`}>
             <input
-              type="range" min={0} max={1} step={0.05}
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
               value={style.bgOpacity}
               onChange={(e) => set("bgOpacity", +e.target.value)}
               className="w-full accent-[hsl(var(--primary))]"
@@ -166,7 +184,10 @@ export function StylePanel({ style, onStyleChange, safeZone, onSafeZoneChange }:
         </div>
         <Row label={`Corner radius (${style.bgRadius}px)`}>
           <input
-            type="range" min={0} max={64} step={1}
+            type="range"
+            min={0}
+            max={64}
+            step={1}
             value={style.bgRadius}
             onChange={(e) => set("bgRadius", +e.target.value)}
             className="w-full accent-[hsl(var(--primary))]"
@@ -175,7 +196,10 @@ export function StylePanel({ style, onStyleChange, safeZone, onSafeZoneChange }:
         <div className="grid grid-cols-2 gap-3">
           <Row label={`Padding X (${style.bgPaddingX}px)`}>
             <input
-              type="range" min={0} max={80} step={2}
+              type="range"
+              min={0}
+              max={80}
+              step={2}
               value={style.bgPaddingX}
               onChange={(e) => set("bgPaddingX", +e.target.value)}
               className="w-full accent-[hsl(var(--primary))]"
@@ -183,7 +207,10 @@ export function StylePanel({ style, onStyleChange, safeZone, onSafeZoneChange }:
           </Row>
           <Row label={`Padding Y (${style.bgPaddingY}px)`}>
             <input
-              type="range" min={0} max={60} step={2}
+              type="range"
+              min={0}
+              max={60}
+              step={2}
               value={style.bgPaddingY}
               onChange={(e) => set("bgPaddingY", +e.target.value)}
               className="w-full accent-[hsl(var(--primary))]"

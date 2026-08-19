@@ -19,8 +19,14 @@ const fmt = (s: number) => {
 };
 
 export function VideoControls({
-  playing, currentTime, duration,
-  onPlayPause, onSeek, onVolume, onRate, onFullscreen,
+  playing,
+  currentTime,
+  duration,
+  onPlayPause,
+  onSeek,
+  onVolume,
+  onRate,
+  onFullscreen,
 }: Props) {
   return (
     <div className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
@@ -32,7 +38,7 @@ export function VideoControls({
         {playing ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
       </button>
 
-      <div className="flex flex-1 items-center gap-3 min-w-[200px]">
+      <div className="flex flex-1 items-center gap-3 min-w-50">
         <span className="text-xs tabular-nums text-muted-foreground w-10">{fmt(currentTime)}</span>
         <input
           type="range"
@@ -49,7 +55,11 @@ export function VideoControls({
       <div className="flex items-center gap-2">
         <Volume2 size={16} className="text-muted-foreground" />
         <input
-          type="range" min={0} max={1} step={0.01} defaultValue={1}
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          defaultValue={1}
           onChange={(e) => onVolume(+e.target.value)}
           className="w-20 accent-[hsl(var(--primary))]"
         />
@@ -61,7 +71,9 @@ export function VideoControls({
         className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
       >
         {[0.5, 0.75, 1, 1.25, 1.5, 2].map((r) => (
-          <option key={r} value={r}>{r}x</option>
+          <option key={r} value={r}>
+            {r}x
+          </option>
         ))}
       </select>
 
