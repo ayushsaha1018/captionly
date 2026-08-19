@@ -1,4 +1,4 @@
-import type { SafeZonePreset } from "./types";
+import type { SafeZonePreset } from "subtitle-renderer";
 
 const ZONES: Record<Exclude<SafeZonePreset, "none">, { label: string; insetX: number; insetY: number; ratio?: string }> = {
   instagram: { label: "Instagram 9:16", insetX: 6, insetY: 14 },

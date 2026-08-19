@@ -1,4 +1,4 @@
-import type { SubtitleStyle, SafeZonePreset } from "./types";
+import type { SubtitleStyle, SafeZonePreset } from "subtitle-renderer";
 
 type Props = {
   style: SubtitleStyle;

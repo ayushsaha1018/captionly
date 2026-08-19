@@ -1,18 +1,18 @@
-import type {
-  AnimationConfig,
-  AnimationType,
-  ColorFillOptions,
-  TypewriterOptions,
-  RollUpOptions,
-  PaintOnOptions,
-  PopOnOptions,
-  WipeOptions,
-  FlapBoardOptions,
-  TickerOptions,
-  DigitalMatrixOptions,
-} from "./types";
-import { ANIMATION_LABELS } from "./animations/registry";
-import { defaultOptionsFor } from "./sampleData";
+import {
+  ANIMATION_LABELS,
+  defaultOptionsFor,
+  type AnimationConfig,
+  type AnimationType,
+  type ColorFillOptions,
+  type TypewriterOptions,
+  type RollUpOptions,
+  type PaintOnOptions,
+  type PopOnOptions,
+  type WipeOptions,
+  type FlapBoardOptions,
+  type TickerOptions,
+  type DigitalMatrixOptions,
+} from "subtitle-renderer";
 
 type Props = {
   animation: AnimationConfig;

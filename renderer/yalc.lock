@@ -1,9 +1,0 @@
-{
-  "version": "v1",
-  "packages": {
-    "subtitle-renderer": {
-      "signature": "74137c8ae012d53de3a37499be2a39a7",
-      "file": true
-    }
-  }
-}

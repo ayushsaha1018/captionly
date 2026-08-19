@@ -1,24 +1,23 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { fabric } from "fabric";
-import { SubtitleRenderer, CANVAS_W, CANVAS_H } from "./renderer";
 import {
+  SubtitleRenderer,
+  CANVAS_W,
+  CANVAS_H,
   sampleSubtitles,
   defaultStyle,
   defaultPosition,
   defaultAnimation,
-} from "./sampleData";
-import type {
-  SubtitleStyle,
-  SafeZonePreset,
-  AnimationConfig,
-} from "./types";
+  type SubtitleStyle,
+  type SafeZonePreset,
+  type AnimationConfig,
+} from "subtitle-renderer";
 import { SafeZones } from "./SafeZones";
 import { StylePanel } from "./StylePanel";
 import { AnimationPanel } from "./AnimationPanel";
 import { VideoControls } from "./VideoControls";
 
-const VIDEO_SRC =
-  "https://videos.pexels.com/video-files/37233052/15773739_1920_1080_25fps.mp4";
+const VIDEO_SRC = "https://videos.pexels.com/video-files/37233052/15773739_1920_1080_25fps.mp4";
 
 export function SubtitleEditor() {
   const videoRef = useRef<HTMLVideoElement>(null);
