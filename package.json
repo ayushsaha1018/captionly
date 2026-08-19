@@ -1,5 +1,5 @@
 {
-  "name": "caption-generator",
+  "name": "captionly",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -11,9 +11,9 @@
   },
   "scripts": {
     "dev": "turbo run dev",
-    "dev:frontend": "turbo run dev --filter=caption-canvas",
+    "dev:frontend": "turbo run dev --filter=studio",
     "build": "turbo run build",
-    "build:frontend": "turbo run build --filter=caption-canvas",
+    "build:frontend": "turbo run build --filter=studio",
     "lint": "turbo run lint"
   }
 }

@@ -9,13 +9,13 @@ if (typeof document === "undefined") {
   ).document;
 }
 
-import { SubtitleRenderer, CANVAS_W, CANVAS_H } from "subtitle-renderer";
+import { SubtitleRenderer, CANVAS_W, CANVAS_H } from "engine";
 import type {
   SubtitleLine,
   SubtitleStyle,
   SubtitlePosition,
   AnimationConfig,
-} from "subtitle-renderer";
+} from "engine";
 
 // fabric 5 node mode: jsdom-backed canvas; get raw node-canvas via impl wrapper
 function canvasToBuffer(fabricCanvas: fabric.StaticCanvas): Buffer {

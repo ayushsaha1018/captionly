@@ -11,7 +11,7 @@ import {
   type SubtitleStyle,
   type SafeZonePreset,
   type AnimationConfig,
-} from "subtitle-renderer";
+} from "engine";
 import { SafeZones } from "./SafeZones";
 import { StylePanel } from "./StylePanel";
 import { AnimationPanel } from "./AnimationPanel";

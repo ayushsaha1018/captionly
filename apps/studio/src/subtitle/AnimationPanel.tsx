@@ -12,7 +12,7 @@ import {
   type FlapBoardOptions,
   type TickerOptions,
   type DigitalMatrixOptions,
-} from "subtitle-renderer";
+} from "engine";
 
 type Props = {
   animation: AnimationConfig;

@@ -8,7 +8,7 @@ import type {
   SubtitleStyle,
   SubtitlePosition,
   AnimationConfig,
-} from "subtitle-renderer";
+} from "engine";
 
 type SubtitleJSON = {
   lines: SubtitleLine[];
