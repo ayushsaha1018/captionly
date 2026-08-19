@@ -1,0 +1,16 @@
+{
+  "name": "subtitle-renderer",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "main": "./src/index.ts",
+  "files": [
+    "src"
+  ],
+  "peerDependencies": {
+    "fabric": "5.3.0"
+  },
+  "devDependencies": {
+    "@types/fabric": "^5.3.11"
+  }
+}

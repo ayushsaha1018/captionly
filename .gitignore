@@ -1,0 +1,20 @@
+node_modules
+dist
+.turbo
+.wrangler
+.env
+.env.*
+!.env.example
+
+# renderer sample media / output
+apps/renderer/output/
+apps/renderer/files/*.mp4
+
+# logs & caches
+*.log
+.eslintcache
+.cache
+*.tsbuildinfo
+
+# OS
+.DS_Store

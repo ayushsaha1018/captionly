@@ -1,0 +1,21 @@
+{
+  "name": "renderer",
+  "module": "src/index.ts",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/fabric": "^5.3.11"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "private": true,
+  "scripts": {
+    "render": "bun src/index.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "canvas": "^3.2.3",
+    "fabric": "^5.3.0",
+    "subtitle-renderer": "file:.yalc/subtitle-renderer"
+  }
+}

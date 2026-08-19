@@ -1,0 +1,54 @@
+{
+  "lines": [
+    {
+      "id": "line-1",
+      "start": 0.5,
+      "end": 5.0,
+      "words": [
+        { "id": "w1", "text": "This", "start": 0.5, "end": 0.9 },
+        { "id": "w2", "text": "is", "start": 0.9, "end": 1.2 },
+        { "id": "w3", "text": "your", "start": 1.2, "end": 1.5 },
+        { "id": "w4", "text": "first", "start": 1.5, "end": 2.0 },
+        { "id": "w5", "text": "caption", "start": 2.0, "end": 2.8 },
+        { "id": "w6", "text": "line.", "start": 2.8, "end": 4.8 }
+      ]
+    },
+    {
+      "id": "line-2",
+      "start": 5.5,
+      "end": 10.5,
+      "words": [
+        { "id": "w7", "text": "Edit", "start": 5.5, "end": 5.9 },
+        { "id": "w8", "text": "subtitles", "start": 5.9, "end": 6.7 },
+        { "id": "w9", "text": "dot", "start": 6.7, "end": 7.0 },
+        { "id": "w10", "text": "json", "start": 7.0, "end": 7.5 },
+        { "id": "w11", "text": "to", "start": 7.5, "end": 7.7 },
+        { "id": "w12", "text": "change", "start": 7.7, "end": 8.2 },
+        { "id": "w13", "text": "this.", "start": 8.2, "end": 10.3 }
+      ]
+    }
+  ],
+  "style": {
+    "fontFamily": "Inter",
+    "fontWeight": 900,
+    "fontSize": 34,
+    "color": "#ffffff",
+    "activeColor": "#FFD60A",
+    "stroke": "#000000",
+    "strokeWidth": 6,
+    "activeScale": 1.25,
+    "shadowBlur": 24,
+    "boxWidth": 1600,
+    "boxAnchor": "bottom",
+    "bgColor": "#000000",
+    "bgOpacity": 0,
+    "bgRadius": 16,
+    "bgPaddingX": 24,
+    "bgPaddingY": 12
+  },
+  "position": { "x": 960, "y": 900 },
+  "animation": {
+    "type": "wipe",
+    "options": { "direction": "ltr" }
+  }
+}
