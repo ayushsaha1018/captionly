@@ -87,12 +87,18 @@ export class BackgroundLayer {
  * Greedy word-wrap using a measurement canvas so we can wrap pre-measured
  * text without relying on fabric.Textbox internals.
  */
-let measureCtx: CanvasRenderingContext2D | null = null;
-function ctx() {
+let measureCtx:
+  CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
+function ctx(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D {
   if (measureCtx) return measureCtx;
-  const c = document.createElement("canvas");
-  measureCtx = c.getContext("2d")!;
-  return measureCtx;
+  if (typeof document !== "undefined") {
+    const c = document.createElement("canvas");
+    measureCtx = c.getContext("2d")!;
+  } else if (typeof OffscreenCanvas !== "undefined") {
+    const c = new OffscreenCanvas(1, 1);
+    measureCtx = c.getContext("2d")!;
+  }
+  return measureCtx!;
 }
 
 export function measureWidth(
@@ -119,7 +125,10 @@ export function wrapTextToLines(
   for (const tok of words) {
     if (!tok) continue;
     const test = cur + tok;
-    if (measureWidth(test.trimEnd(), fontPx, family, weight) > maxWidth && cur.trim().length) {
+    if (
+      measureWidth(test.trimEnd(), fontPx, family, weight) > maxWidth &&
+      cur.trim().length
+    ) {
       lines.push(cur.trimEnd());
       cur = tok.trimStart();
     } else {

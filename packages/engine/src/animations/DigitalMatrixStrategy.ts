@@ -86,8 +86,7 @@ export class DigitalMatrixStrategy implements AnimationStrategy {
       display += GLITCH[seed];
     }
 
-    const jitterX =
-      (Math.sin(currentTime * 47.3) * opts.glitchAmplitude) | 0;
+    const jitterX = (Math.sin(currentTime * 47.3) * opts.glitchAmplitude) | 0;
 
     this.text.set({
       text: display,

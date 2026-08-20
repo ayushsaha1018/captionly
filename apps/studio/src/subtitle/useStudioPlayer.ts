@@ -51,24 +51,25 @@ export function useStudioPlayer(options: UseStudioPlayerOptions): StudioPlayerSt
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Initialize volume and mute from localStorage if available
-  const [volume, setVolumeState] = useState<number>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY_VOLUME);
-      return saved !== null ? Number(saved) : 1;
-    } catch {
-      return 1;
-    }
-  });
+  // Initialize volume and mute states consistently for SSR
+  const [volume, setVolumeState] = useState<number>(1);
+  const [isMuted, setIsMutedState] = useState<boolean>(true);
 
-  const [isMuted, setIsMutedState] = useState<boolean>(() => {
+  // Restore saved volume/muted preferences on client mount
+  useEffect(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY_MUTED);
-      return saved !== null ? saved === "true" : true; // default muted for browser autoplay policy
+      const savedVolume = localStorage.getItem(STORAGE_KEY_VOLUME);
+      if (savedVolume !== null) {
+        setVolumeState(Number(savedVolume));
+      }
+      const savedMuted = localStorage.getItem(STORAGE_KEY_MUTED);
+      if (savedMuted !== null) {
+        setIsMutedState(savedMuted === "true");
+      }
     } catch {
-      return true;
+      // Ignore localStorage errors
     }
-  });
+  }, []);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -167,10 +168,30 @@ export function useStudioPlayer(options: UseStudioPlayerOptions): StudioPlayerSt
       setIsMutedState(video.muted);
     };
 
+    // If metadata is already loaded before event listener is attached (e.g. local / cached video)
+    if (video.readyState >= 1 && video.duration && !isNaN(video.duration)) {
+      setDuration(video.duration);
+      setCurrentTime(video.currentTime);
+      setError(null);
+      setIsBuffering(false);
+      onDurationChange?.(video.duration);
+      updateBuffered();
+    }
+
+    const handleDurationChange = () => {
+      if (video.duration && !isNaN(video.duration)) {
+        setDuration(video.duration);
+        setError(null);
+        onDurationChange?.(video.duration);
+        updateBuffered();
+      }
+    };
+
     video.addEventListener("play", handlePlay);
     video.addEventListener("pause", handlePause);
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("durationchange", handleDurationChange);
     video.addEventListener("progress", handleProgress);
     video.addEventListener("waiting", handleWaiting);
     video.addEventListener("playing", handlePlaying);
@@ -184,6 +205,7 @@ export function useStudioPlayer(options: UseStudioPlayerOptions): StudioPlayerSt
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("durationchange", handleDurationChange);
       video.removeEventListener("progress", handleProgress);
       video.removeEventListener("waiting", handleWaiting);
       video.removeEventListener("playing", handlePlaying);

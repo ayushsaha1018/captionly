@@ -18,8 +18,10 @@ import { AnimationPanel } from "./AnimationPanel";
 import { StudioPlayer } from "./StudioPlayer";
 import { VideoControls } from "./VideoControls";
 import { useStudioPlayer } from "./useStudioPlayer";
+import { ExportDialog } from "@/export/ExportDialog";
+import { Download, Film, Sparkles } from "lucide-react";
 
-const VIDEO_SRC = "https://videos.pexels.com/video-files/37233052/15773739_1920_1080_25fps.mp4";
+const VIDEO_SRC = "/test1.mp4";
 
 export function SubtitleEditor() {
   const canvasElRef = useRef<HTMLCanvasElement>(null);
@@ -29,7 +31,9 @@ export function SubtitleEditor() {
 
   const [style, setStyle] = useState<SubtitleStyle>(defaultStyle);
   const [animation, setAnimation] = useState<AnimationConfig>(defaultAnimation);
+  const [position, setPosition] = useState(defaultPosition);
   const [safeZone, setSafeZone] = useState<SafeZonePreset>("none");
+  const [exportOpen, setExportOpen] = useState<boolean>(false);
 
   // Dedicated declarative video player controller
   const player = useStudioPlayer({
@@ -134,6 +138,20 @@ export function SubtitleEditor() {
       </div>
 
       <div className="flex flex-col gap-4">
+        {/* Export Action Card */}
+        <div className="rounded-xl border border-border bg-card p-3.5 shadow-sm">
+          <button
+            onClick={() => setExportOpen(true)}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[hsl(45_100%_50%)] to-[hsl(15_100%_55%)] px-4 py-2.5 text-xs font-semibold text-black shadow-md hover:opacity-95 active:scale-[0.99] transition cursor-pointer"
+          >
+            <Download className="h-4 w-4" />
+            <span>Export Video (In-Browser)</span>
+          </button>
+          <p className="mt-2 text-center text-[10px] text-muted-foreground">
+            Fast WebCodecs render · 0 backend upload
+          </p>
+        </div>
+
         <AnimationPanel animation={animation} onChange={setAnimation} />
         <StylePanel
           style={style}
@@ -142,6 +160,19 @@ export function SubtitleEditor() {
           onSafeZoneChange={setSafeZone}
         />
       </div>
+
+      {/* In-Browser Video Export Modal */}
+      <ExportDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        videoSrc={VIDEO_SRC}
+        subtitles={{
+          lines: sampleSubtitles,
+          style,
+          position,
+          animation,
+        }}
+      />
     </div>
   );
 }

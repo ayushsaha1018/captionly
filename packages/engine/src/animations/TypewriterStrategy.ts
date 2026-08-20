@@ -135,8 +135,8 @@ export class TypewriterStrategy implements AnimationStrategy {
       style.boxAnchor === "top"
         ? position.y
         : style.boxAnchor === "bottom"
-        ? position.y - totalH
-        : position.y - totalH / 2;
+          ? position.y - totalH
+          : position.y - totalH / 2;
     const lastLineCenterY =
       topEdge + (Math.max(1, wrapped.length) - 0.5) * lineHeight;
     const cursorX = position.x + lastLineWidth / 2 + 4;

@@ -11,7 +11,13 @@ export const easeInOutCubic = (t: number) =>
 // Hex color interpolation
 const hexToRgb = (hex: string): [number, number, number] => {
   const h = hex.replace("#", "");
-  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const full =
+    h.length === 3
+      ? h
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : h;
   const num = parseInt(full, 16);
   return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
 };
@@ -19,7 +25,11 @@ const hexToRgb = (hex: string): [number, number, number] => {
 const rgbToHex = (r: number, g: number, b: number) =>
   "#" +
   [r, g, b]
-    .map((x) => Math.round(clamp(x, 0, 255)).toString(16).padStart(2, "0"))
+    .map((x) =>
+      Math.round(clamp(x, 0, 255))
+        .toString(16)
+        .padStart(2, "0"),
+    )
     .join("");
 
 export const lerpColor = (a: string, b: string, t: number) => {

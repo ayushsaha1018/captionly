@@ -27,7 +27,10 @@ export class RollUpStrategy implements AnimationStrategy {
     this.canvas = canvas;
   }
 
-  private buildText(line: SubtitleLine, style: SubtitleStyle): {
+  private buildText(
+    line: SubtitleLine,
+    style: SubtitleStyle,
+  ): {
     text: fabric.Text;
     visualLines: number;
   } {

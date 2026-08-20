@@ -39,7 +39,10 @@ export class TickerStrategy implements AnimationStrategy {
         style.fontWeight,
       );
       // Repeat tape so it always fills the screen
-      const repeats = Math.max(2, Math.ceil((CANVAS_W * 2) / Math.max(1, this.tapeWidth)) + 1);
+      const repeats = Math.max(
+        2,
+        Math.ceil((CANVAS_W * 2) / Math.max(1, this.tapeWidth)) + 1,
+      );
       const display = tape.repeat(repeats);
       this.text = new fabric.Text(display, {
         fontFamily: style.fontFamily,
