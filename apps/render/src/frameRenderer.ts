@@ -13,7 +13,7 @@ import type {
 } from "@captionly/engine";
 
 function canvasToBuffer(fabricCanvas: StaticCanvas): Buffer {
-  return fabricCanvas.getNodeCanvas().toBuffer("image/png");
+  return fabricCanvas.getNodeCanvas().toBuffer("raw");
 }
 
 export async function* renderFrames(

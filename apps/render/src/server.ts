@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { probeVideo } from "./probe";
 import { renderFrames } from "./frameRenderer";
 import { encodeVideo } from "./encode";
+import { CANVAS_W, CANVAS_H } from "@captionly/engine";
 import type {
   SubtitleLine,
   SubtitleStyle,
@@ -62,9 +63,20 @@ async function handleRender(req: Request): Promise<Response> {
 
     log("Rendering subtitle overlay + encoding…");
     const frames = renderFrames(lines, style, position, animation, fps, duration);
-    await encodeVideo(inputPath, outputPath, fps, width, height, frames, totalFrames, (frame, total) => {
-      if (frame === total || frame % 30 === 0) log(`Rendering frame ${frame} / ${total}`);
-    });
+    await encodeVideo(
+      inputPath,
+      outputPath,
+      fps,
+      width,
+      height,
+      frames,
+      totalFrames,
+      CANVAS_W,
+      CANVAS_H,
+      (frame, total) => {
+        if (frame === total || frame % 30 === 0) log(`Rendering frame ${frame} / ${total}`);
+      },
+    );
 
     const outputBuffer = await Bun.file(outputPath).arrayBuffer();
     log("Done");

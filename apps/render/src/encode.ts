@@ -6,6 +6,8 @@ export async function encodeVideo(
   height: number,
   frameGen: AsyncGenerator<Buffer>,
   totalFrames: number,
+  subWidth: number,
+  subHeight: number,
   onProgress: (frame: number, total: number) => void = (frame, total) =>
     process.stdout.write(`\rRendering frame ${frame} / ${total}`),
 ): Promise<void> {
@@ -16,7 +18,11 @@ export async function encodeVideo(
       "-i",
       inputPath,
       "-f",
-      "image2pipe",
+      "rawvideo",
+      "-pixel_format",
+      "bgra",
+      "-video_size",
+      `${subWidth}x${subHeight}`,
       "-framerate",
       String(fps),
       "-i",
@@ -48,7 +54,7 @@ export async function encodeVideo(
   for await (const buf of frameGen) {
     frame++;
     onProgress(frame, totalFrames);
-    proc.stdin.write(buf);
+    await proc.stdin.write(buf);
   }
   process.stdout.write("\n");
 

@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { probeVideo } from "./probe";
 import { renderFrames } from "./frameRenderer";
 import { encodeVideo } from "./encode";
+import { CANVAS_W, CANVAS_H } from "@captionly/engine";
 import type {
   SubtitleLine,
   SubtitleStyle,
@@ -37,6 +38,16 @@ console.log(
 
 console.log("Rendering subtitle overlay + encoding…");
 const frames = renderFrames(lines, style, position, animation, fps, duration);
-await encodeVideo(INPUT_VIDEO, OUTPUT_VIDEO, fps, width, height, frames, totalFrames);
+await encodeVideo(
+  INPUT_VIDEO,
+  OUTPUT_VIDEO,
+  fps,
+  width,
+  height,
+  frames,
+  totalFrames,
+  CANVAS_W,
+  CANVAS_H,
+);
 
 console.log(`Done → ${OUTPUT_VIDEO}`);
