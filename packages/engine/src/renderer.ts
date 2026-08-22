@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import { Canvas } from "fabric";
 import type {
   SubtitleLine,
   SubtitleStyle,
@@ -11,41 +11,6 @@ import { createStrategy } from "./animations/registry";
 export const CANVAS_W = 1920;
 export const CANVAS_H = 1080;
 
-// Patch Fabric.js 5.3.0 'alphabetical' canvas textBaseline bug
-if (typeof fabric !== "undefined" && fabric.Text && fabric.Text.prototype) {
-  (
-    fabric.Text.prototype as unknown as {
-      _setTextStyles: (
-        ctx: CanvasRenderingContext2D,
-        charStyle: unknown,
-        forMeasuring: boolean,
-      ) => void;
-      _getFontDeclaration: (
-        charStyle: unknown,
-        forMeasuring: boolean,
-      ) => string;
-      path?: unknown;
-      pathAlign?: string;
-    }
-  )._setTextStyles = function (ctx, charStyle, forMeasuring) {
-    ctx.textBaseline = "alphabetic";
-    if (this.path) {
-      switch (this.pathAlign) {
-        case "center":
-          ctx.textBaseline = "middle";
-          break;
-        case "ascender":
-          ctx.textBaseline = "top";
-          break;
-        case "descender":
-          ctx.textBaseline = "bottom";
-          break;
-      }
-    }
-    ctx.font = this._getFontDeclaration(charStyle, forMeasuring);
-  };
-}
-
 /**
  * SubtitleRenderer
  *
@@ -54,7 +19,7 @@ if (typeof fabric !== "undefined" && fabric.Text && fabric.Text.prototype) {
  * for headless / server-side reuse.
  */
 export class SubtitleRenderer {
-  private canvas: fabric.Canvas;
+  private canvas: Canvas;
   private lines: SubtitleLine[] = [];
   private style: SubtitleStyle;
   private position: SubtitlePosition;
@@ -62,7 +27,7 @@ export class SubtitleRenderer {
   private strategy: AnimationStrategy;
 
   constructor(
-    canvas: fabric.Canvas,
+    canvas: Canvas,
     lines: SubtitleLine[],
     style: SubtitleStyle,
     position: SubtitlePosition,

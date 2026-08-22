@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { fabric } from "fabric";
+import { Canvas } from "fabric";
 import {
   SubtitleRenderer,
   CANVAS_W,
@@ -25,7 +25,7 @@ const VIDEO_SRC = "/test1.mp4";
 
 export function SubtitleEditor() {
   const canvasElRef = useRef<HTMLCanvasElement>(null);
-  const fabricRef = useRef<fabric.Canvas | null>(null);
+  const fabricRef = useRef<Canvas | null>(null);
   const rendererRef = useRef<SubtitleRenderer | null>(null);
   const rafRef = useRef<number | null>(null);
 
@@ -43,7 +43,7 @@ export function SubtitleEditor() {
   // Initialize Fabric canvas & SubtitleRenderer
   useEffect(() => {
     if (!canvasElRef.current) return;
-    const canvas = new fabric.Canvas(canvasElRef.current, {
+    const canvas = new Canvas(canvasElRef.current, {
       width: CANVAS_W,
       height: CANVAS_H,
       backgroundColor: "rgba(0,0,0,0)",

@@ -1,4 +1,4 @@
-import type { fabric } from "fabric";
+import type { Canvas } from "fabric";
 import type {
   SubtitleLine,
   SubtitleStyle,
@@ -7,7 +7,7 @@ import type {
 } from "../types";
 
 export type UpdateCtx = {
-  canvas: fabric.Canvas;
+  canvas: Canvas;
   lines: SubtitleLine[];
   style: SubtitleStyle;
   position: SubtitlePosition;
@@ -22,7 +22,7 @@ export type UpdateCtx = {
  * reused for headless server-side frame export.
  */
 export interface AnimationStrategy {
-  mount(canvas: fabric.Canvas): void;
+  mount(canvas: Canvas): void;
   update(ctx: UpdateCtx): void;
   dispose(): void;
 }

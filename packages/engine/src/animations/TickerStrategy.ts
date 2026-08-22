@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import { Canvas, FabricText, Rect } from "fabric";
 import type { AnimationStrategy, UpdateCtx } from "./types";
 import type { TickerOptions } from "../types";
 import { CANVAS_W } from "../renderer";
@@ -10,13 +10,13 @@ import { BackgroundLayer, measureWidth } from "./helpers";
  * timing (all visible always).
  */
 export class TickerStrategy implements AnimationStrategy {
-  private canvas!: fabric.Canvas;
-  private text: fabric.Text | null = null;
+  private canvas!: Canvas;
+  private text: FabricText | null = null;
   private tapeText: string = "";
   private tapeWidth: number = 0;
   private bg!: BackgroundLayer;
 
-  mount(canvas: fabric.Canvas) {
+  mount(canvas: Canvas) {
     this.canvas = canvas;
     this.bg = new BackgroundLayer(canvas);
   }
@@ -44,7 +44,7 @@ export class TickerStrategy implements AnimationStrategy {
         Math.ceil((CANVAS_W * 2) / Math.max(1, this.tapeWidth)) + 1,
       );
       const display = tape.repeat(repeats);
-      this.text = new fabric.Text(display, {
+      this.text = new FabricText(display, {
         fontFamily: style.fontFamily,
         fontWeight: style.fontWeight,
         fontSize: style.fontSize,
@@ -72,7 +72,7 @@ export class TickerStrategy implements AnimationStrategy {
 
     // Background spans the canvas width as a strip
     if (style.bgOpacity > 0 && this.text) {
-      const fakeStrip = new fabric.Rect({
+      const fakeStrip = new Rect({
         left: 0,
         top: position.y - style.fontSize / 2 - style.bgPaddingY,
         width: CANVAS_W,

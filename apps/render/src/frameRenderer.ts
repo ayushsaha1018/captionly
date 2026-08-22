@@ -1,13 +1,8 @@
-import { fabric } from "fabric";
+import { setEnv } from "fabric";
+import { getEnv as getNodeEnv, StaticCanvas, type Canvas } from "fabric/node";
 
-// fabric 5 bootstraps a jsdom document at fabric.document. Expose it as the
-// global `document` so animation helpers (e.g. measureWidth in helpers.ts)
-// can call document.createElement("canvas") in a Node/Bun environment.
-if (typeof document === "undefined") {
-  (globalThis as Record<string, unknown>).document = (
-    fabric as unknown as { document: unknown }
-  ).document;
-}
+// Configure Fabric with Node/JSDOM environment for headless rendering
+setEnv(getNodeEnv());
 
 import { SubtitleRenderer, CANVAS_W, CANVAS_H } from "@captionly/engine";
 import type {
@@ -17,16 +12,8 @@ import type {
   AnimationConfig,
 } from "@captionly/engine";
 
-// fabric 5 node mode: jsdom-backed canvas; get raw node-canvas via impl wrapper
-function canvasToBuffer(fabricCanvas: fabric.StaticCanvas): Buffer {
-  const impl = (
-    fabric as unknown as {
-      jsdomImplForWrapper: (el: unknown) => {
-        _canvas: { toBuffer(fmt: string): Buffer };
-      };
-    }
-  ).jsdomImplForWrapper(fabricCanvas.lowerCanvasEl);
-  return impl._canvas.toBuffer("image/png");
+function canvasToBuffer(fabricCanvas: StaticCanvas): Buffer {
+  return fabricCanvas.getNodeCanvas().toBuffer("image/png");
 }
 
 export async function* renderFrames(
@@ -37,14 +24,14 @@ export async function* renderFrames(
   fps: number,
   duration: number,
 ): AsyncGenerator<Buffer> {
-  const canvas = new fabric.StaticCanvas(null, {
+  const canvas = new StaticCanvas(undefined, {
     width: CANVAS_W,
     height: CANVAS_H,
     renderOnAddRemove: false,
   });
 
   const renderer = new SubtitleRenderer(
-    canvas,
+    canvas as unknown as Canvas,
     lines,
     style,
     position,

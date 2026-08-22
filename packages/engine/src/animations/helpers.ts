@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import { Canvas, Rect, FabricObject, getFabricDocument } from "fabric";
 import type { BoxAnchor, SubtitleStyle } from "../types";
 
 /**
@@ -38,21 +38,21 @@ export function cpsForLine(
  * Pure-state: call `update(target)` each frame; call `dispose()` on teardown.
  */
 export class BackgroundLayer {
-  private canvas: fabric.Canvas;
-  private rect: fabric.Rect | null = null;
+  private canvas: Canvas;
+  private rect: Rect | null = null;
 
-  constructor(canvas: fabric.Canvas) {
+  constructor(canvas: Canvas) {
     this.canvas = canvas;
   }
 
-  update(target: fabric.Object | null, style: SubtitleStyle, opacity = 1) {
+  update(target: FabricObject | null, style: SubtitleStyle, opacity = 1) {
     if (!target || style.bgOpacity <= 0) {
       if (this.rect) this.rect.set({ opacity: 0 });
       return;
     }
-    const bbox = target.getBoundingRect(true, true);
+    const bbox = target.getBoundingRect();
     if (!this.rect) {
-      this.rect = new fabric.Rect({
+      this.rect = new Rect({
         selectable: false,
         evented: false,
         objectCaching: false,
@@ -61,7 +61,7 @@ export class BackgroundLayer {
       });
       this.canvas.add(this.rect);
       // Keep it under the text
-      this.canvas.sendToBack(this.rect);
+      this.canvas.sendObjectToBack(this.rect);
     }
     this.rect.set({
       left: bbox.left - style.bgPaddingX,
@@ -73,7 +73,7 @@ export class BackgroundLayer {
       fill: style.bgColor,
       opacity: style.bgOpacity * opacity,
     });
-    this.canvas.sendToBack(this.rect);
+    this.canvas.sendObjectToBack(this.rect);
     this.rect.setCoords();
   }
 
@@ -91,12 +91,23 @@ let measureCtx:
   CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
 function ctx(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D {
   if (measureCtx) return measureCtx;
-  if (typeof document !== "undefined") {
-    const c = document.createElement("canvas");
-    measureCtx = c.getContext("2d")!;
-  } else if (typeof OffscreenCanvas !== "undefined") {
-    const c = new OffscreenCanvas(1, 1);
-    measureCtx = c.getContext("2d")!;
+  try {
+    const doc = getFabricDocument();
+    if (doc && typeof doc.createElement === "function") {
+      const c = doc.createElement("canvas") as HTMLCanvasElement;
+      measureCtx = c.getContext("2d");
+    }
+  } catch {
+    // fallback if environment not initialized yet
+  }
+  if (!measureCtx) {
+    if (typeof document !== "undefined") {
+      const c = document.createElement("canvas");
+      measureCtx = c.getContext("2d")!;
+    } else if (typeof OffscreenCanvas !== "undefined") {
+      const c = new OffscreenCanvas(1, 1);
+      measureCtx = c.getContext("2d")!;
+    }
   }
   return measureCtx!;
 }

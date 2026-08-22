@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import { Canvas, FabricText, Shadow } from "fabric";
 import type { AnimationStrategy, UpdateCtx } from "./types";
 import type { TypewriterOptions, SubtitleLine, SubtitleStyle } from "../types";
 import {
@@ -13,13 +13,13 @@ import {
  * (capped by maxCps). Cursor blinks at the current write position.
  */
 export class TypewriterStrategy implements AnimationStrategy {
-  private canvas!: fabric.Canvas;
-  private text: fabric.Text | null = null;
-  private cursor: fabric.Text | null = null;
+  private canvas!: Canvas;
+  private text: FabricText | null = null;
+  private cursor: FabricText | null = null;
   private currentLineId: string | null = null;
   private bg!: BackgroundLayer;
 
-  mount(canvas: fabric.Canvas) {
+  mount(canvas: Canvas) {
     this.canvas = canvas;
     this.bg = new BackgroundLayer(canvas);
   }
@@ -49,7 +49,7 @@ export class TypewriterStrategy implements AnimationStrategy {
 
     if (this.currentLineId !== line.id || !this.text) {
       this.disposeObjects();
-      this.text = new fabric.Text("", {
+      this.text = new FabricText("", {
         fontFamily: style.fontFamily,
         fontWeight: style.fontWeight,
         fontSize: style.fontSize,
@@ -68,14 +68,14 @@ export class TypewriterStrategy implements AnimationStrategy {
         lockScalingY: true,
         evented: true,
         objectCaching: false,
-        shadow: new fabric.Shadow({
+        shadow: new Shadow({
           color: "rgba(0,0,0,0.6)",
           blur: 8,
           offsetX: 0,
           offsetY: 4,
         }),
       });
-      this.cursor = new fabric.Text(opts.cursor, {
+      this.cursor = new FabricText(opts.cursor, {
         fontFamily: style.fontFamily,
         fontWeight: style.fontWeight,
         fontSize: style.fontSize,
@@ -122,7 +122,7 @@ export class TypewriterStrategy implements AnimationStrategy {
 
     // Compute cursor position: end of the last visual line
     const lineHeight = style.fontSize * 1.16;
-    const lastLine = wrapped.length ? wrapped[wrapped.length - 1] : "";
+    const lastLine = (wrapped.length && wrapped[wrapped.length - 1]) || "";
     const lastLineWidth = measureWidth(
       lastLine,
       style.fontSize,

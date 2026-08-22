@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import { Canvas, FabricText, Group, Shadow } from "fabric";
 import type { AnimationStrategy, UpdateCtx } from "./types";
 import type {
   SubtitleLine,
@@ -15,11 +15,11 @@ type LetterObj = {
   word: Word;
   charIdxInWord: number;
   charsInWord: number;
-  text: fabric.Text;
+  text: FabricText;
 };
 
 type LineCache = {
-  group: fabric.Group | null;
+  group: Group | null;
   letters: LetterObj[];
 };
 
@@ -29,12 +29,12 @@ type LineCache = {
  * Wraps to new visual lines when total width exceeds style.boxWidth.
  */
 export class ColorFillStrategy implements AnimationStrategy {
-  private canvas!: fabric.Canvas;
+  private canvas!: Canvas;
   private cache = new Map<string, LineCache>();
   private currentLineId: string | null = null;
   private bg!: BackgroundLayer;
 
-  mount(canvas: fabric.Canvas) {
+  mount(canvas: Canvas) {
     this.canvas = canvas;
     this.bg = new BackgroundLayer(canvas);
   }
@@ -79,7 +79,7 @@ export class ColorFillStrategy implements AnimationStrategy {
       anchor === "top" ? 0 : anchor === "bottom" ? -totalH : -totalH / 2;
 
     const letters: LetterObj[] = [];
-    const allFabric: fabric.Text[] = [];
+    const allFabric: FabricText[] = [];
 
     visualLines.forEach((vl, vlIdx) => {
       const yCenter = yStart + vlIdx * lineHeight + lineHeight / 2;
@@ -87,7 +87,7 @@ export class ColorFillStrategy implements AnimationStrategy {
       vl.items.forEach((wm, wIdx) => {
         const chars = Array.from(wm.word.text);
         chars.forEach((ch, ci) => {
-          const t = new fabric.Text(ch, {
+          const t = new FabricText(ch, {
             fontFamily: style.fontFamily,
             fontWeight: style.fontWeight,
             fontSize: style.fontSize,
@@ -103,7 +103,7 @@ export class ColorFillStrategy implements AnimationStrategy {
             selectable: false,
             evented: false,
             objectCaching: true,
-            shadow: new fabric.Shadow({
+            shadow: new Shadow({
               color: "rgba(0,0,0,0.6)",
               blur: 8,
               offsetX: 0,
@@ -123,7 +123,7 @@ export class ColorFillStrategy implements AnimationStrategy {
       });
     });
 
-    const group = new fabric.Group(allFabric, {
+    const group = new Group(allFabric, {
       originX: "center",
       originY: "center",
       selectable: true,
@@ -140,7 +140,7 @@ export class ColorFillStrategy implements AnimationStrategy {
     return { group, letters };
   }
 
-  private anchorYOffset(style: SubtitleStyle, group: fabric.Group): number {
+  private anchorYOffset(style: SubtitleStyle, group: Group): number {
     // group origin is center; we positioned children so that anchor sits at y=0.
     // So setting group.top = position.y aligns the anchor point with position.y
     // automatically because we used yStart relative to anchor.

@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import { Canvas, Textbox, Shadow } from "fabric";
 import type { AnimationStrategy, UpdateCtx } from "./types";
 import type { PopOnOptions, SubtitleLine } from "../types";
 import { clamp, easeOutCubic } from "../animation";
@@ -8,12 +8,12 @@ import { BackgroundLayer } from "./helpers";
  * Pop-On — full caption appears at once with a quick scale "pop".
  */
 export class PopOnStrategy implements AnimationStrategy {
-  private canvas!: fabric.Canvas;
-  private text: fabric.Textbox | null = null;
+  private canvas!: Canvas;
+  private text: Textbox | null = null;
   private currentLineId: string | null = null;
   private bg!: BackgroundLayer;
 
-  mount(canvas: fabric.Canvas) {
+  mount(canvas: Canvas) {
     this.canvas = canvas;
     this.bg = new BackgroundLayer(canvas);
   }
@@ -37,7 +37,7 @@ export class PopOnStrategy implements AnimationStrategy {
 
     if (this.currentLineId !== line.id || !this.text) {
       this.disposeObjects();
-      this.text = new fabric.Textbox(this.fullText(line), {
+      this.text = new Textbox(this.fullText(line), {
         fontFamily: style.fontFamily,
         fontWeight: style.fontWeight,
         fontSize: style.fontSize,
@@ -55,7 +55,7 @@ export class PopOnStrategy implements AnimationStrategy {
         lockRotation: true,
         evented: true,
         objectCaching: false,
-        shadow: new fabric.Shadow({
+        shadow: new Shadow({
           color: "rgba(0,0,0,0.6)",
           blur: 8,
           offsetX: 0,

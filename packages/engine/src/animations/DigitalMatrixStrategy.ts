@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import { Canvas, Textbox, Shadow } from "fabric";
 import type { AnimationStrategy, UpdateCtx } from "./types";
 import type { DigitalMatrixOptions, SubtitleLine } from "../types";
 import { clamp } from "../animation";
@@ -11,12 +11,12 @@ const GLITCH = "!@#$%^&*<>/\\|01";
  * heavy glow, slight per-frame jitter on the latest character.
  */
 export class DigitalMatrixStrategy implements AnimationStrategy {
-  private canvas!: fabric.Canvas;
-  private text: fabric.Textbox | null = null;
+  private canvas!: Canvas;
+  private text: Textbox | null = null;
   private currentLineId: string | null = null;
   private bg!: BackgroundLayer;
 
-  mount(canvas: fabric.Canvas) {
+  mount(canvas: Canvas) {
     this.canvas = canvas;
     this.bg = new BackgroundLayer(canvas);
   }
@@ -40,7 +40,7 @@ export class DigitalMatrixStrategy implements AnimationStrategy {
 
     if (this.currentLineId !== line.id || !this.text) {
       this.disposeObjects();
-      this.text = new fabric.Textbox("", {
+      this.text = new Textbox("", {
         fontFamily: "'Courier New', monospace",
         fontWeight: style.fontWeight,
         fontSize: style.fontSize,
@@ -58,7 +58,7 @@ export class DigitalMatrixStrategy implements AnimationStrategy {
         lockRotation: true,
         evented: true,
         objectCaching: false,
-        shadow: new fabric.Shadow({
+        shadow: new Shadow({
           color: style.activeColor,
           blur: 24 * opts.glowIntensity,
           offsetX: 0,
@@ -95,7 +95,7 @@ export class DigitalMatrixStrategy implements AnimationStrategy {
       originY: style.boxAnchor,
       width: style.boxWidth,
       opacity: 1,
-      shadow: new fabric.Shadow({
+      shadow: new Shadow({
         color: style.activeColor,
         blur: 24 * opts.glowIntensity,
         offsetX: 0,

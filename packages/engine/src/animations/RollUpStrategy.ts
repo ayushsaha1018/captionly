@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import { Canvas, FabricText, Shadow } from "fabric";
 import type { AnimationStrategy, UpdateCtx } from "./types";
 import type { RollUpOptions, SubtitleLine, SubtitleStyle } from "../types";
 import { clamp, easeOutCubic } from "../animation";
@@ -8,7 +8,7 @@ const SOFT_DURATION = 0.4;
 
 type LineObj = {
   line: SubtitleLine;
-  text: fabric.Text;
+  text: FabricText;
   visualLines: number;
 };
 
@@ -19,11 +19,11 @@ type LineObj = {
  * lines below it. Line spacing is added between logical lines only.
  */
 export class RollUpStrategy implements AnimationStrategy {
-  private canvas!: fabric.Canvas;
+  private canvas!: Canvas;
   private objs = new Map<string, LineObj>();
   private bgs = new Map<string, BackgroundLayer>();
 
-  mount(canvas: fabric.Canvas) {
+  mount(canvas: Canvas) {
     this.canvas = canvas;
   }
 
@@ -31,7 +31,7 @@ export class RollUpStrategy implements AnimationStrategy {
     line: SubtitleLine,
     style: SubtitleStyle,
   ): {
-    text: fabric.Text;
+    text: FabricText;
     visualLines: number;
   } {
     const raw = line.words.map((w) => w.text).join(" ");
@@ -43,7 +43,7 @@ export class RollUpStrategy implements AnimationStrategy {
       style.fontWeight,
     );
     const visualLines = Math.max(1, wrapped.length);
-    const text = new fabric.Text(wrapped.join("\n"), {
+    const text = new FabricText(wrapped.join("\n"), {
       fontFamily: style.fontFamily,
       fontWeight: style.fontWeight,
       fontSize: style.fontSize,
@@ -60,7 +60,7 @@ export class RollUpStrategy implements AnimationStrategy {
       selectable: false,
       evented: false,
       objectCaching: false,
-      shadow: new fabric.Shadow({
+      shadow: new Shadow({
         color: "rgba(0,0,0,0.6)",
         blur: 8,
         offsetX: 0,
@@ -106,6 +106,10 @@ export class RollUpStrategy implements AnimationStrategy {
 
     // Newest line drives the soft transition
     const newest = visible[visible.length - 1];
+    if (!newest) {
+      canvas.requestRenderAll();
+      return;
+    }
     const since = currentTime - newest.start;
     const scrollT =
       opts.transition === "soft"
@@ -130,7 +134,7 @@ export class RollUpStrategy implements AnimationStrategy {
     let acc = position.y;
     for (let i = 0; i < slotsBottomUp.length; i++) {
       slotBottomY.push(acc);
-      acc -= heights[i] + blockGap;
+      acc -= (heights[i] ?? 0) + blockGap;
     }
 
     // Previous frame slot positions (for soft scroll lerp): each line was
@@ -140,8 +144,8 @@ export class RollUpStrategy implements AnimationStrategy {
     // belonged to the now-newer line). For slot 0 (the new line) it animates
     // from position.y + heights[0] (just below the visible band) up to position.y.
     const prevSlotBottomY: number[] = slotsBottomUp.map((_, i) => {
-      if (i === 0) return position.y + heights[0]; // entering from below
-      return slotBottomY[i - 1];
+      if (i === 0) return position.y + (heights[0] ?? 0); // entering from below
+      return slotBottomY[i - 1] ?? position.y;
     });
 
     // Hide / fade behavior for over-limit oldest line
@@ -149,9 +153,9 @@ export class RollUpStrategy implements AnimationStrategy {
 
     slotsBottomUp.forEach((l, i) => {
       const o = this.getOrCreate(l, style);
-      const targetBottom = slotBottomY[i];
+      const targetBottom = slotBottomY[i] ?? position.y;
       const fromBottom =
-        opts.transition === "soft" ? prevSlotBottomY[i] : targetBottom;
+        opts.transition === "soft" ? (prevSlotBottomY[i] ?? targetBottom) : targetBottom;
       const interp = fromBottom + (targetBottom - fromBottom) * scrollT;
 
       // Active highlight: only the newest line uses activeColor

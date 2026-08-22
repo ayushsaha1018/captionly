@@ -83,7 +83,7 @@ function extractCodecDescription(track: RawTrack): Uint8Array | null {
     const stream = new DataStream(
       undefined,
       0,
-      (DataStream as unknown as { BIG_ENDIAN: boolean }).BIG_ENDIAN,
+      (DataStream as unknown as { BIG_ENDIAN: never }).BIG_ENDIAN,
     );
     box.write(stream);
     // Skip 8-byte box header (4 bytes size + 4 bytes box type)
@@ -172,11 +172,12 @@ export async function demuxMP4(buffer: ArrayBuffer): Promise<DemuxedMedia> {
       file.start();
     };
 
-    file.onSamples = (trackId: number, _user: unknown, samples: DemuxedSample[]) => {
+    file.onSamples = (trackId: number, _user: unknown, samples: unknown[]) => {
+      const typedSamples = samples as DemuxedSample[];
       if (videoTrack && trackId === videoTrack.id) {
-        videoSamples.push(...samples);
+        videoSamples.push(...typedSamples);
       } else if (audioTrack && trackId === audioTrack.id) {
-        audioSamples.push(...samples);
+        audioSamples.push(...typedSamples);
       }
     };
 

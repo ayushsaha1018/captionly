@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import { Canvas, Textbox, Shadow } from "fabric";
 import type { AnimationStrategy, UpdateCtx } from "./types";
 import type { PaintOnOptions, SubtitleLine } from "../types";
 import { BackgroundLayer, cpsForLine } from "./helpers";
@@ -8,12 +8,12 @@ import { BackgroundLayer, cpsForLine } from "./helpers";
  * (capped by maxCps).
  */
 export class PaintOnStrategy implements AnimationStrategy {
-  private canvas!: fabric.Canvas;
-  private text: fabric.Textbox | null = null;
+  private canvas!: Canvas;
+  private text: Textbox | null = null;
   private currentLineId: string | null = null;
   private bg!: BackgroundLayer;
 
-  mount(canvas: fabric.Canvas) {
+  mount(canvas: Canvas) {
     this.canvas = canvas;
     this.bg = new BackgroundLayer(canvas);
   }
@@ -38,7 +38,7 @@ export class PaintOnStrategy implements AnimationStrategy {
 
     if (this.currentLineId !== line.id || !this.text) {
       this.disposeObjects();
-      this.text = new fabric.Textbox("", {
+      this.text = new Textbox("", {
         fontFamily: style.fontFamily,
         fontWeight: style.fontWeight,
         fontSize: style.fontSize,
@@ -58,7 +58,7 @@ export class PaintOnStrategy implements AnimationStrategy {
         lockScalingY: true,
         evented: true,
         objectCaching: false,
-        shadow: new fabric.Shadow({
+        shadow: new Shadow({
           color: "rgba(0,0,0,0.6)",
           blur: 8,
           offsetX: 0,

@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import { Canvas, Textbox, Shadow } from "fabric";
 import type { AnimationStrategy, UpdateCtx } from "./types";
 
 /**
@@ -7,8 +7,8 @@ import type { AnimationStrategy, UpdateCtx } from "./types";
  * without crashing while the real animation is built later.
  */
 export class StaticStubStrategy implements AnimationStrategy {
-  private canvas!: fabric.Canvas;
-  private text: fabric.Textbox | null = null;
+  private canvas!: Canvas;
+  private text: Textbox | null = null;
   private currentLineId: string | null = null;
   private label: string;
 
@@ -16,7 +16,7 @@ export class StaticStubStrategy implements AnimationStrategy {
     this.label = label;
   }
 
-  mount(canvas: fabric.Canvas) {
+  mount(canvas: Canvas) {
     this.canvas = canvas;
   }
 
@@ -33,7 +33,7 @@ export class StaticStubStrategy implements AnimationStrategy {
 
     if (this.currentLineId !== line.id || !this.text) {
       if (this.text) this.canvas.remove(this.text);
-      this.text = new fabric.Textbox(line.words.map((w) => w.text).join(" "), {
+      this.text = new Textbox(line.words.map((w) => w.text).join(" "), {
         fontFamily: style.fontFamily,
         fontWeight: style.fontWeight,
         fontSize: style.fontSize,
@@ -53,7 +53,7 @@ export class StaticStubStrategy implements AnimationStrategy {
         lockScalingY: true,
         evented: true,
         objectCaching: false,
-        shadow: new fabric.Shadow({
+        shadow: new Shadow({
           color: "rgba(0,0,0,0.6)",
           blur: 8,
           offsetX: 0,

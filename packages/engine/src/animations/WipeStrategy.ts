@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import { Canvas, Textbox, Rect } from "fabric";
 import type { AnimationStrategy, UpdateCtx } from "./types";
 import type { WipeOptions, SubtitleLine } from "../types";
 import { clamp } from "../animation";
@@ -9,13 +9,13 @@ import { BackgroundLayer } from "./helpers";
  * Sweeps across the full line duration.
  */
 export class WipeStrategy implements AnimationStrategy {
-  private canvas!: fabric.Canvas;
-  private text: fabric.Textbox | null = null;
-  private clip: fabric.Rect | null = null;
+  private canvas!: Canvas;
+  private text: Textbox | null = null;
+  private clip: Rect | null = null;
   private currentLineId: string | null = null;
   private bg!: BackgroundLayer;
 
-  mount(canvas: fabric.Canvas) {
+  mount(canvas: Canvas) {
     this.canvas = canvas;
     this.bg = new BackgroundLayer(canvas);
   }
@@ -39,7 +39,7 @@ export class WipeStrategy implements AnimationStrategy {
 
     if (this.currentLineId !== line.id || !this.text) {
       this.disposeObjects();
-      this.text = new fabric.Textbox(this.fullText(line), {
+      this.text = new Textbox(this.fullText(line), {
         fontFamily: style.fontFamily,
         fontWeight: style.fontWeight,
         fontSize: style.fontSize,
@@ -79,7 +79,7 @@ export class WipeStrategy implements AnimationStrategy {
 
     const dur = Math.max(0.001, line.end - line.start);
     const t = clamp((currentTime - line.start) / dur, 0, 1);
-    const bbox = this.text.getBoundingRect(true, true);
+    const bbox = this.text.getBoundingRect();
 
     // Build a clip rect in canvas coords.
     let clipLeft = bbox.left;
@@ -97,7 +97,7 @@ export class WipeStrategy implements AnimationStrategy {
     }
 
     // Use a clipPath on the text (in absolute coords)
-    const cp = new fabric.Rect({
+    const cp = new Rect({
       left: clipLeft,
       top: clipTop,
       width: Math.max(0.01, clipW),

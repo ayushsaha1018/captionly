@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import { Canvas, FabricText } from "fabric";
 import type { AnimationStrategy, UpdateCtx } from "./types";
 import type { FlapBoardOptions, SubtitleLine } from "../types";
 import { clamp } from "../animation";
@@ -11,12 +11,12 @@ const FLAP_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
  * letters before settling on its final value, staggered left-to-right.
  */
 export class FlapBoardStrategy implements AnimationStrategy {
-  private canvas!: fabric.Canvas;
-  private text: fabric.Text | null = null;
+  private canvas!: Canvas;
+  private text: FabricText | null = null;
   private currentLineId: string | null = null;
   private bg!: BackgroundLayer;
 
-  mount(canvas: fabric.Canvas) {
+  mount(canvas: Canvas) {
     this.canvas = canvas;
     this.bg = new BackgroundLayer(canvas);
   }
@@ -49,7 +49,7 @@ export class FlapBoardStrategy implements AnimationStrategy {
 
     if (this.currentLineId !== line.id || !this.text) {
       this.disposeObjects();
-      this.text = new fabric.Text("", {
+      this.text = new FabricText("", {
         fontFamily: style.fontFamily,
         fontWeight: style.fontWeight,
         fontSize: style.fontSize,
@@ -103,7 +103,7 @@ export class FlapBoardStrategy implements AnimationStrategy {
             (localT / opts.flapDuration) * opts.cyclesPerChar,
           );
           const seed = (charIdx * 131 + phase * 17) % FLAP_CHARS.length;
-          lineOut.push(FLAP_CHARS[seed]);
+          lineOut.push(FLAP_CHARS[seed] ?? "");
         } else {
           lineOut.push(ch);
         }

@@ -1,5 +1,5 @@
-import "./worker-polyfill";
-import { fabric } from "fabric";
+import { makeFabricCompatible } from "./worker-polyfill";
+import { StaticCanvas, type Canvas } from "fabric";
 import {
   SubtitleRenderer,
   CANVAS_W,
@@ -9,37 +9,6 @@ import {
   type SubtitlePosition,
   type AnimationConfig,
 } from "@captionly/engine";
-
-function makeFabricCompatible(canvas: OffscreenCanvas): void {
-  const c = canvas as unknown as Record<string, unknown>;
-  if (!c.style) {
-    c.style = { width: `${canvas.width}px`, height: `${canvas.height}px` };
-  }
-  if (!c.classList) {
-    c.classList = {
-      add: () => {},
-      remove: () => {},
-      contains: () => false,
-    };
-  }
-  if (!c.className) {
-    c.className = "";
-  }
-  if (!c.setAttribute) {
-    c.setAttribute = () => {};
-  }
-  if (!c.removeAttribute) {
-    c.removeAttribute = () => {};
-  }
-  if (!c.getBoundingClientRect) {
-    c.getBoundingClientRect = () => ({
-      left: 0,
-      top: 0,
-      width: canvas.width,
-      height: canvas.height,
-    });
-  }
-}
 
 export interface CompositorOptions {
   width: number;
@@ -56,7 +25,7 @@ export class VideoFrameCompositor {
   private compositeCanvas: OffscreenCanvas;
   private compositeCtx: OffscreenCanvasRenderingContext2D;
   private subtitleCanvas: OffscreenCanvas;
-  private fabricCanvas: fabric.StaticCanvas;
+  private fabricCanvas: StaticCanvas;
   private subtitleRenderer: SubtitleRenderer;
 
   constructor(options: CompositorOptions) {
@@ -81,19 +50,16 @@ export class VideoFrameCompositor {
     makeFabricCompatible(this.subtitleCanvas);
 
     // Initialize Fabric StaticCanvas on the subtitle offscreen canvas
-    this.fabricCanvas = new fabric.StaticCanvas(
-      this.subtitleCanvas as unknown as HTMLCanvasElement,
-      {
-        width: CANVAS_W,
-        height: CANVAS_H,
-        renderOnAddRemove: false,
-        backgroundColor: "rgba(0,0,0,0)",
-        enableRetinaScaling: false,
-      },
-    );
+    this.fabricCanvas = new StaticCanvas(this.subtitleCanvas as unknown as HTMLCanvasElement, {
+      width: CANVAS_W,
+      height: CANVAS_H,
+      renderOnAddRemove: false,
+      backgroundColor: "rgba(0,0,0,0)",
+      enableRetinaScaling: false,
+    });
 
     this.subtitleRenderer = new SubtitleRenderer(
-      this.fabricCanvas as unknown as fabric.Canvas,
+      this.fabricCanvas as unknown as Canvas,
       options.lines,
       options.style,
       options.position,
