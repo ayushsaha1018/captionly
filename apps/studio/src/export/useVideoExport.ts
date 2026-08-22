@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { downloadBlob } from "./downloadBlob";
 import type {
   SubtitleExportData,
   ExportOptions,
@@ -68,17 +69,6 @@ export function useVideoExport(): UseVideoExportReturn {
       resolvePromiseRef.current(null);
       resolvePromiseRef.current = null;
     }
-  }, []);
-
-  const downloadBlob = useCallback((blob: Blob, filename = "captionly-video.mp4") => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
   }, []);
 
   const exportVideo = useCallback(

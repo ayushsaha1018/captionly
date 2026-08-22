@@ -9,7 +9,10 @@
   },
   "private": true,
   "scripts": {
-    "render": "bun src/index.ts"
+    "render": "bun src/index.ts",
+    "dev": "bun --watch src/server.ts",
+    "start": "bun src/server.ts",
+    "test": "bun test"
   },
   "type": "module",
   "dependencies": {

@@ -37,6 +37,6 @@ console.log(
 
 console.log("Rendering subtitle overlay + encoding…");
 const frames = renderFrames(lines, style, position, animation, fps, duration);
-await encodeVideo(INPUT_VIDEO, OUTPUT_VIDEO, fps, frames, totalFrames);
+await encodeVideo(INPUT_VIDEO, OUTPUT_VIDEO, fps, width, height, frames, totalFrames);
 
 console.log(`Done → ${OUTPUT_VIDEO}`);

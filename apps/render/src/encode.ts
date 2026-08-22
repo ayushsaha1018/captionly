@@ -2,8 +2,12 @@ export async function encodeVideo(
   inputPath: string,
   outputPath: string,
   fps: number,
+  width: number,
+  height: number,
   frameGen: AsyncGenerator<Buffer>,
   totalFrames: number,
+  onProgress: (frame: number, total: number) => void = (frame, total) =>
+    process.stdout.write(`\rRendering frame ${frame} / ${total}`),
 ): Promise<void> {
   const proc = Bun.spawn(
     [
@@ -18,7 +22,7 @@ export async function encodeVideo(
       "-i",
       "pipe:0",
       "-filter_complex",
-      "[0:v][1:v]overlay=0:0[out]",
+      `[1:v]scale=${width}:${height}[sub];[0:v][sub]overlay=0:0[out]`,
       "-map",
       "[out]",
       "-map",
@@ -43,7 +47,7 @@ export async function encodeVideo(
   let frame = 0;
   for await (const buf of frameGen) {
     frame++;
-    process.stdout.write(`\rRendering frame ${frame} / ${totalFrames}`);
+    onProgress(frame, totalFrames);
     proc.stdin.write(buf);
   }
   process.stdout.write("\n");
