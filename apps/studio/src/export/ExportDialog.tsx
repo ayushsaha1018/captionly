@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { useVideoExport, type UseVideoExportReturn } from "./useVideoExport";
-import type { SubtitleExportData, ExportOptions } from "./types";
+import type { SubtitleExportData } from "./types";
 
 interface ExportDialogProps {
   open: boolean;
@@ -30,21 +30,13 @@ export function ExportDialog({ open, onOpenChange, videoSrc, subtitles }: Export
     downloadBlob,
   }: UseVideoExportReturn = useVideoExport();
 
-  const [fps, setFps] = useState<number>(60);
-  const [quality, setQuality] = useState<"standard" | "high" | "ultra">("high");
   const [exportedBlob, setExportedBlob] = useState<Blob | null>(null);
 
   const handleStartExport = async () => {
     setExportedBlob(null);
-    const bitrate = quality === "ultra" ? 18_000_000 : quality === "high" ? 12_000_000 : 8_000_000;
-
-    const options: ExportOptions = {
-      fps,
-      bitrate,
-    };
 
     try {
-      const blob = await exportVideo(videoSrc, subtitles, options);
+      const blob = await exportVideo(videoSrc, subtitles);
       if (blob) {
         setExportedBlob(blob);
       }
@@ -171,35 +163,6 @@ export function ExportDialog({ open, onOpenChange, videoSrc, subtitles }: Export
                 <span>{error}</span>
               </div>
             )}
-
-            {/* Export Settings */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground">Frame Rate</label>
-                <select
-                  value={fps}
-                  onChange={(e) => setFps(Number(e.target.value))}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground focus:ring-1 focus:ring-primary"
-                >
-                  <option value={60}>60 FPS (Ultra Smooth)</option>
-                  <option value={30}>30 FPS (Standard)</option>
-                  <option value={24}>24 FPS (Cinematic)</option>
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground">Quality Preset</label>
-                <select
-                  value={quality}
-                  onChange={(e) => setQuality(e.target.value as "standard" | "high" | "ultra")}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground focus:ring-1 focus:ring-primary"
-                >
-                  <option value="high">High (12 Mbps)</option>
-                  <option value="ultra">Ultra (18 Mbps)</option>
-                  <option value="standard">Standard (8 Mbps)</option>
-                </select>
-              </div>
-            </div>
 
             <div className="rounded-lg bg-secondary/40 p-3 text-xs space-y-1.5 text-muted-foreground">
               <div className="flex items-center gap-1.5 font-medium text-foreground">

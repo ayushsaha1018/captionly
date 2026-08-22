@@ -18,11 +18,12 @@ export interface PipelineResult {
   mimeType: string;
 }
 
-function calculateBitrate(width: number, height: number, fps: number): number {
-  // Balanced high-quality H.264 bitrate calculation
-  const bpp = 0.1;
-  const calculated = Math.round(width * height * fps * bpp);
-  return Math.max(4_000_000, Math.min(25_000_000, calculated));
+function calculateSourceBitrate(
+  videoSamples: DemuxedMedia["videoSamples"],
+  durationSec: number,
+): number {
+  const totalBytes = videoSamples.reduce((sum, sample) => sum + sample.size, 0);
+  return durationSec > 0 ? Math.round((totalBytes * 8) / durationSec) : 8_000_000;
 }
 
 /**
@@ -120,7 +121,8 @@ export async function runExportPipeline(params: PipelineParams): Promise<Pipelin
     },
   });
 
-  const targetBitrate = options?.bitrate ?? calculateBitrate(width, height, fps);
+  const targetBitrate =
+    options?.bitrate ?? calculateSourceBitrate(videoSamples, videoTrack.duration);
   let encoderCodec = "avc1.4d002a";
 
   try {
@@ -143,6 +145,7 @@ export async function runExportPipeline(params: PipelineParams): Promise<Pipelin
     width,
     height,
     bitrate: targetBitrate,
+    bitrateMode: "constant",
     framerate: Math.round(fps),
     hardwareAcceleration: "prefer-hardware",
   });
@@ -150,6 +153,8 @@ export async function runExportPipeline(params: PipelineParams): Promise<Pipelin
   // 6. Initialize VideoDecoder
   let processedFrames = 0;
   const startTime = performance.now();
+  const PROGRESS_INTERVAL_MS = 100;
+  let lastProgressAt = 0;
 
   const decoder = new VideoDecoder({
     output: (decodedFrame) => {
@@ -179,19 +184,23 @@ export async function runExportPipeline(params: PipelineParams): Promise<Pipelin
 
         // Calculate progress stats
         const now = performance.now();
-        const elapsedSec = (now - startTime) / 1000;
-        const currentSpeedFps = elapsedSec > 0 ? processedFrames / elapsedSec : 0;
-        const remainingFrames = Math.max(0, totalFrames - processedFrames);
-        const estimatedRemainingSec = currentSpeedFps > 0 ? remainingFrames / currentSpeedFps : 0;
+        const isLastFrame = processedFrames >= totalFrames;
+        if (now - lastProgressAt >= PROGRESS_INTERVAL_MS || isLastFrame) {
+          lastProgressAt = now;
+          const elapsedSec = (now - startTime) / 1000;
+          const currentSpeedFps = elapsedSec > 0 ? processedFrames / elapsedSec : 0;
+          const remainingFrames = Math.max(0, totalFrames - processedFrames);
+          const estimatedRemainingSec = currentSpeedFps > 0 ? remainingFrames / currentSpeedFps : 0;
 
-        onProgress?.({
-          phase: "rendering",
-          progress: totalFrames > 0 ? processedFrames / totalFrames : 0,
-          currentFrame: processedFrames,
-          totalFrames,
-          fps: Math.round(currentSpeedFps),
-          estimatedRemainingSec: Math.round(estimatedRemainingSec),
-        });
+          onProgress?.({
+            phase: "rendering",
+            progress: totalFrames > 0 ? processedFrames / totalFrames : 0,
+            currentFrame: processedFrames,
+            totalFrames,
+            fps: Math.round(currentSpeedFps),
+            estimatedRemainingSec: Math.round(estimatedRemainingSec),
+          });
+        }
       } catch (err) {
         console.error("Error processing decoded frame:", err);
         decoderError = err as Error;
