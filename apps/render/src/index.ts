@@ -1,9 +1,7 @@
 import { readFileSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
-import { probeVideo } from "./probe";
-import { renderFrames } from "./frameRenderer";
-import { encodeVideo } from "./encode";
-import { CANVAS_W, CANVAS_H } from "@captionly/engine";
+import { bundle } from "@remotion/bundler";
+import { renderMedia, selectComposition } from "@remotion/renderer";
 import type {
   SubtitleLine,
   SubtitleStyle,
@@ -29,25 +27,40 @@ const { lines, style, position, animation } = JSON.parse(
   readFileSync(INPUT_SUBTITLES, "utf-8"),
 ) as SubtitleJSON;
 
-console.log("Probing video…");
-const { fps, duration, width, height } = await probeVideo(INPUT_VIDEO);
-const totalFrames = Math.ceil(duration * fps);
-console.log(
-  `  ${width}×${height} @ ${fps.toFixed(2)} fps — ${duration.toFixed(2)}s — ${totalFrames} frames`,
-);
+console.log("Bundling Remotion composition…");
+const bundleLocation = await bundle({
+  entryPoint: resolve(import.meta.dir, "remotionRoot.tsx"),
+});
 
-console.log("Rendering subtitle overlay + encoding…");
-const frames = renderFrames(lines, style, position, animation, fps, duration);
-await encodeVideo(
-  INPUT_VIDEO,
-  OUTPUT_VIDEO,
-  fps,
-  width,
-  height,
-  frames,
-  totalFrames,
-  CANVAS_W,
-  CANVAS_H,
-);
+const inputProps = {
+  videoSrc: INPUT_VIDEO,
+  subtitles: {
+    lines,
+    style,
+    position,
+    animation,
+  },
+};
 
-console.log(`Done → ${OUTPUT_VIDEO}`);
+const composition = await selectComposition({
+  serveUrl: bundleLocation,
+  id: "MainComposition",
+  inputProps,
+});
+
+console.log("Rendering Remotion video…");
+await renderMedia({
+  composition,
+  serveUrl: bundleLocation,
+  codec: "h264",
+  outputLocation: OUTPUT_VIDEO,
+  inputProps,
+  licenseKey: "free-license",
+  onProgress: ({ progress, renderedFrames }) => {
+    process.stdout.write(
+      `\rRendering: ${Math.round(progress * 100)}% (${renderedFrames} frames)`,
+    );
+  },
+});
+
+console.log(`\nDone → ${OUTPUT_VIDEO}`);

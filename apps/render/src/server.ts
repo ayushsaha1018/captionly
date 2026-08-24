@@ -1,10 +1,8 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { probeVideo } from "./probe";
-import { renderFrames } from "./frameRenderer";
-import { encodeVideo } from "./encode";
-import { CANVAS_W, CANVAS_H } from "@captionly/engine";
+import { bundle } from "@remotion/bundler";
+import { renderMedia, selectComposition } from "@remotion/renderer";
 import type {
   SubtitleLine,
   SubtitleStyle,
@@ -20,6 +18,16 @@ type SubtitleJSON = {
 };
 
 const ALLOWED_ORIGIN = process.env.RENDER_ALLOW_ORIGIN ?? "*";
+let bundlePromise: Promise<string> | null = null;
+
+function getBundle(): Promise<string> {
+  if (!bundlePromise) {
+    bundlePromise = bundle({
+      entryPoint: join(import.meta.dir, "remotionRoot.tsx"),
+    });
+  }
+  return bundlePromise;
+}
 
 function jsonError(message: string, status: number): Response {
   return Response.json(
@@ -54,29 +62,37 @@ async function handleRender(req: Request): Promise<Response> {
     const outputPath = join(workDir, "output.mp4");
     await Bun.write(inputPath, video);
 
-    log("Probing video…");
-    const { fps, duration, width, height } = await probeVideo(inputPath);
-    const totalFrames = Math.ceil(duration * fps);
-    log(
-      `${width}×${height} @ ${fps.toFixed(2)} fps — ${duration.toFixed(2)}s — ${totalFrames} frames`,
-    );
+    log("Bundling / resolving composition…");
+    const bundleLocation = await getBundle();
 
-    log("Rendering subtitle overlay + encoding…");
-    const frames = renderFrames(lines, style, position, animation, fps, duration);
-    await encodeVideo(
-      inputPath,
-      outputPath,
-      fps,
-      width,
-      height,
-      frames,
-      totalFrames,
-      CANVAS_W,
-      CANVAS_H,
-      (frame, total) => {
-        if (frame === total || frame % 30 === 0) log(`Rendering frame ${frame} / ${total}`);
+    const inputProps = {
+      videoSrc: inputPath,
+      subtitles: {
+        lines,
+        style,
+        position,
+        animation,
       },
-    );
+    };
+
+    const composition = await selectComposition({
+      serveUrl: bundleLocation,
+      id: "MainComposition",
+      inputProps,
+    });
+
+    log("Rendering Remotion video…");
+    await renderMedia({
+      composition,
+      serveUrl: bundleLocation,
+      codec: "h264",
+      outputLocation: outputPath,
+      inputProps,
+      licenseKey: "free-license",
+      onProgress: ({ progress, renderedFrames }) => {
+        log(`Rendering progress: ${Math.round(progress * 100)}% (${renderedFrames} frames)`);
+      },
+    });
 
     const outputBuffer = await Bun.file(outputPath).arrayBuffer();
     log("Done");
