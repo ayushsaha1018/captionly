@@ -86,6 +86,17 @@ export function useVideoExport(): UseVideoExportReturn {
           videoCodec: "h264",
           audioCodec: "aac",
           controller,
+          onVideoTrack: ({ defaultVideoCodec }) => {
+            return {
+              type: "reencode",
+              videoCodec: defaultVideoCodec || "h264",
+            };
+          },
+          onAudioTrack: () => {
+            return {
+              type: "copy",
+            };
+          },
           onVideoFrame: ({ frame }) => {
             const width = frame.displayWidth || frame.codedWidth;
             const height = frame.displayHeight || frame.codedHeight;
@@ -113,7 +124,7 @@ export function useVideoExport(): UseVideoExportReturn {
             // 1. Draw source video frame
             ctx.drawImage(frame as unknown as CanvasImageSource, 0, 0, width, height);
 
-            // 2. Draw animated subtitles
+            // 2. Draw animated subtitles onto video
             drawSubtitlesOnCanvas({
               ctx,
               subtitles,
@@ -122,7 +133,7 @@ export function useVideoExport(): UseVideoExportReturn {
               height,
             });
 
-            // 3. Create composited frame
+            // 3. Create composited frame with exact timestamps & duration
             const compositedFrame = new VideoFrame(canvas as unknown as CanvasImageSource, {
               timestamp,
               duration,
