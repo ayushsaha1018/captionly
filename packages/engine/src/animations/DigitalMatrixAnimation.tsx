@@ -28,7 +28,18 @@ export const DigitalMatrixAnimation: React.FC<AnimationProps> = ({
       : {};
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center font-mono">
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "center",
+        columnGap: "0.28em",
+        rowGap: "0.15em",
+        textAlign: "center",
+        fontFamily: "monospace",
+      }}
+    >
       {line.words.map((word) => {
         const isActive = currentTime >= word.start && currentTime <= word.end;
 
@@ -45,6 +56,7 @@ export const DigitalMatrixAnimation: React.FC<AnimationProps> = ({
                 ? `0 0 ${12 * glow}px ${style.activeColor}, 0 0 ${24 * glow}px #00ff66`
                 : "none",
               display: "inline-block",
+              margin: "0 0.12em",
               ...strokeStyle,
             }}
           >

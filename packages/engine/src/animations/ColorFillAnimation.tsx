@@ -19,7 +19,17 @@ export const ColorFillAnimation: React.FC<AnimationProps> = ({
   fps,
 }) => {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center">
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "center",
+        columnGap: "0.28em",
+        rowGap: "0.15em",
+        textAlign: "center",
+      }}
+    >
       {line.words.map((word) => {
         const isActive = currentTime >= word.start && currentTime <= word.end;
         const isPast = currentTime > word.end;
@@ -66,6 +76,7 @@ export const ColorFillAnimation: React.FC<AnimationProps> = ({
               transform: `scale(${scale})`,
               transformOrigin: "center bottom",
               display: "inline-block",
+              margin: "0 0.12em",
               transition: "color 0.1s ease",
               ...strokeStyle,
               ...shadowStyle,

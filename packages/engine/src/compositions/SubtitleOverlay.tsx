@@ -39,8 +39,8 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
 
   return (
     <div
-      className="absolute pointer-events-none select-none flex items-center justify-center"
       style={{
+        position: "absolute",
         left: posX,
         top: posY,
         transform: anchorTransform,
@@ -49,6 +49,11 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
         fontFamily: style.fontFamily,
         fontWeight: style.fontWeight,
         fontSize: `${style.fontSize}px`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        pointerEvents: "none",
+        userSelect: "none",
       }}
     >
       <div

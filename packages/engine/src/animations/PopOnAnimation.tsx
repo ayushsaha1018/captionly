@@ -22,7 +22,17 @@ export const PopOnAnimation: React.FC<AnimationProps> = ({
   const popScale = options.popScale ?? 1.15;
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center">
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "center",
+        columnGap: "0.28em",
+        rowGap: "0.15em",
+        textAlign: "center",
+      }}
+    >
       {line.words.map((word) => {
         const hasStarted = currentTime >= word.start;
         const isActive = currentTime >= word.start && currentTime <= word.end;
@@ -34,6 +44,7 @@ export const PopOnAnimation: React.FC<AnimationProps> = ({
               style={{
                 opacity: 0,
                 display: "inline-block",
+                margin: "0 0.12em",
               }}
             >
               {word.text}
@@ -77,6 +88,7 @@ export const PopOnAnimation: React.FC<AnimationProps> = ({
               transform: `scale(${currentScale})`,
               transformOrigin: "center center",
               display: "inline-block",
+              margin: "0 0.12em",
               ...strokeStyle,
               ...shadowStyle,
             }}
