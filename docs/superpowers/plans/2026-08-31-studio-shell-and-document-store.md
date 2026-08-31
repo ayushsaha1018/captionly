@@ -1047,7 +1047,11 @@ import { useStudioStore } from "@/store";
 import { StylePanel } from "@/subtitle/StylePanel";
 import { AnimationPanel } from "@/subtitle/AnimationPanel";
 import { LineList } from "@/lines/LineList";
-import type { SafeZonePreset } from "@captionly/engine";
+import type {
+  SafeZonePreset,
+  SubtitleStyle,
+  AnimationConfig,
+} from "@captionly/engine";
 
 export function WorkSurface({
   playerRef,
@@ -1064,7 +1068,24 @@ export function WorkSurface({
   const setStyle = useStudioStore((s) => s.setStyle);
   const animation = useStudioStore((s) => s.animation);
   const setAnimation = useStudioStore((s) => s.setAnimation);
+  const commit = useStudioStore((s) => s.commit);
   const lineCount = useStudioStore((s) => s.lines.length);
+
+  // commit() snapshots the CURRENT state, so it must run BEFORE the mutation
+  // it is meant to undo. Committing after would record the post-change state
+  // and undo would land a step short.
+  //
+  // Both carry a coalesceKey: a slider drag fires dozens of changes, and
+  // without one each would become its own undo entry.
+  const changeStyle = (next: SubtitleStyle) => {
+    commit("Change style", { coalesceKey: "style" });
+    setStyle(next);
+  };
+
+  const changeAnimation = (next: AnimationConfig) => {
+    commit("Change animation", { coalesceKey: "animation" });
+    setAnimation(next);
+  };
 
   return (
     <Tabs
@@ -1085,10 +1106,10 @@ export function WorkSurface({
       </TabsContent>
 
       <TabsContent value="style" className="flex flex-col gap-4">
-        <AnimationPanel animation={animation} onChange={setAnimation} />
+        <AnimationPanel animation={animation} onChange={changeAnimation} />
         <StylePanel
           style={style}
-          onStyleChange={(s) => setStyle(s)}
+          onStyleChange={changeStyle}
           safeZone={safeZone}
           onSafeZoneChange={onSafeZoneChange}
         />
