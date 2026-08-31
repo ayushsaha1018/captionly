@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PlayerRef } from "@remotion/player";
 import { Download, Undo2, Redo2 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
@@ -28,14 +28,33 @@ export function StudioShell() {
   const undo = useStudioStore((s) => s.undo);
   const redo = useStudioStore((s) => s.redo);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "z") return;
+
+      // Let text fields keep their native field-level undo.
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) {
+        return;
+      }
+
+      e.preventDefault();
+      if (e.shiftKey) {
+        redo();
+      } else {
+        undo();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [undo, redo]);
+
   return (
     <div className="min-h-screen bg-void text-ink">
       <header className="sticky top-0 z-30 border-b border-hairline bg-void/80 backdrop-blur">
         <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-6 py-3">
           <div className="flex items-baseline gap-3">
-            <span className="font-display text-lg font-semibold tracking-tight">
-              Captionly
-            </span>
+            <span className="font-display text-lg font-semibold tracking-tight">Captionly</span>
             {video && (
               <span className="tabular text-xs text-ink-muted">
                 {video.src.split("/").pop()} · {video.width}×{video.height} ·{" "}
@@ -80,16 +99,8 @@ export function StudioShell() {
       </header>
 
       <div className="mx-auto flex max-w-[1600px] items-start gap-8 px-6 py-6">
-        <PlayerRail
-          playerRef={playerRef}
-          safeZone={safeZone}
-          onSafeZoneChange={setSafeZone}
-        />
-        <WorkSurface
-          playerRef={playerRef}
-          safeZone={safeZone}
-          onSafeZoneChange={setSafeZone}
-        />
+        <PlayerRail playerRef={playerRef} safeZone={safeZone} onSafeZoneChange={setSafeZone} />
+        <WorkSurface playerRef={playerRef} safeZone={safeZone} onSafeZoneChange={setSafeZone} />
       </div>
 
       {video && (
