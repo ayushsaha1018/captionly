@@ -174,8 +174,19 @@ Three roles, deliberately not the default Inter + JetBrains pairing:
   aligned columns at the left and right of each line block and must not shift width as
   digits change.
 
-Loaded self-hosted via `@fontsource` packages rather than a Google Fonts `<link>`, so the
-editor has no render-blocking third-party request and works offline.
+Loaded self-hosted rather than via a Google Fonts `<link>`, so the editor has no
+render-blocking third-party request and works offline. Package names verified against the
+registry on 2026-08-31 — note the two variable faces use the `@fontsource-variable/` scope
+while IBM Plex Mono has no variable build and uses plain `@fontsource/`:
+
+```
+@fontsource-variable/bricolage-grotesque   ^5.3.0
+@fontsource-variable/archivo               ^5.3.0
+@fontsource/ibm-plex-mono                  ^5.3.0   # static only — no variable build exists
+```
+
+Every face declares a real fallback stack (`system-ui, sans-serif` / `ui-monospace,
+monospace`) so a failed font load degrades rather than reflows into nothing.
 
 Type scale (rem, 16px base): `0.6875 / 0.75 / 0.8125 / 0.875 / 1 / 1.25 / 1.75 / 2.5`.
 
@@ -265,12 +276,37 @@ src/
 │   └── Playhead.tsx           # leaf; the ONLY frame subscriber
 ├── store/
 │   ├── index.ts               # create<Doc & Editor & History>()
+│   ├── fixture.ts             # SP1 seed — deleted by SP2
 │   ├── documentSlice.ts
 │   ├── editorSlice.ts
 │   ├── historySlice.ts
 │   └── selectors.ts
 └── lib/timecode.ts            # format/parse M:SS.cc
 ```
+
+`routes/index.tsx` is reduced to a route definition whose `component` is `StudioShell` and
+whose `head` carries the corrected metadata. It holds no state and no layout.
+
+### 5.2 Sub-project 1 fixture
+
+Upload lands in sub-project 2, but `documentSlice.video` is the only source of
+`durationSec` — and three things need it immediately: `PlayerRail`'s transport,
+`LineList`'s trailing "Ns left" affordance, and `<Player durationInFrames>`. So SP1 seeds
+the store from `store/fixture.ts`:
+
+```ts
+video: { src: "/test1.mp4", durationSec: 15, width: 1920, height: 1080 },
+lines: sampleSubtitles,
+```
+
+These are the existing hardcoded constants from `SubtitleEditor.tsx`, relocated rather than
+invented. `fixture.ts` is **deleted in sub-project 2** when real metadata arrives from
+`loadedmetadata`, and exists as a separate file precisely so that deletion is unambiguous.
+
+Because `video` is non-null from the first render in SP1, the "don't mount `<Player>`
+before duration resolves" hazard in §10 does not bite yet — but `PlayerRail` must already
+guard on `video === null` rather than assuming the fixture, or SP2 reintroduces
+`durationInFrames={0}` the moment the seed is removed.
 
 ---
 
@@ -305,14 +341,25 @@ interface EditorSlice {
 }
 
 // historySlice
+interface HistoryEntry {
+  snapshot: DocumentSnapshot;
+  label: string;         // shown in UI; also the undo entry name
+  coalesceKey?: string;  // e.g. `text:${lineId}` — absent for discrete actions
+  at: number;            // Date.now() at push, read by the coalescing window
+}
+
 interface HistorySlice {
-  past: DocumentSnapshot[];
-  future: DocumentSnapshot[];
-  commit: (label: string) => void;
+  past: HistoryEntry[];
+  future: HistoryEntry[];
+  commit: (label: string, opts?: { coalesceKey?: string }) => void;
   undo: () => void;
   redo: () => void;
 }
 ```
+
+`coalesceKey` and `at` exist solely to make §6.3's rule implementable — a bare
+`DocumentSnapshot` carries neither the line identity nor the timestamp the rule reads.
+Discrete actions omit `coalesceKey` and therefore never coalesce.
 
 Composed with `StateCreator<Doc & Editor & History, [], [], Slice>` per slice and combined
 in a single `create<Doc & Editor & History>()((...a) => ({ ...createDocumentSlice(...a), ... }))`.
@@ -346,10 +393,12 @@ animation + position), so structural sharing is unnecessary and no `immer` is re
 Coalescing is the only non-trivial part — typing a line must not produce forty undo entries:
 
 - Discrete actions (merge, split, delete, add, retime, style change) call `commit(label)`
-  directly, pushing a snapshot and clearing `future`.
-- Text edits coalesce: if the top of `past` was produced by a text edit **to the same line
-  id within 600ms**, replace it rather than pushing.
-- `past` is capped at 100 entries.
+  with no `coalesceKey`, pushing an entry and clearing `future`.
+- Text edits call `commit("Edit line", { coalesceKey: \`text:${lineId}\` })`. If the top of
+  `past` has the **same `coalesceKey`** and `Date.now() - top.at < 600`, the new entry
+  replaces it instead of being pushed. Note the replacement keeps the *older* snapshot —
+  undo must return to the state before the typing burst began, not to the middle of it.
+- `past` is capped at 100 entries, dropping from the oldest end.
 
 `zundo` provides this via `handleSet` throttling but is a second dependency to control ~25
 lines of logic. Rejected on those grounds; revisit if the coalescing rules grow.
@@ -444,5 +493,6 @@ The word-timing algorithm gets its own test in sub-project 3.
 | Proportional line heights make long videos an unusable scroll. | Heights clamped 72–200px, voids clamped to 120px with a duration label. Proportion is relative, not literal. If it still fails at 10min+, fall back to uniform heights and keep the ruler as a pure duration indicator. |
 | Frame subscription leaks into the list and re-renders everything. | Single-leaf rule (6.2.1), enforced by the Profiler check in step 5. |
 | Remapping shadcn's slate variables breaks installed components. | Remap the semantic variables only; do not edit files under `components/ui/`. Verify against `Dialog`, `Tabs`, `Select`, `Slider`, and `Sonner`, which the app already uses. |
+| **`--border` and `--input` are currently alpha values, not opaque colors.** `.dark` defines them as `oklch(1 0 0 / 10%)` and `oklch(1 0 0 / 15%)` — white at low opacity, so they composite against whatever sits behind them and stay subtle over both `--surface` and `--raised`. `--hairline` is opaque. Mapping `--border: var(--hairline)` will read subtly heavier on raised surfaces, and it will not surface as a *failure* in the component check above — just as something wrong-looking. | Keep `--border`/`--input` as alpha-on-white and use `--hairline` **only** for the line list's own dividers and ruler, where it sits on a known ground. Compare the two side by side on `Dialog` over `--raised` before committing the remap. |
 | The no-bottom-timeline bet proves wrong once lines are editable. | Contained: the ruler gutter is one component (`RulerGutter`) and the list is a normal scroll container. Adding a conventional timeline later does not require restructuring the shell. |
 | Aspect-driven rail width causes layout thrash on upload. | Rail width is a CSS `clamp()` on a single custom property set once when metadata resolves — not a JS resize loop. Do not mount `<Player>` before duration is known, or it receives `durationInFrames={0}`. |
