@@ -1,0 +1,105 @@
+import { useRef, useState } from "react";
+import type { PlayerRef } from "@remotion/player";
+import { Download, Undo2, Redo2 } from "lucide-react";
+import { useShallow } from "zustand/react/shallow";
+import { useStudioStore } from "@/store";
+import { ExportDialog } from "@/export/ExportDialog";
+import { PlayerRail } from "./PlayerRail";
+import { WorkSurface } from "./WorkSurface";
+import { formatTimecode } from "@/lib/timecode";
+import type { SafeZonePreset } from "@captionly/engine";
+
+export function StudioShell() {
+  const playerRef = useRef<PlayerRef | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [safeZone, setSafeZone] = useState<SafeZonePreset>("none");
+
+  const { video, lines, style, animation, position } = useStudioStore(
+    useShallow((s) => ({
+      video: s.video,
+      lines: s.lines,
+      style: s.style,
+      animation: s.animation,
+      position: s.position,
+    })),
+  );
+  const canUndo = useStudioStore((s) => s.past.length > 0);
+  const canRedo = useStudioStore((s) => s.future.length > 0);
+  const undo = useStudioStore((s) => s.undo);
+  const redo = useStudioStore((s) => s.redo);
+
+  return (
+    <div className="min-h-screen bg-void text-ink">
+      <header className="sticky top-0 z-30 border-b border-hairline bg-void/80 backdrop-blur">
+        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-6 py-3">
+          <div className="flex items-baseline gap-3">
+            <span className="font-display text-lg font-semibold tracking-tight">
+              Captionly
+            </span>
+            {video && (
+              <span className="tabular text-xs text-ink-muted">
+                {video.src.split("/").pop()} · {video.width}×{video.height} ·{" "}
+                {formatTimecode(video.durationSec)}
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={undo}
+              disabled={!canUndo}
+              aria-label="Undo"
+              className="grid h-8 w-8 place-items-center rounded-md text-ink-muted
+                         transition-colors hover:bg-raised hover:text-ink disabled:opacity-30
+                         focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-edit"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={redo}
+              disabled={!canRedo}
+              aria-label="Redo"
+              className="grid h-8 w-8 place-items-center rounded-md text-ink-muted
+                         transition-colors hover:bg-raised hover:text-ink disabled:opacity-30
+                         focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-edit"
+            >
+              <Redo2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setExportOpen(true)}
+              className="flex items-center gap-2 rounded-md bg-edit px-3 py-1.5 text-xs
+                         font-semibold text-void transition-transform hover:scale-[1.02]
+                         active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2
+                         focus-visible:outline-edit"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Export
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="mx-auto flex max-w-[1600px] items-start gap-8 px-6 py-6">
+        <PlayerRail
+          playerRef={playerRef}
+          safeZone={safeZone}
+          onSafeZoneChange={setSafeZone}
+        />
+        <WorkSurface
+          playerRef={playerRef}
+          safeZone={safeZone}
+          onSafeZoneChange={setSafeZone}
+        />
+      </div>
+
+      {video && (
+        <ExportDialog
+          open={exportOpen}
+          onOpenChange={setExportOpen}
+          videoSrc={video.src}
+          subtitles={{ lines, style, position, animation }}
+        />
+      )}
+    </div>
+  );
+}
