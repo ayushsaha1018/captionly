@@ -3,8 +3,8 @@ export function RulerGutter({ selected }: { selected: boolean }) {
   return (
     <div
       aria-hidden
-      className={`w-px shrink-0 rounded-full transition-colors ${
-        selected ? "w-[3px] bg-edit" : "bg-hairline"
+      className={`shrink-0 rounded-full transition-colors ${
+        selected ? "w-[3px] bg-edit" : "w-px bg-hairline"
       }`}
     />
   );

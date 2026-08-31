@@ -26,9 +26,17 @@ export const LineRow = memo(function LineRow({
   return (
     <div className="flex gap-4">
       <RulerGutter selected={selected} />
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label={`Line ${formatTimecode(line.start)} to ${formatTimecode(line.end)}`}
         onClick={() => onSelect(line.id)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onSelect(line.id);
+          }
+        }}
         style={{ minHeight: lineHeight(line.end - line.start) }}
         className={`group flex w-full flex-col gap-2 rounded-md px-3 py-3 text-left
                     transition-colors focus-visible:outline-2 focus-visible:outline-offset-2
@@ -52,7 +60,7 @@ export const LineRow = memo(function LineRow({
         </p>
 
         {selected && <WordStrip line={line} />}
-      </button>
+      </div>
     </div>
   );
 });
