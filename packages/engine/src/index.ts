@@ -1,28 +1,24 @@
-export { SubtitleRenderer, CANVAS_W, CANVAS_H } from "./renderer";
-export { ANIMATION_LABELS } from "./animations/registry";
-export type {
-  Word,
-  SubtitleLine,
-  SubtitleStyle,
-  SubtitlePosition,
-  BoxAnchor,
-  SafeZonePreset,
-  AnimationType,
-  AnimationConfig,
-  ColorFillOptions,
-  TypewriterOptions,
-  RollUpOptions,
-  PaintOnOptions,
-  PopOnOptions,
-  WipeOptions,
-  FlapBoardOptions,
-  TickerOptions,
-  DigitalMatrixOptions,
-} from "./types";
-export {
-  defaultStyle,
-  defaultPosition,
-  defaultAnimation,
-  defaultOptionsFor,
-  sampleSubtitles,
-} from "./sampleData";
+export const CANVAS_W = 1920;
+export const CANVAS_H = 1080;
+
+// Core Types & Constants
+export * from "./types";
+
+// Sample & Default Data
+export * from "./sampleData";
+
+// Compositions
+export { MainComposition } from "./compositions/MainComposition";
+export { SubtitleOverlay } from "./compositions/SubtitleOverlay";
+
+// Animations & Strategy Registry
+export { SubtitleAnimationRenderer } from "./animations/registry";
+export { ColorFillAnimation } from "./animations/ColorFillAnimation";
+export { PopOnAnimation } from "./animations/PopOnAnimation";
+export { TypewriterAnimation } from "./animations/TypewriterAnimation";
+export { WipeAnimation } from "./animations/WipeAnimation";
+export { RollUpAnimation } from "./animations/RollUpAnimation";
+export { PaintOnAnimation } from "./animations/PaintOnAnimation";
+export { FlapBoardAnimation } from "./animations/FlapBoardAnimation";
+export { TickerAnimation } from "./animations/TickerAnimation";
+export { DigitalMatrixAnimation } from "./animations/DigitalMatrixAnimation";

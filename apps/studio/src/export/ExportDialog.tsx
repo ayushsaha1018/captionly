@@ -161,9 +161,7 @@ export function ExportDialog({ open, onOpenChange, videoSrc, subtitles }: Export
               <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
               <div className="space-y-1">
                 <p className="text-sm font-medium text-foreground">
-                  {serverExport.phase === "uploading"
-                    ? "Uploading video…"
-                    : "Rendering on server…"}
+                  {serverExport.phase === "uploading" ? "Uploading video…" : "Rendering on server…"}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   This may take a moment depending on video length.
@@ -236,7 +234,9 @@ export function ExportDialog({ open, onOpenChange, videoSrc, subtitles }: Export
                   ) : (
                     <ServerIcon className="h-3.5 w-3.5 text-primary" />
                   )}
-                  <span>{mode === "client" ? "Client-Side Fast Export" : "Server-Side Export"}</span>
+                  <span>
+                    {mode === "client" ? "Client-Side Fast Export" : "Server-Side Export"}
+                  </span>
                 </div>
                 <p className="text-[11px] leading-relaxed">
                   {mode === "client"

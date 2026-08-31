@@ -15,7 +15,7 @@ export const sampleSubtitles: SubtitleLine[] = [
       { id: "w1", text: "This", start: 0.2, end: 0.7 },
       { id: "w2", text: "is", start: 0.7, end: 1.0 },
       { id: "w3", text: "a", start: 1.0, end: 1.2 },
-      { id: "w4", text: "Fabric", start: 1.2, end: 1.9 },
+      { id: "w4", text: "Remotion", start: 1.2, end: 1.9 },
       { id: "w5", text: "subtitle", start: 1.9, end: 2.7 },
       { id: "w6", text: "preview", start: 2.7, end: 3.5 },
       { id: "w7", text: "editor", start: 3.5, end: 4.4 },
@@ -33,7 +33,7 @@ export const sampleSubtitles: SubtitleLine[] = [
       { id: "w12", text: "animation", start: 7.0, end: 8.2 },
       { id: "w13", text: "powered", start: 8.2, end: 8.9 },
       { id: "w14", text: "by", start: 8.9, end: 9.1 },
-      { id: "w15", text: "Fabric.js", start: 9.1, end: 9.5 },
+      { id: "w15", text: "Remotion", start: 9.1, end: 9.5 },
     ],
   },
   {
@@ -41,9 +41,9 @@ export const sampleSubtitles: SubtitleLine[] = [
     start: 10.0,
     end: 15.0,
     words: [
-      { id: "w16", text: "Pluggable", start: 10.0, end: 10.8 },
-      { id: "w17", text: "animation", start: 10.8, end: 11.6 },
-      { id: "w18", text: "strategies", start: 11.6, end: 12.5 },
+      { id: "w16", text: "Declarative", start: 10.0, end: 10.8 },
+      { id: "w17", text: "React", start: 10.8, end: 11.6 },
+      { id: "w18", text: "compositions", start: 11.6, end: 12.5 },
       { id: "w19", text: "for", start: 12.5, end: 12.8 },
       { id: "w20", text: "every", start: 12.8, end: 13.3 },
       { id: "w21", text: "style.", start: 13.3, end: 14.5 },
@@ -52,7 +52,7 @@ export const sampleSubtitles: SubtitleLine[] = [
 ];
 
 export const defaultStyle: SubtitleStyle = {
-  fontFamily: "Inter, system-ui, sans-serif",
+  fontFamily: "Inter, system-ui, -apple-system, sans-serif",
   fontWeight: 900,
   fontSize: 84,
   color: "#ffffff",

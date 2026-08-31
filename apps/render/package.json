@@ -2,7 +2,9 @@
   "name": "@captionly/render",
   "module": "src/index.ts",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -16,8 +18,11 @@
   },
   "type": "module",
   "dependencies": {
-    "canvas": "^3.2.3",
-    "fabric": "^7.4.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "remotion": "^4.0.0",
+    "@remotion/renderer": "^4.0.0",
+    "@remotion/bundler": "^4.0.0",
     "@captionly/engine": "workspace:*"
   }
 }
