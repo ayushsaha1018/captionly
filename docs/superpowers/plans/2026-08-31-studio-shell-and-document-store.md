@@ -1549,52 +1549,43 @@ Create `apps/studio/src/lines/Playhead.tsx`:
 
 ```tsx
 import type { PlayerRef } from "@remotion/player";
+import type { SubtitleLine } from "@captionly/engine";
 import { useCurrentPlayerFrame } from "@/lib/useCurrentPlayerFrame";
 import { useStudioStore } from "@/store";
 import { FPS } from "@/lib/constants";
-import { lineHeight, voidHeight } from "./geometry";
 
 /**
- * THE ONLY FRAME SUBSCRIBER in the app. See spec §6.2.1.
+ * The playhead renders INSIDE the active row and positions itself as a
+ * percentage of that row's own height.
  *
- * It re-renders at fps by design, which is why it renders one absolutely
- * positioned element and nothing else. Do not add store writes here, and do
- * not call useCurrentPlayerFrame anywhere above a leaf.
+ * It deliberately does NOT compute an absolute offset by re-walking
+ * lineHeight()/voidHeight(). LineRow sets `minHeight`, so a row whose content
+ * exceeds the 72px floor — any selected short line, once the word strip
+ * appears — is taller than geometry predicts, and every subsequent offset
+ * drifts. Positioning within the row is correct by construction.
+ *
+ * This re-renders at fps by design, which is why it renders one element and
+ * nothing else. No store writes here, and never call useCurrentPlayerFrame
+ * anywhere but a leaf like this one.
  */
 export function Playhead({
   playerRef,
+  line,
 }: {
   playerRef: React.RefObject<PlayerRef | null>;
+  line: SubtitleLine;
 }) {
   const frame = useCurrentPlayerFrame(playerRef);
-  const lines = useStudioStore((s) => s.lines);
-  const t = frame / FPS;
+  const span = line.end - line.start;
+  if (span <= 0) return null;
 
-  // Walk the same geometry the list lays out with, accumulating offsets.
-  let offset = 0;
-  let top: number | null = null;
-  for (let i = 0; i < lines.length; i++) {
-    if (i > 0) {
-      const gap = lines[i].start - lines[i - 1].end;
-      if (gap > 0.001) offset += voidHeight(gap);
-      else offset += 1;
-    }
-    const h = lineHeight(lines[i].end - lines[i].start);
-    if (t >= lines[i].start && t <= lines[i].end) {
-      const progress = (t - lines[i].start) / (lines[i].end - lines[i].start);
-      top = offset + progress * h;
-      break;
-    }
-    offset += h;
-  }
-
-  if (top === null) return null;
+  const progress = Math.min(1, Math.max(0, (frame / FPS - line.start) / span));
 
   return (
     <div
       aria-hidden
       className="pointer-events-none absolute left-0 right-0 z-10 h-px bg-now"
-      style={{ top }}
+      style={{ top: `${progress * 100}%` }}
     />
   );
 }
@@ -1663,10 +1654,46 @@ Then in `LineList`, replace the `lines.map(...)` block in the return with `<Rows
 
 ```tsx
 import { Fragment, useCallback, useEffect, useRef } from "react";
-import { Playhead, useActiveLineId } from "./Playhead";
+import { useActiveLineId } from "./Playhead";
 ```
 
-`LineList` itself no longer reads `selectedLineId` — delete that selector from it, keeping only `lines` (for the empty-state check) and `select`.
+`LineList` no longer renders `<Playhead />` itself and no longer reads `selectedLineId` — delete both, keeping only the `lines` selector (for the empty-state check) and `select`. Also drop the now-unused `FPS`-adjacent import if the seek callback is the only user; it is not — keep `FPS`.
+
+- [ ] **Step 2b: Render the playhead inside the active row**
+
+`LineRow` gains a `playerRef` prop and hosts the playhead. Add to `LineRowProps`:
+
+```tsx
+  playerRef: React.RefObject<PlayerRef | null>;
+```
+
+Add the imports:
+
+```tsx
+import type { PlayerRef } from "@remotion/player";
+import { Playhead } from "./Playhead";
+```
+
+Add `relative` to the button's class list, and render the playhead as its last child when active:
+
+```tsx
+        {selected && <WordStrip line={line} />}
+        {active && <Playhead playerRef={playerRef} line={line} />}
+```
+
+Pass it through from `Rows`:
+
+```tsx
+            <LineRow
+              line={line}
+              selected={line.id === selectedLineId}
+              active={line.id === activeId}
+              onSelect={onSelect}
+              playerRef={playerRef}
+            />
+```
+
+> `playerRef` is a stable ref object, so adding it to `LineRow`'s props does not defeat `memo`. `LineRow` itself still does not re-render per frame — only the `Playhead` mounted inside the one active row does.
 
 > `Rows` re-renders at fps, but every `LineRow` inside it is memoized, so only the two rows whose `active` prop actually flips will re-render. This is the arrangement the Profiler check in Task 10 verifies.
 
@@ -1772,7 +1799,7 @@ git commit -m "feat(studio): bind undo and redo keyboard shortcuts"
 
 ## Self-Review Notes
 
-**Spec coverage:** §4.2 palette → T1. §4.3 type → T1. §4.4 timecode → T2. §4.5 motion → T1 (reduced-motion), T7 (interstitial hover), T8 (stagger). §5 layout → T6. §5.1 structure → T6/T7. §5.2 fixture → T3. §6.1 slices → T3/T4. §6.2 re-render → T7 (memo), T9 (leaf), T10 (Profiler). §6.3 undo → T4/T10. §7 deletions → T6. §8 copy → T1/T6/T7. §9 verification → T10. §10 risks → T1 (border alpha), T6 (null guard).
+**Spec coverage:** §4.2 palette → T1. §4.3 type → T1. §4.4 timecode → T2. §4.5 motion → T1 (reduced-motion) and T8 (word-strip stagger); **the interstitial hover pill defers to SP3** with the Merge/Add controls it reveals, so SP1 ships one microinteraction, not two. §5 layout → T6. §5.1 structure → T6/T7. §5.2 fixture → T3. §6.1 slices → T3/T4. §6.2 re-render → T7 (memo), T9 (leaf), T10 (Profiler). §6.3 undo → T4/T10. §7 deletions → T6. §8 copy → T1/T6/T7. §9 verification → T10. §10 risks → T1 (border alpha), T6 (null guard).
 
 **Known ordering consequence:** Tasks 6–8 do not build in isolation — `StudioShell` imports `LineList` (T7), which imports `Playhead` (T9). The tree first compiles at Task 9 Step 3. Each task still commits independently; only the build gate moves.
 
