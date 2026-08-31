@@ -1718,6 +1718,18 @@ Pass it through from `Rows`:
 
 > `Rows` re-renders at fps, but every `LineRow` inside it is memoized, so only the two rows whose `active` prop actually flips will re-render. This is the arrangement the Profiler check in Task 10 verifies.
 
+- [ ] **Step 2c: Let the rail own the player's aspect ratio**
+
+`StudioPlayer`'s wrapper still carries a hardcoded `aspect-video` from when it was mounted directly by the deleted `SubtitleEditor`. `PlayerRail` now wraps it in a div whose ratio is computed from the video's real dimensions, so the inner `aspect-video` fights it: for any non-16:9 video the inner box sizes itself to 16:9 off its own width and ignores the parent. The 16:9 fixture masks this today; upload in sub-project 2 would expose it immediately.
+
+In `apps/studio/src/subtitle/StudioPlayer.tsx`, drop `aspect-video` from the wrapper's class list and add `h-full` so it fills the parent instead of computing its own box:
+
+```tsx
+      className={`relative w-full h-full overflow-hidden rounded-xl bg-black shadow-2xl ring-1 ring-white/10 select-none ${className}`}
+```
+
+This task is where the component first actually renders, which is why the fix lands here rather than in Task 6.
+
 - [ ] **Step 3: Build**
 
 ```bash
