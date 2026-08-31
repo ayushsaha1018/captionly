@@ -33,3 +33,11 @@ test("rejects malformed input", () => {
   expect(parseTimecode("abc")).toBeNull();
   expect(parseTimecode("1:2:3:4.00")).toBeNull();
 });
+
+test("minutes-only input is a total minute count; explicit hours bound minutes to 59", () => {
+  // Lenient without an hour field — "99:05" means 99 minutes, 5 seconds.
+  expect(parseTimecode("99:05")).toBe(5945);
+  expect(parseTimecode("65:00")).toBe(3900);
+  // Strict with one — 99 minutes alongside an explicit hour is malformed.
+  expect(parseTimecode("1:99:05")).toBeNull();
+});

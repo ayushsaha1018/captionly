@@ -12,7 +12,10 @@ export function formatTimecode(seconds: number): string {
   return hh > 0 ? `${hh}:${p(mm)}:${p(ss)}.${p(cc)}` : `${mm}:${p(ss)}.${p(cc)}`;
 }
 
-/** Parses M:SS.cc or H:MM:SS.cc. Returns null when the input is not a timecode. */
+/** Parses M:SS.cc or H:MM:SS.cc to seconds. Parsing is deliberately more lenient than
+ *  formatting: without an explicit hour field, the leading field is a total minute count
+ *  (so "99:05" is 5945 seconds). With an explicit hour field, minutes must be < 60.
+ *  Returns null for malformed input. */
 export function parseTimecode(input: string): number | null {
   const m = input.trim().match(/^(?:(\d+):)?(\d{1,2}):(\d{1,2})(?:\.(\d{1,2}))?$/);
   if (!m) return null;
