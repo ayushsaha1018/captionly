@@ -1,12 +1,7 @@
 import type { StateCreator } from "zustand";
 import type { EditorSlice, StudioState } from "./types";
 
-export const createEditorSlice: StateCreator<
-  StudioState,
-  [],
-  [],
-  EditorSlice
-> = (set) => ({
+export const createEditorSlice: StateCreator<StudioState, [], [], EditorSlice> = (set) => ({
   selectedLineId: null,
   editingLineId: null,
   activeTab: "lines",

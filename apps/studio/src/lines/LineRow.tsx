@@ -44,19 +44,13 @@ export const LineRow = memo(function LineRow({
         style={{ minHeight: lineHeight(line.end - line.start) }}
         className={`group relative flex w-full flex-col gap-2 rounded-md px-3 py-3 text-left
                     transition-colors focus-visible:outline-2 focus-visible:outline-offset-2
-                    focus-visible:outline-edit ${
-                      selected ? "bg-raised" : "hover:bg-raised/50"
-                    }`}
+                    focus-visible:outline-edit ${selected ? "bg-raised" : "hover:bg-raised/50"}`}
       >
         <div className="flex items-baseline justify-between">
-          <span
-            className={`tabular text-xs ${active ? "text-now" : "text-ink-muted"}`}
-          >
+          <span className={`tabular text-xs ${active ? "text-now" : "text-ink-muted"}`}>
             {formatTimecode(line.start)}
           </span>
-          <span className="tabular text-xs text-ink-muted">
-            {formatTimecode(line.end)}
-          </span>
+          <span className="tabular text-xs text-ink-muted">{formatTimecode(line.end)}</span>
         </div>
 
         <p className={`text-base leading-snug ${active ? "text-now" : "text-ink"}`}>

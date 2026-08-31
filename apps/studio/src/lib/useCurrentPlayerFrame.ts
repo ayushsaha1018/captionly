@@ -8,9 +8,7 @@ import { useCallback, useSyncExternalStore } from "react";
  * calling it higher in the tree re-renders the whole editor at fps.
  * The frame must never be written into the zustand store — see spec §6.2.1.
  */
-export function useCurrentPlayerFrame(
-  ref: React.RefObject<PlayerRef | null>,
-): number {
+export function useCurrentPlayerFrame(ref: React.RefObject<PlayerRef | null>): number {
   const subscribe = useCallback(
     (onStoreChange: () => void) => {
       const { current } = ref;

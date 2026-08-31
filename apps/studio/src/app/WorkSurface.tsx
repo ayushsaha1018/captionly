@@ -4,11 +4,7 @@ import { useStudioStore } from "@/store";
 import { StylePanel } from "@/subtitle/StylePanel";
 import { AnimationPanel } from "@/subtitle/AnimationPanel";
 import { LineList } from "@/lines/LineList";
-import type {
-  SafeZonePreset,
-  SubtitleStyle,
-  AnimationConfig,
-} from "@captionly/engine";
+import type { SafeZonePreset, SubtitleStyle, AnimationConfig } from "@captionly/engine";
 
 export function WorkSurface({
   playerRef,

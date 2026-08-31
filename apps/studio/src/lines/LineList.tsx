@@ -44,11 +44,7 @@ function Rows({
   );
 }
 
-export function LineList({
-  playerRef,
-}: {
-  playerRef: React.RefObject<PlayerRef | null>;
-}) {
+export function LineList({ playerRef }: { playerRef: React.RefObject<PlayerRef | null> }) {
   const lines = useStudioStore((s) => s.lines);
   const select = useStudioStore((s) => s.select);
 
@@ -66,9 +62,7 @@ export function LineList({
     return (
       <div className="rounded-xl border border-dashed border-hairline p-12 text-center">
         <p className="font-display text-lg">No lines yet.</p>
-        <p className="mt-1 text-sm text-ink-muted">
-          Add one at the playhead, or load the demo.
-        </p>
+        <p className="mt-1 text-sm text-ink-muted">Add one at the playhead, or load the demo.</p>
       </div>
     );
   }

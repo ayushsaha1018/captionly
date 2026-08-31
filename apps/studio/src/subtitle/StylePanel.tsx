@@ -32,9 +32,7 @@ export function StylePanel({ style, onStyleChange, safeZone, onSafeZoneChange }:
     <aside className="flex flex-col gap-5 rounded-xl border border-border bg-card p-5 shadow-lg h-fit">
       <div>
         <h2 className="text-sm font-semibold text-card-foreground">Subtitle Style</h2>
-        <p className="text-xs text-ink-muted mt-1">
-          Applies to every line in the project.
-        </p>
+        <p className="text-xs text-ink-muted mt-1">Applies to every line in the project.</p>
       </div>
 
       <Row label="Font family">

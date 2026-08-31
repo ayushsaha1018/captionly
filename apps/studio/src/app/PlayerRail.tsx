@@ -86,9 +86,7 @@ export function PlayerRail({
         >
           {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         </button>
-        <span className="tabular text-xs text-ink-muted">
-          {formatTimecode(video.durationSec)}
-        </span>
+        <span className="tabular text-xs text-ink-muted">{formatTimecode(video.durationSec)}</span>
       </div>
 
       <label className="flex flex-col gap-2">

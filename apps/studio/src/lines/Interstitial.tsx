@@ -17,9 +17,7 @@ export function Interstitial({ gapSec }: { gapSec: number }) {
       className="ml-6 flex items-center justify-center rounded-sm border border-dashed border-hairline"
       style={{ height: voidHeight(gapSec) }}
     >
-      <span className="tabular text-[0.6875rem] text-ink-muted">
-        {gapSec.toFixed(2)}s free
-      </span>
+      <span className="tabular text-[0.6875rem] text-ink-muted">{gapSec.toFixed(2)}s free</span>
     </div>
   );
 }

@@ -41,9 +41,7 @@ export function Playhead({
 }
 
 /** Returns the id of the line under the playhead, or null. Leaf-only. */
-export function useActiveLineId(
-  playerRef: React.RefObject<PlayerRef | null>,
-): string | null {
+export function useActiveLineId(playerRef: React.RefObject<PlayerRef | null>): string | null {
   const frame = useCurrentPlayerFrame(playerRef);
   const lines = useStudioStore((s) => s.lines);
   const t = frame / FPS;

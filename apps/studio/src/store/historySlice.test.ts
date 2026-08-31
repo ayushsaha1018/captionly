@@ -2,8 +2,7 @@ import { test, expect, beforeEach } from "bun:test";
 import { useStudioStore, COALESCE_MS, MAX_HISTORY } from "./index";
 import { SP1_FIXTURE } from "./fixture";
 
-const reset = () =>
-  useStudioStore.setState({ ...SP1_FIXTURE, past: [], future: [] });
+const reset = () => useStudioStore.setState({ ...SP1_FIXTURE, past: [], future: [] });
 
 beforeEach(reset);
 

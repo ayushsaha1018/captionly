@@ -14,12 +14,7 @@ function snapshot(s: StudioState): DocumentSnapshot {
   };
 }
 
-export const createHistorySlice: StateCreator<
-  StudioState,
-  [],
-  [],
-  HistorySlice
-> = (set, get) => ({
+export const createHistorySlice: StateCreator<StudioState, [], [], HistorySlice> = (set, get) => ({
   past: [],
   future: [],
 
@@ -58,10 +53,7 @@ export const createHistorySlice: StateCreator<
     if (!top) return;
     set({
       past: state.past.slice(0, -1),
-      future: [
-        ...state.future,
-        { snapshot: snapshot(state), label: top.label, at: Date.now() },
-      ],
+      future: [...state.future, { snapshot: snapshot(state), label: top.label, at: Date.now() }],
     });
     state.replaceDocument(top.snapshot);
   },
@@ -72,10 +64,7 @@ export const createHistorySlice: StateCreator<
     if (!top) return;
     set({
       future: state.future.slice(0, -1),
-      past: [
-        ...state.past,
-        { snapshot: snapshot(state), label: top.label, at: Date.now() },
-      ],
+      past: [...state.past, { snapshot: snapshot(state), label: top.label, at: Date.now() }],
     });
     state.replaceDocument(top.snapshot);
   },
