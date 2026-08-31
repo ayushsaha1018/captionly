@@ -32,7 +32,7 @@ export function StudioPlayer({
 }: StudioPlayerProps) {
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-xl bg-black shadow-2xl ring-1 ring-white/10 select-none aspect-video ${className}`}
+      className={`relative w-full h-full overflow-hidden rounded-xl bg-black shadow-2xl ring-1 ring-white/10 select-none ${className}`}
     >
       <Player
         ref={playerRef}

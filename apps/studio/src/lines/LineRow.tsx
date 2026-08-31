@@ -1,15 +1,18 @@
 import { memo } from "react";
+import type { PlayerRef } from "@remotion/player";
 import type { SubtitleLine } from "@captionly/engine";
 import { formatTimecode } from "@/lib/timecode";
 import { lineHeight } from "./geometry";
 import { RulerGutter } from "./RulerGutter";
 import { WordStrip } from "./WordStrip";
+import { Playhead } from "./Playhead";
 
 interface LineRowProps {
   line: SubtitleLine;
   selected: boolean;
   active: boolean;
   onSelect: (id: string) => void;
+  playerRef: React.RefObject<PlayerRef | null>;
 }
 
 /**
@@ -22,6 +25,7 @@ export const LineRow = memo(function LineRow({
   selected,
   active,
   onSelect,
+  playerRef,
 }: LineRowProps) {
   return (
     <div className="flex gap-4">
@@ -38,7 +42,7 @@ export const LineRow = memo(function LineRow({
           }
         }}
         style={{ minHeight: lineHeight(line.end - line.start) }}
-        className={`group flex w-full flex-col gap-2 rounded-md px-3 py-3 text-left
+        className={`group relative flex w-full flex-col gap-2 rounded-md px-3 py-3 text-left
                     transition-colors focus-visible:outline-2 focus-visible:outline-offset-2
                     focus-visible:outline-edit ${
                       selected ? "bg-raised" : "hover:bg-raised/50"
@@ -60,6 +64,7 @@ export const LineRow = memo(function LineRow({
         </p>
 
         {selected && <WordStrip line={line} />}
+        {active && <Playhead playerRef={playerRef} line={line} />}
       </div>
     </div>
   );

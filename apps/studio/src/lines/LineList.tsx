@@ -1,10 +1,48 @@
 import type { PlayerRef } from "@remotion/player";
-import { Fragment, useCallback } from "react";
+import { Fragment, useCallback, useEffect, useRef } from "react";
 import { useStudioStore } from "@/store";
 import { FPS } from "@/lib/constants";
 import { LineRow } from "./LineRow";
 import { Interstitial } from "./Interstitial";
-import { Playhead } from "./Playhead";
+import { useActiveLineId } from "./Playhead";
+
+function Rows({
+  playerRef,
+  onSelect,
+}: {
+  playerRef: React.RefObject<PlayerRef | null>;
+  onSelect: (id: string) => void;
+}) {
+  const lines = useStudioStore((s) => s.lines);
+  const selectedLineId = useStudioStore((s) => s.selectedLineId);
+  const activeId = useActiveLineId(playerRef);
+  const activeRef = useRef<HTMLDivElement | null>(null);
+
+  // Auto-scroll keyed on the active id, so this fires once per line change
+  // rather than once per frame.
+  useEffect(() => {
+    activeRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [activeId]);
+
+  return (
+    <>
+      {lines.map((line, i) => (
+        <Fragment key={line.id}>
+          {i > 0 && <Interstitial gapSec={line.start - lines[i - 1].end} />}
+          <div ref={line.id === activeId ? activeRef : undefined}>
+            <LineRow
+              line={line}
+              selected={line.id === selectedLineId}
+              active={line.id === activeId}
+              onSelect={onSelect}
+              playerRef={playerRef}
+            />
+          </div>
+        </Fragment>
+      ))}
+    </>
+  );
+}
 
 export function LineList({
   playerRef,
@@ -12,7 +50,6 @@ export function LineList({
   playerRef: React.RefObject<PlayerRef | null>;
 }) {
   const lines = useStudioStore((s) => s.lines);
-  const selectedLineId = useStudioStore((s) => s.selectedLineId);
   const select = useStudioStore((s) => s.select);
 
   // One click selects AND seeks — spec §"one click does everything".
@@ -38,18 +75,7 @@ export function LineList({
 
   return (
     <div className="relative">
-      <Playhead playerRef={playerRef} />
-      {lines.map((line, i) => (
-        <Fragment key={line.id}>
-          {i > 0 && <Interstitial gapSec={line.start - lines[i - 1].end} />}
-          <LineRow
-            line={line}
-            selected={line.id === selectedLineId}
-            active={false}
-            onSelect={onSelect}
-          />
-        </Fragment>
-      ))}
+      <Rows playerRef={playerRef} onSelect={onSelect} />
     </div>
   );
 }
