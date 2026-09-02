@@ -80,3 +80,12 @@ test("undo on empty history is a no-op", () => {
   expect(() => s().undo()).not.toThrow();
   expect(s().past.length).toBe(0);
 });
+
+test("a snapshot carries exactly the five document fields and no editor state", () => {
+  s().select("line-1");
+  s().commit("Set style");
+
+  expect(Object.keys(s().past[0].snapshot).sort()).toEqual(
+    ["animation", "lines", "position", "style", "video"].sort(),
+  );
+});

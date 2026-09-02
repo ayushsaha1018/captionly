@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { voidHeight } from "./geometry";
 
 /**
@@ -6,8 +7,12 @@ import { voidHeight } from "./geometry";
  *
  * Sub-project 1 is VISUAL ONLY. The "Merge lines" and "Add line" controls
  * this hosts arrive in sub-project 3.
+ *
+ * memo is load-bearing: Rows (LineList.tsx) re-renders at frame rate via
+ * useActiveLineId, so every Interstitial in the list would otherwise
+ * re-invoke on every frame.
  */
-export function Interstitial({ gapSec }: { gapSec: number }) {
+export const Interstitial = memo(function Interstitial({ gapSec }: { gapSec: number }) {
   if (gapSec <= 0.001) {
     return <div aria-hidden className="ml-6 h-px bg-hairline" />;
   }
@@ -20,4 +25,4 @@ export function Interstitial({ gapSec }: { gapSec: number }) {
       <span className="tabular text-[0.6875rem] text-ink-muted">{gapSec.toFixed(2)}s free</span>
     </div>
   );
-}
+});

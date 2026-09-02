@@ -4,7 +4,8 @@ import { useCallback, useSyncExternalStore } from "react";
 /**
  * Subscribes to the player's current frame.
  *
- * Call this in ONE leaf component only (Playhead). It fires on every frame;
+ * Call this only from leaf components — currently Playhead and
+ * useActiveLineId (both in lines/Playhead.tsx). It fires on every frame;
  * calling it higher in the tree re-renders the whole editor at fps.
  * The frame must never be written into the zustand store — see spec §6.2.1.
  */
