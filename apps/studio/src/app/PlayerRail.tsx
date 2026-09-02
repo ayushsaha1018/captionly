@@ -59,8 +59,10 @@ export function PlayerRail({
   const aspect = video.width / video.height;
 
   return (
+    // `sticky` is gone: the page no longer scrolls, so the rail is already
+    // fixed. It scrolls itself only if the viewport is too short for it.
     <aside
-      className="flex flex-col gap-4 self-start sticky top-6"
+      className="flex max-h-full shrink-0 flex-col gap-4 self-start overflow-y-auto"
       style={{ width: `clamp(280px, ${aspect >= 1 ? "42vw" : "24vw"}, 640px)` }}
     >
       <div style={{ aspectRatio: String(aspect) }}>

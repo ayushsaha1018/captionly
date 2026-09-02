@@ -50,8 +50,8 @@ export function StudioShell() {
   }, [undo, redo]);
 
   return (
-    <div className="min-h-screen bg-void text-ink">
-      <header className="sticky top-0 z-30 border-b border-hairline bg-void/80 backdrop-blur">
+    <div className="flex h-screen flex-col overflow-hidden bg-void text-ink">
+      <header className="shrink-0 border-b border-hairline bg-void/80 backdrop-blur">
         <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-6 py-3">
           <div className="flex items-baseline gap-3">
             <span className="font-display text-lg font-semibold tracking-tight">Captionly</span>
@@ -98,7 +98,7 @@ export function StudioShell() {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[1600px] items-start gap-8 px-6 py-6">
+      <div className="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 gap-8 px-6 py-6">
         <PlayerRail playerRef={playerRef} safeZone={safeZone} onSafeZoneChange={setSafeZone} />
         <WorkSurface playerRef={playerRef} safeZone={safeZone} onSafeZoneChange={setSafeZone} />
       </div>
