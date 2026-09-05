@@ -100,6 +100,19 @@ describe("computeWordTimings", () => {
     expect(computeWordTimings("   ", 0, 5)).toEqual([]);
   });
 
+  it("enforces the minimum for every word even with uneven weights that only fit after re-iterating", () => {
+    // 5 words: three 1-char, one 20-char, one 77-char (total=1.05s). n*0.2=1.0<=1.05,
+    // so the minimum IS satisfiable overall - but a single clamp-and-renormalize
+    // pass pushes the 20-char word to ~0.093s. Every word must still meet the floor.
+    const text = `a b c ${"d".repeat(20)} ${"e".repeat(77)}`;
+    const words = computeWordTimings(text, 0, 1.05);
+    for (const w of words) {
+      expect(w.end - w.start).toBeGreaterThanOrEqual(0.2 - 1e-9);
+    }
+    expect(words[0].start).toBe(0);
+    expect(words.at(-1)!.end).toBe(1.05);
+  });
+
   it("assigns each word a unique id", () => {
     const words = computeWordTimings("a a a", 0, 3);
     const ids = new Set(words.map((w) => w.id));
@@ -146,19 +159,35 @@ export function computeWordTimings(text: string, start: number, end: number): Wo
 
   const minFits = tokens.length * MIN_WORD_DURATION <= total;
   if (minFits) {
-    const belowFloor = durations.map((d) => d < MIN_WORD_DURATION);
-    const flooredTotal = belowFloor.filter(Boolean).length * MIN_WORD_DURATION;
-    const aboveIndices = belowFloor
-      .map((isBelow, i) => (isBelow ? -1 : i))
-      .filter((i) => i !== -1);
-    const aboveWeightSum = aboveIndices.reduce((sum, i) => sum + weights[i], 0);
-    const remaining = total - flooredTotal;
+    // Iterated water-filling: a single clamp-and-renormalize pass can push an
+    // "above floor" word below the floor when it redistributes the shrunken
+    // remainder (verified: weights [1,1,1,20,77], total=1.05 pushes one word
+    // to 0.093s in one pass despite minFits being true). Looping until a pass
+    // floors nothing new is guaranteed to converge - each iteration either
+    // floors at least one more word or terminates, and the total floor
+    // requirement is satisfiable whenever minFits is true.
+    const floored = new Array(tokens.length).fill(false);
+    for (let iter = 0; iter < tokens.length; iter++) {
+      let changed = false;
+      for (let i = 0; i < tokens.length; i++) {
+        if (!floored[i] && durations[i] < MIN_WORD_DURATION) {
+          floored[i] = true;
+          changed = true;
+        }
+      }
+      if (!changed) break;
 
-    durations = durations.map((d, i) => {
-      if (belowFloor[i]) return MIN_WORD_DURATION;
-      if (aboveWeightSum === 0) return d;
-      return (weights[i] / aboveWeightSum) * remaining;
-    });
+      const flooredTotal = floored.filter(Boolean).length * MIN_WORD_DURATION;
+      const aboveIndices = weights.map((_, i) => i).filter((i) => !floored[i]);
+      const aboveWeightSum = aboveIndices.reduce((sum, i) => sum + weights[i], 0);
+      const remaining = total - flooredTotal;
+
+      durations = durations.map((d, i) => {
+        if (floored[i]) return MIN_WORD_DURATION;
+        if (aboveWeightSum === 0) return d;
+        return (weights[i] / aboveWeightSum) * remaining;
+      });
+    }
   }
 
   const words: Word[] = [];
