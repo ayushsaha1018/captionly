@@ -1,9 +1,4 @@
-import {
-  calculateSubtitleLayout,
-  type SubtitleExportData,
-  type SubtitleLine,
-  type Word,
-} from "@captionly/engine";
+import { calculateSubtitleLayout, type SubtitleExportData } from "@captionly/engine";
 
 export interface DrawSubtitlesParams {
   ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
@@ -56,9 +51,9 @@ export function drawSubtitlesOnCanvas({
   const targetY = position.y <= 100 ? (position.y / 100) * height : (position.y / 1080) * height;
 
   const boxHeight = fontSize * 1.35;
-  const padX = (style.bgPaddingX || 24) * scale;
-  const padY = (style.bgPaddingY || 12) * scale;
-  const bgRadius = (style.bgRadius || 16) * scale;
+  const padX = Math.round((style.bgPaddingX ?? 24) * scale);
+  const padY = Math.round((style.bgPaddingY ?? 12) * scale);
+  const bgRadius = Math.round((style.bgRadius ?? 16) * scale);
 
   const rawBoxWidth = totalTextWidth + padX * 2;
   const boxWidth = Math.min(rawBoxWidth, maxWidth);

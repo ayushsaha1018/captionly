@@ -28,9 +28,9 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
   const scaledPadY = Math.round((style.bgPaddingY ?? 12) * scale);
   const scaledRadius = Math.round((style.bgRadius ?? 16) * scale);
 
-  // Calculate percentage-based or absolute position (default composition 1920x1080)
-  const posX = position.x <= 100 ? `${position.x}%` : `${(position.x / (width || 1920)) * 100}%`;
-  const posY = position.y <= 100 ? `${position.y}%` : `${(position.y / (height || 1080)) * 100}%`;
+  // Calculate percentage-based or absolute position (reference composition 1920x1080)
+  const posX = position.x <= 100 ? `${position.x}%` : `${(position.x / 1920) * 100}%`;
+  const posY = position.y <= 100 ? `${position.y}%` : `${(position.y / 1080) * 100}%`;
 
   const anchorTransform =
     style.boxAnchor === "top"
@@ -41,8 +41,15 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
 
   const bgRgba =
     style.bgOpacity > 0
-      ? hexToRgba(style.bgColor, style.bgOpacity)
+      ? hexToRgba(style.bgColor || "#000000", style.bgOpacity)
       : "transparent";
+
+  const scaledStyle = {
+    ...style,
+    fontSize: scaledFontSize,
+    strokeWidth: Math.round((style.strokeWidth ?? 0) * scale),
+    shadowBlur: Math.round((style.shadowBlur ?? 0) * scale),
+  };
 
   return (
     <div
@@ -73,7 +80,7 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
       >
         <SubtitleAnimationRenderer
           line={activeLine}
-          style={style}
+          style={scaledStyle}
           animation={animation}
           currentTime={currentTime}
           frame={frame}
