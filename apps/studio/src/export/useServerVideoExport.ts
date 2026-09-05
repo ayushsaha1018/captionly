@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { downloadBlob } from "./downloadBlob";
 import type { SubtitleExportData } from "./types";
 
