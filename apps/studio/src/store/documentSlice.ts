@@ -1,6 +1,11 @@
 import type { StateCreator } from "zustand";
 import type { SubtitleLine, Word } from "@captionly/engine";
-import { defaultStyle, defaultPosition, defaultAnimation, computeWordTimings } from "@captionly/engine";
+import {
+  defaultStyle,
+  defaultPosition,
+  defaultAnimation,
+  computeWordTimings,
+} from "@captionly/engine";
 import type { DocumentSlice, StudioState, VideoMeta } from "./types";
 
 /** Returns how many of `words` go in the first half after splitting at the
@@ -102,7 +107,11 @@ export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlic
 
     state.commit("Retime line", { coalesceKey: `retime:${id}:in` });
     const text = line.words.map((w) => w.text).join(" ");
-    const updated: SubtitleLine = { ...line, start, words: computeWordTimings(text, start, line.end) };
+    const updated: SubtitleLine = {
+      ...line,
+      start,
+      words: computeWordTimings(text, start, line.end),
+    };
     set({ lines: state.lines.map((l) => (l.id === id ? updated : l)) });
   },
 
@@ -117,7 +126,11 @@ export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlic
 
     state.commit("Retime line", { coalesceKey: `retime:${id}:out` });
     const text = line.words.map((w) => w.text).join(" ");
-    const updated: SubtitleLine = { ...line, end, words: computeWordTimings(text, line.start, end) };
+    const updated: SubtitleLine = {
+      ...line,
+      end,
+      words: computeWordTimings(text, line.start, end),
+    };
     set({ lines: state.lines.map((l) => (l.id === id ? updated : l)) });
   },
 
