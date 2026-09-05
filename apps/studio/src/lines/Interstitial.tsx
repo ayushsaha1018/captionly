@@ -41,7 +41,9 @@ export const Interstitial = memo(function Interstitial({
                    focus-visible:h-5 focus-visible:outline-2 focus-visible:outline-offset-2
                    focus-visible:outline-edit"
       >
-        <span className="hidden text-[0.625rem] text-edit group-hover:inline">Merge lines</span>
+        <span className="hidden text-[0.625rem] text-edit group-hover:inline group-focus-visible:inline">
+          Merge lines
+        </span>
       </button>
     );
   }

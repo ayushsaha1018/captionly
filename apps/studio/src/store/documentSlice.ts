@@ -67,7 +67,19 @@ export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlic
   setStyle: (patch) => set((s) => ({ style: { ...s.style, ...patch } })),
   setAnimation: (animation) => set({ animation }),
   setPosition: (position) => set({ position }),
-  replaceDocument: (doc) => set({ ...doc }),
+  // undo/redo restore a snapshot that may not contain the line the selection /
+  // edit cursor points at (e.g. undoing an addLine). A dangling editingLineId
+  // silently disables keyboard-delete and playhead-follow, so drop both if they
+  // no longer resolve.
+  replaceDocument: (doc) => {
+    const { selectedLineId, editingLineId } = get();
+    const ids = new Set(doc.lines.map((l) => l.id));
+    set({
+      ...doc,
+      selectedLineId: selectedLineId && ids.has(selectedLineId) ? selectedLineId : null,
+      editingLineId: editingLineId && ids.has(editingLineId) ? editingLineId : null,
+    });
+  },
 
   addLine: (afterLineId, startAt, endAt) => {
     const state = get();
@@ -103,7 +115,11 @@ export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlic
     const line = state.lines[idx];
     const prev = state.lines[idx - 1];
     const min = prev ? prev.end : 0;
-    const start = Math.min(Math.max(seconds, min), line.end - 0.01);
+    const max = line.end - 0.01;
+    // Degenerate: the line is already too short for the self-bound and the
+    // neighbour bound to both hold. Reject rather than silently overlap prev.
+    if (min > max) return;
+    const start = Math.min(Math.max(seconds, min), max);
 
     state.commit("Retime line", { coalesceKey: `retime:${id}:in` });
     const text = line.words.map((w) => w.text).join(" ");
@@ -121,8 +137,11 @@ export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlic
     if (idx === -1) return;
     const line = state.lines[idx];
     const next = state.lines[idx + 1];
+    const min = line.start + 0.01;
     const max = next ? next.start : (state.video?.durationSec ?? Infinity);
-    const end = Math.max(Math.min(seconds, max), line.start + 0.01);
+    // Degenerate: see setLineIn.
+    if (min > max) return;
+    const end = Math.max(Math.min(seconds, max), min);
 
     state.commit("Retime line", { coalesceKey: `retime:${id}:out` });
     const text = line.words.map((w) => w.text).join(" ");

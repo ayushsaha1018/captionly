@@ -233,6 +233,37 @@ describe("setLineIn / setLineOut", () => {
     expect(line.words.at(-1)!.end).toBe(1);
   });
 
+  it("setLineIn no-ops when the line is too short for the range to be valid", () => {
+    // b spans [2, 2.005]: prev.end (2) > b.end - 0.01 (1.995). No valid start.
+    useStudioStore.setState({
+      lines: [
+        { id: "a", start: 0, end: 2, words: [] },
+        { id: "b", start: 2, end: 2.005, words: [] },
+      ],
+      past: [],
+    });
+    useStudioStore.getState().setLineIn("b", 1);
+    const state = useStudioStore.getState();
+    expect(state.lines[1].start).toBe(2);
+    expect(state.lines[1].end).toBe(2.005);
+    expect(state.past.length).toBe(0);
+  });
+
+  it("setLineOut no-ops when the line is too short for the range to be valid", () => {
+    // a spans [0, 0.005]: a.start + 0.01 (0.01) > next.start (0.005). No valid end.
+    useStudioStore.setState({
+      lines: [
+        { id: "a", start: 0, end: 0.005, words: [] },
+        { id: "b", start: 0.005, end: 2, words: [] },
+      ],
+      past: [],
+    });
+    useStudioStore.getState().setLineOut("a", 1);
+    const state = useStudioStore.getState();
+    expect(state.lines[0].end).toBe(0.005);
+    expect(state.past.length).toBe(0);
+  });
+
   it("coalesces rapid retimes to the same line and field, not across fields", () => {
     useStudioStore.getState().setLineOut("a", 1.5);
     useStudioStore.getState().setLineOut("a", 1.8);
@@ -344,6 +375,39 @@ describe("mergeLines", () => {
   });
 });
 
+describe("replaceDocument via undo/redo", () => {
+  beforeEach(() => {
+    useStudioStore.setState({
+      video: { src: "/test.mp4", durationSec: 10, width: 1920, height: 1080 },
+      lines: [{ id: "a", start: 0, end: 2, words: [] }],
+      past: [],
+      future: [],
+      selectedLineId: null,
+      editingLineId: null,
+    });
+  });
+
+  it("clears selection/editing that point at a line the restored snapshot lacks", () => {
+    useStudioStore.getState().addLine("a", 2, 4); // beginEdit()s the new line
+    expect(useStudioStore.getState().editingLineId).not.toBeNull();
+
+    useStudioStore.getState().undo(); // the new line is gone from the snapshot
+    const state = useStudioStore.getState();
+    expect(state.lines).toHaveLength(1);
+    expect(state.selectedLineId).toBeNull();
+    expect(state.editingLineId).toBeNull();
+  });
+
+  it("keeps selection/editing that still resolve in the restored snapshot", () => {
+    useStudioStore.setState({ selectedLineId: "a", editingLineId: "a" });
+    useStudioStore.getState().setLineOut("a", 1.5);
+    useStudioStore.getState().undo();
+    const state = useStudioStore.getState();
+    expect(state.selectedLineId).toBe("a");
+    expect(state.editingLineId).toBe("a");
+  });
+});
+
 describe("splitLine", () => {
   beforeEach(() => {
     useStudioStore.setState({
@@ -375,7 +439,9 @@ describe("splitLine", () => {
     expect(state.lines[0].id).toBe("a");
     expect(state.lines[0].words.map((w) => w.text)).toEqual(["hello"]);
     expect(state.lines[1].words.map((w) => w.text)).toEqual(["there", "friend"]);
-    // Contiguous: the split time is the shared boundary.
+    // Contiguous, AND at the boundary-finder's chosen word edge (w1.end = 1),
+    // not just at whatever value the two halves happen to share.
+    expect(state.lines[0].end).toBe(1);
     expect(state.lines[0].end).toBe(state.lines[1].start);
     expect(state.lines[0].start).toBe(0);
     expect(state.lines[1].end).toBe(4);

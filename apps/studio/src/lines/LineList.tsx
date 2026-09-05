@@ -83,7 +83,6 @@ function Rows({
 
 export function LineList({ playerRef }: { playerRef: React.RefObject<PlayerRef | null> }) {
   const video = useStudioStore((s) => s.video);
-  const select = useStudioStore((s) => s.select);
   const beginEdit = useStudioStore((s) => s.beginEdit);
 
   // One click selects, seeks, AND begins editing - spec §5 "one click does everything".
