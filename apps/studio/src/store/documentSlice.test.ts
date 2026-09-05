@@ -279,3 +279,42 @@ describe("deleteLine", () => {
     expect(useStudioStore.getState().lines).toHaveLength(2);
   });
 });
+
+describe("mergeLines", () => {
+  beforeEach(() => {
+    useStudioStore.setState({
+      video: { src: "/test.mp4", durationSec: 10, width: 1920, height: 1080 },
+      lines: [
+        {
+          id: "a",
+          start: 0,
+          end: 2,
+          words: [{ id: "w1", text: "hello", start: 0, end: 2 }],
+        },
+        {
+          id: "b",
+          start: 3,
+          end: 5, // note the gap 2 -> 3, which merge must swallow
+          words: [{ id: "w2", text: "world", start: 3, end: 5 }],
+        },
+      ],
+      past: [],
+      future: [],
+    });
+  });
+
+  it("concatenates text and spans [a.start, b.end], swallowing the gap", () => {
+    useStudioStore.getState().mergeLines("a", "b");
+    const state = useStudioStore.getState();
+    expect(state.lines).toHaveLength(1);
+    expect(state.lines[0].id).toBe("a");
+    expect(state.lines[0].start).toBe(0);
+    expect(state.lines[0].end).toBe(5);
+    expect(state.lines[0].words.map((w) => w.text)).toEqual(["hello", "world"]);
+  });
+
+  it("records undo under the 'Merge lines' label", () => {
+    useStudioStore.getState().mergeLines("a", "b");
+    expect(useStudioStore.getState().past[0].label).toBe("Merge lines");
+  });
+});

@@ -102,4 +102,24 @@ export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlic
     if (state.selectedLineId === id) get().select(null);
     if (state.editingLineId === id) get().endEdit();
   },
+
+  mergeLines: (aId, bId) => {
+    const state = get();
+    const a = state.lines.find((l) => l.id === aId);
+    const b = state.lines.find((l) => l.id === bId);
+    if (!a || !b) return;
+
+    state.commit("Merge lines");
+
+    const text = [...a.words, ...b.words].map((w) => w.text).join(" ");
+    const merged: SubtitleLine = {
+      id: a.id,
+      start: a.start,
+      end: b.end,
+      words: computeWordTimings(text, a.start, b.end),
+    };
+
+    const lines = state.lines.filter((l) => l.id !== bId).map((l) => (l.id === aId ? merged : l));
+    set({ lines });
+  },
 });
