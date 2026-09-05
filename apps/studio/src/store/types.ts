@@ -10,6 +10,8 @@ export interface VideoMeta {
   durationSec: number;
   width: number;
   height: number;
+  file?: File;
+  isDemo?: boolean;
 }
 
 /** The serializable document. Undo snapshots this and only this. */
@@ -22,6 +24,7 @@ export interface DocumentSnapshot {
 }
 
 export interface DocumentSlice extends DocumentSnapshot {
+  loadVideo: (meta: VideoMeta, lines?: SubtitleLine[]) => void;
   setStyle: (patch: Partial<SubtitleStyle>) => void;
   setAnimation: (a: AnimationConfig) => void;
   setPosition: (p: SubtitlePosition) => void;
