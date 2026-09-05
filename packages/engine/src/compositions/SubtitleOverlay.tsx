@@ -2,6 +2,7 @@ import React from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import type { SubtitleOverlayProps } from "../types";
 import { SubtitleAnimationRenderer } from "../animations/registry";
+import { calculateSubtitleLayout } from "../utils/geometry";
 
 export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
   lines,
@@ -20,6 +21,12 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
   if (!activeLine) {
     return null;
   }
+
+  const { scale, maxWidth } = calculateSubtitleLayout(width, height, style.boxWidth);
+  const scaledFontSize = Math.round(style.fontSize * scale);
+  const scaledPadX = Math.round((style.bgPaddingX ?? 24) * scale);
+  const scaledPadY = Math.round((style.bgPaddingY ?? 12) * scale);
+  const scaledRadius = Math.round((style.bgRadius ?? 16) * scale);
 
   // Calculate percentage-based or absolute position (default composition 1920x1080)
   const posX = position.x <= 100 ? `${position.x}%` : `${(position.x / (width || 1920)) * 100}%`;
@@ -44,11 +51,11 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
         left: posX,
         top: posY,
         transform: anchorTransform,
-        maxWidth: `${style.boxWidth || 1400}px`,
+        maxWidth: `${maxWidth}px`,
         width: "max-content",
         fontFamily: style.fontFamily,
         fontWeight: style.fontWeight,
-        fontSize: `${style.fontSize}px`,
+        fontSize: `${scaledFontSize}px`,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -59,8 +66,8 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
       <div
         style={{
           backgroundColor: bgRgba,
-          borderRadius: `${style.bgRadius}px`,
-          padding: `${style.bgPaddingY}px ${style.bgPaddingX}px`,
+          borderRadius: `${scaledRadius}px`,
+          padding: `${scaledPadY}px ${scaledPadX}px`,
           backdropFilter: style.bgOpacity > 0 ? "blur(4px)" : "none",
         }}
       >
