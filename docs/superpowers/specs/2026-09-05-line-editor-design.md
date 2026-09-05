@@ -1,7 +1,7 @@
 # SP3 — Line Editor — Design
 
 **Date:** 2026-09-05
-**Status:** approved, ready for implementation plan
+**Status:** implemented and verified
 **Branch:** `feat/studio-line-editor` (branches from `feat/studio-video-in`)
 **Scope:** `apps/studio/src/lines/`, `apps/studio/src/store/`, `apps/studio/src/app/`,
 `apps/studio/src/lib/timecode.ts`, `packages/engine/src/`
@@ -20,8 +20,8 @@ fixture standing in for a future autotranscription source) and the user freely e
 correcting text, merging misplaced splits, deleting extras, retiming boundaries, splitting
 runs that should be two lines. This is what SP3 is designed and tested against.
 
-**Secondary/fallback scenario:** an empty line list, populated by typing from scratch
-(keyboard-first: type, Enter, type, Enter...) via the interstitial's "Add line" affordance.
+**Secondary/fallback scenario:** an empty line list, populated by clicking "+ Add first line"
+or keyboard-first typing (type, Enter, type, Enter...) via the contextual boundary affordances.
 This remains fully supported — the same primitives (§3) drive both scenarios — but it is
 not the showcased flow. See roadmap §1/§2/§7 for the program-level decision this revises.
 
@@ -98,50 +98,52 @@ with two different defaults**, resolved deliberately to avoid a conflict between
 
 ---
 
-## 4. Interstitial wiring
+## 4. Boundary interactions (floating pills)
 
-`Interstitial` (`apps/studio/src/lines/Interstitial.tsx`) gains props:
+Rather than rendering physical expanding dashed voids or a separate `Interstitial.tsx`
+component (which created 120px layout shifts when hovered/mounted), boundary interactions
+are rendered as non-shifting contextual floating pills:
 
-```ts
-{ gapSec: number; gapStart: number; prevLineId: string | null; nextLineId: string | null }
-```
+- **Bottom-center floating pill (`[ Merge | + Add line ]`)**:
+  Appears at `-bottom-3 left-1/2 -translate-x-1/2` when hovering anywhere over the row block
+  (or on keyboard `focus-within`).
+  - `Merge`: shown whenever `nextLineId` exists (merges with the subsequent line).
+  - `+ Add line`: shown when there is an open gap to the next boundary (`> 0.05s`) or the
+    line has duration `>= 1.0s` (in which case it splits the trailing half into a new line).
+    On the last line, only `+ Add line` is displayed.
+- **Top-center floating pill (`[ + Add line ]`)**:
+  On the first line (`isFirst`), if a leading gap exists (`line.start > 0.05`), hovering the
+  block reveals a floating pill at `-top-3 left-1/2 -translate-x-1/2`. Clicking it inserts a
+  new subtitle line from `0` to `min(DEFAULT_LINE_DURATION, line.start)` at index 0.
+- **Empty list state**:
+  When `lines.length === 0`, `LineList` renders a clean empty state card with an explicit
+  `+ Add first line` button spanning `0` to `min(DEFAULT_LINE_DURATION, duration)`.
 
-`LineList.tsx`'s `Rows` renders three gap positions instead of one:
-- **Leading**: `0 → lines[0].start`, only when `lines[0].start > 0.001`. `prevLineId: null`.
-  When `lines.length === 0`, this is the *only* row rendered, spanning `0 → duration` —
-  this replaces today's static "No lines yet" empty state in `LineList.tsx`.
-- **Between**: every adjacent pair, as today.
-- **Trailing**: `lastLine.end → duration`, shown when `lines.length > 0 && duration - lastLine.end > 0.001`,
-  `nextLineId: null`.
-
-Button visibility: butt joint (`gapSec ≤ 0.001`) → hairline, Merge only (already correct).
-A gap with `prevLineId === null` or `nextLineId === null` → "Add line" only, no Merge
-(nothing on that open side to merge with). A real gap between two lines → both.
-
-"Add line" calls `addLine(prevLineId, gapStart, gapStart + gapSec)` — fills the entire
-visible gap. "Merge" calls `mergeLines(prevLineId, nextLineId)`.
+`Interstitial.tsx` and `geometry.ts` (`voidHeight`/`lineHeight`) were retired completely.
 
 ---
 
 ## 5. Editable row
 
 `LineRow` (`apps/studio/src/lines/LineRow.tsx`) drops `role="button"`/`tabIndex` from the
-outer wrapper — it becomes a plain container, since it will host a text input, two numeric
-fields, and a delete button, and nested interactives inside a button role is broken
-accessibility. The line text becomes the click/focus target directly.
+outer wrapper — it is a clean container hosting the timecode header, text editing area,
+delete button, and boundary pills.
 
-- **Click** the text → `onSelect` (select + seek, unchanged) → focuses an inline text
-  input for editing (roadmap: one click does everything).
+- **Natural 1-line default & dynamic growth**: artificial duration-proportional `minHeight`
+  was removed. Rows default to a compact 1-line height. When editing, the text is rendered
+  in an auto-growing `<textarea rows={1} ... className="... resize-none [field-sizing:content]" />`,
+  which naturally expands vertically as text wraps or exceeds 1 line in both edit and view modes.
+- **Click** the text → `onSelect` (select + seek) → focuses the textarea for inline editing
+  (one click does everything).
 - **Esc** while editing → `endEdit()`. Blurs, keeps selection, no seek.
 - **⌘↵** while editing → `splitLine(id, caretPosition)`.
-- **Enter** while editing → commits the text (the input's change already drives
-  `editLineText` via onChange, so Enter's job is just to blur/exit edit mode), then:
+- **Enter** (without Shift) while editing → commits the text and exits edit mode, then:
   - if free time remains immediately after this line (`nextGapSec > 0`, whether a real
     gap or trailing gap with `duration - line.end > 0`), calls
     `addLine(line.id, line.end, Math.min(line.end + DEFAULT_LINE_DURATION, line.end + nextGapSec))` —
-    a fixed short default duration (`DEFAULT_LINE_DURATION`, 3s), clamped to the gap, **not**
-    the whole remaining gap (see §3's note on `addLine`'s two callers);
+    a fixed short default duration (`DEFAULT_LINE_DURATION`, 2.5s), clamped to the gap;
   - otherwise, Enter just blurs. No line is created past the end of the video.
+- **Shift+Enter** allows soft line breaks within a subtitle.
 
 ---
 
@@ -159,11 +161,14 @@ leaves the field's value unchanged (no commit).
 
 ## 7. Delete
 
-A small delete affordance on the row (visible when selected or hovered), calling
-`deleteLine(id)` directly. **And** a global `Backspace`/`Delete` handler added to the
-existing keydown listener in `StudioShell.tsx` (same file as the ⌘Z undo/redo listener,
-same guard pattern): fires only when `selectedLineId` is set, `editingLineId` is `null`,
-and the event target isn't an INPUT/TEXTAREA/contentEditable element.
+A delete trash icon is positioned at the top-right of the row header (visible when selected
+or hovered), calling `deleteLine(id)` with `onMouseDown={(e) => e.preventDefault()}` and
+`e.stopPropagation()` to avoid blur/selection race conditions.
+
+**And** a global `Backspace`/`Delete` handler added to the existing keydown listener in
+`StudioShell.tsx` (same file as the ⌘Z undo/redo listener, same guard pattern): fires only
+when `selectedLineId` is set, `editingLineId` is `null`, and the event target isn't an
+INPUT/TEXTAREA/contentEditable element.
 
 ---
 
@@ -177,9 +182,7 @@ where it lives today, in `LineList.onSelect`. This means playback-follow updates
 `selectedLineId` (and therefore highlighting/scroll) without ever triggering a seek, so
 playback and the follow-selection never fight each other.
 
-**Accepted consequence:** `WordStrip` renders whenever a line is `selected`, so during
-playback it will now pop open row-by-row as the active line changes. This is intended —
-inspecting computed word timings as they play — not a regression to guard against.
+`WordStrip.tsx` was deleted to preserve visual simplicity and legibility across line rows.
 
 ---
 

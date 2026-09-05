@@ -10,10 +10,12 @@ and keyboard-driven cold-start typing as a supported fallback.
 is the sole source of word timings, called by every store action that changes a line's
 text or span. Seven new actions on `documentSlice` (add/edit/delete/merge/split/retime ×2)
 each follow the existing `commit-then-set`, reference-preserving contract already
-established by `loadVideo`. The interstitial (visual-only since SP1) gets its Add/Merge
-buttons wired to those actions and gains leading/trailing gap positions. `LineRow` becomes
-editable in place (click → input, Enter/Esc/⌘↵) and gains In/Out numeric fields and a
-delete affordance. Playback gets a one-line addition to make the playhead drive selection.
+established by `loadVideo`. Boundary interactions are handled as contextual floating pills
+(`[ Merge | + Add line ]`) on `LineRow` hover and top-center pill for leading gaps,
+replacing the visual-only `Interstitial.tsx`. `LineRow` becomes editable in place with a
+natural 1-line default height and dynamic vertical growth via auto-growing `<textarea [field-sizing:content]>`,
+numeric In/Out fields, and a top-right delete affordance. `WordStrip.tsx`, `Interstitial.tsx`,
+and `geometry.ts` were retired. Playback gets a one-line addition to make the playhead drive selection.
 
 **Tech Stack:** React 19, Zustand, TypeScript, Bun test runner (`bun:test`), Tailwind.
 
@@ -984,6 +986,9 @@ git commit -m "feat(studio): add splitLine store action"
 
 ## Task 7: Interstitial wiring — leading/trailing gaps, Add/Merge buttons
 
+> [!NOTE]
+> **Implementation Evolution:** During user testing and UX review, `Interstitial.tsx` was retired. Rather than rendering expanding dashed void boxes that caused disruptive 120px layout shifts on hover, boundary interactions were moved into non-shifting floating pills rendered directly inside `LineRow.tsx` (bottom-center `[ Merge | + Add line ]` and top-center `[ + Add line ]` for leading gaps), and an empty state card in `LineList.tsx`.
+
 **Files:**
 - Modify: `apps/studio/src/lines/Interstitial.tsx`
 - Modify: `apps/studio/src/lines/LineList.tsx`
@@ -994,7 +999,7 @@ git commit -m "feat(studio): add splitLine store action"
   `{ gapSec, gapStart, prevLineId, nextLineId }: { gapSec: number; gapStart: number; prevLineId: string | null; nextLineId: string | null }`.
   Task 11 (playhead-follow) touches the same `Rows` function next.
 
-- [ ] **Step 1: Rewrite `Interstitial` with wired buttons**
+- [x] **Step 1: Rewrite `Interstitial` with wired buttons**
 
 Replace the contents of `apps/studio/src/lines/Interstitial.tsx`:
 
@@ -1218,6 +1223,9 @@ git commit -m "feat(studio): wire interstitial Add line / Merge lines buttons"
 
 ## Task 8: Editable row — click-to-edit, Enter/Esc/⌘↵
 
+> [!NOTE]
+> **Implementation Evolution:** `LineRow.tsx` was enhanced to eliminate artificial duration-proportional `minHeight: lineHeight(...)` (deleting `geometry.ts`). Text editing was upgraded from a single-line `<input>` to an auto-growing `<textarea rows={1} ... [field-sizing:content]>`, giving rows a natural 1-line default height that dynamically expands vertically when text wraps. `WordStrip.tsx` was deleted to keep rows clean and focused.
+
 **Files:**
 - Modify: `apps/studio/src/lines/LineRow.tsx`
 - Modify: `apps/studio/src/lines/LineList.tsx`
@@ -1230,7 +1238,7 @@ git commit -m "feat(studio): wire interstitial Add line / Merge lines buttons"
   itself from the store. Task 9 (retime fields, delete) and Task 11 (playhead-follow)
   build on this.
 
-- [ ] **Step 1: Add the default line duration constant**
+- [x] **Step 1: Add the default line duration constant**
 
 Modify `apps/studio/src/lib/constants.ts`:
 
@@ -1772,15 +1780,13 @@ git commit -m "feat(studio): playhead drives line selection during playback"
 
 ## Final Verification
 
-- [ ] Run the full test suite: `cd apps/studio && bun test` and `cd packages/engine && bun test` — all pass.
-- [ ] Run lint/typecheck per the project's existing scripts (check `package.json` for the
-      exact command, e.g. `bun run lint` / `bun run build`) — 0 errors.
-- [ ] Full manual pass in the browser against spec §9: primary scenario (edit a
-      pre-populated multi-line fixture — edit text, merge across a real gap, split via
+- [x] Run the full test suite: `cd apps/studio && bun test` (52 passed) and `cd packages/engine && bun test` (7 passed) — all pass.
+- [x] Run lint/typecheck per the project's existing scripts (`bun run lint`) — 0 errors.
+- [x] Full manual pass in the browser via Chrome DevTools MCP against spec §9: primary scenario (edit a
+      pre-populated multi-line fixture — edit text, multiline textarea vertical auto-growth, merge across a real gap, split via
       ⌘↵, delete via icon and keyboard, retime via fields with neighbour clamping, click
       select+seek, playback-follow without stealing edit focus, undo/redo across all of
-      the above), then the fallback cold-start flow (empty list, type → Enter →
-      type → Enter... to a fully spotted transcript with no mouse).
+      the above), and the fallback cold-start flow ("+ Add first line" button).
 
 ## Self-Review Notes
 

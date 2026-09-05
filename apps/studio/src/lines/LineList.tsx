@@ -1,10 +1,9 @@
 import type { PlayerRef } from "@remotion/player";
-import { Fragment, useCallback, useEffect, useRef } from "react";
-import { Film } from "lucide-react";
+import { useCallback, useEffect, useRef } from "react";
+import { Film, Plus } from "lucide-react";
 import { useStudioStore } from "@/store";
-import { FPS } from "@/lib/constants";
+import { DEFAULT_LINE_DURATION, FPS } from "@/lib/constants";
 import { LineRow } from "./LineRow";
-import { Interstitial } from "./Interstitial";
 import { useActiveLineId } from "./Playhead";
 
 function Rows({
@@ -18,6 +17,7 @@ function Rows({
   const selectedLineId = useStudioStore((s) => s.selectedLineId);
   const editingLineId = useStudioStore((s) => s.editingLineId);
   const select = useStudioStore((s) => s.select);
+  const addLine = useStudioStore((s) => s.addLine);
   const durationSec = useStudioStore((s) => s.video?.durationSec ?? 0);
   const activeId = useActiveLineId(playerRef);
   const activeRef = useRef<HTMLDivElement | null>(null);
@@ -34,50 +34,43 @@ function Rows({
     if (activeId && editingLineId === null) select(activeId);
   }, [activeId, editingLineId, select]);
 
-  const leadingGapSec = lines.length > 0 ? lines[0].start : durationSec;
-  const trailingGapSec = lines.length > 0 ? durationSec - lines[lines.length - 1].end : 0;
+  if (lines.length === 0) {
+    return (
+      <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-hairline bg-surface/30 p-6 text-center">
+        <p className="text-sm font-medium text-ink">No subtitles spotted yet</p>
+        <p className="mt-1 max-w-xs text-xs text-ink-muted">
+          Add your first subtitle line to get started.
+        </p>
+        <button
+          type="button"
+          onClick={() => addLine(null, 0, Math.min(DEFAULT_LINE_DURATION, durationSec))}
+          className="mt-4 flex items-center gap-1.5 rounded-md bg-edit px-3 py-1.5 text-xs font-semibold text-void transition-opacity hover:opacity-90"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Add first line
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <>
-      {(lines.length === 0 || leadingGapSec > 0.001) && (
-        <Interstitial
-          gapSec={leadingGapSec}
-          gapStart={0}
-          prevLineId={null}
-          nextLineId={lines[0]?.id ?? null}
-        />
-      )}
+    <div className="flex flex-col">
       {lines.map((line, i) => (
-        <Fragment key={line.id}>
-          {i > 0 && (
-            <Interstitial
-              gapSec={line.start - lines[i - 1].end}
-              gapStart={lines[i - 1].end}
-              prevLineId={lines[i - 1].id}
-              nextLineId={line.id}
-            />
-          )}
-          <div ref={line.id === activeId ? activeRef : undefined}>
-            <LineRow
-              line={line}
-              selected={line.id === selectedLineId}
-              active={line.id === activeId}
-              nextBoundary={lines[i + 1]?.start ?? durationSec}
-              onSelect={onSelect}
-              playerRef={playerRef}
-            />
-          </div>
-        </Fragment>
+        <div key={line.id} ref={line.id === activeId ? activeRef : undefined} className="relative">
+          {i > 0 && <div aria-hidden className="ml-6 h-px bg-hairline" />}
+          <LineRow
+            line={line}
+            isFirst={i === 0}
+            selected={line.id === selectedLineId}
+            active={line.id === activeId}
+            nextBoundary={lines[i + 1]?.start ?? durationSec}
+            nextLineId={lines[i + 1]?.id ?? null}
+            onSelect={onSelect}
+            playerRef={playerRef}
+          />
+        </div>
       ))}
-      {lines.length > 0 && trailingGapSec > 0.001 && (
-        <Interstitial
-          gapSec={trailingGapSec}
-          gapStart={lines[lines.length - 1].end}
-          prevLineId={lines[lines.length - 1].id}
-          nextLineId={null}
-        />
-      )}
-    </>
+    </div>
   );
 }
 
@@ -108,7 +101,7 @@ export function LineList({ playerRef }: { playerRef: React.RefObject<PlayerRef |
   }
 
   return (
-    <div className="relative">
+    <div className="relative pt-2 pb-6">
       <Rows playerRef={playerRef} onSelect={onSelect} />
     </div>
   );

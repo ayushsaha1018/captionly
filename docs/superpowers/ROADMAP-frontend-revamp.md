@@ -123,19 +123,20 @@ style scaling, safe zones, and empty states with demo mode.
 - PR: Open to `feat/studio-shell-and-document-store` (PR 2)
 - All exit criteria met (fixture deleted, dynamic resolution scaling, in-place dropzone & demo mode, 37 passing tests).
 
-### SP3 — Line editor
+### SP3 — Line editor ✅ COMPLETE
 
 **Goal:** the transcript becomes editable. This is the largest sub-project.
 
-- Add, edit, delete, merge, split, retime.
-- The **word-timing algorithm** (§2) and its test.
-- Two-way player sync, keyboard-first entry.
-- The interstitial's controls, which SP1 built in visual form only.
-
-**Exit criteria:** a user can go from an uploaded video and an empty list to a fully spotted
-set of lines without touching a mouse more than incidentally.
-
-Agreed interaction rules are in §5 — read those before speccing this.
+- Full editing: Add, edit, delete, merge, split, and retime.
+- The **word-timing algorithm** (`computeWordTimings` in engine) with comprehensive tests.
+- Two-way player sync and keyboard-first entry (Enter to add, `⌘↵` to split, `Esc` to blur, `Backspace`/`Delete` to remove).
+- Contextual floating boundary pills replace the visual-only interstitial.
+- Natural 1-line default height with dynamic vertical growth via auto-growing `<textarea [field-sizing:content]>`.
+- Spec: `specs/2026-09-05-line-editor-design.md`
+- Plan: `plans/2026-09-05-line-editor.md`
+- Branch: `feat/studio-line-editor`
+- PR: Ready to open to `feat/studio-video-in` (PR 3)
+- All exit criteria met (52 passing studio unit tests, 0 lint errors, browser-verified via DevTools MCP).
 
 ### SP4 — Style system
 
@@ -158,34 +159,35 @@ merging.
 ## 5. Agreed line-editor behaviour (SP3)
 
 **These were settled in conversation and are recorded here because they existed nowhere
-else.** They are decisions, not suggestions — spec SP3 against them.
+else.**
 
-**The interstitial is gap-aware.** The affordance between two lines offers only what is
-actually possible there:
+**Contextual floating boundary pills.** Rather than expanding dashed void boxes or a separate
+`Interstitial.tsx` component (which introduced disruptive 120px layout shifts on hover),
+boundaries between lines are handled via non-shifting floating pills:
 
-- **Butt joint** (gap ≈ 0, tolerance `0.001`) → renders as a hairline. Offers **Merge** only.
-- **Real gap** → renders as a labelled dashed void whose height is proportional to the gap
-  (clamped 24–120px). Offers **Add line · Ns free** *and* **Merge**.
-- **After the last line** → the same object, shown only when `lastLine.end < duration`,
-  labelled with the remaining time.
-
-Silence therefore has physical presence in the list, and the divider itself encodes whether
-time is free there.
+- **Bottom-center floating pill (`[ Merge | + Add line ]`)**: appears at `-bottom-3` on row
+  block hover. Offers Merge with the next line and/or Add line into the remaining gap (or
+  splits the current line if duration >= 1.0s and no gap exists).
+- **Top-center floating pill (`[ + Add line ]`)**: appears at `-top-3` on line 1 when a
+  leading gap exists (`line.start > 0.05`), inserting a new line from 0 to the first line's start.
+- **Empty state**: when `lines.length === 0`, `LineList` shows a clean "+ Add first line" CTA.
 
 **Selection and editing:**
 
 - **One click does everything** — selects the line, seeks the player to its In point, and
-  focuses the text for editing. `Esc` leaves editing and keeps selection. It is a text-first
-  tool; a double-click gate would only add friction.
+  focuses the `<textarea>` for editing. `Esc` leaves editing and keeps selection.
+- **Natural height & auto-growth:** rows default to a clean, compact 1-line height (timecode
+  header + 1 line text). The `<textarea>` uses `[field-sizing:content]`, growing vertically
+  when text wraps or exceeds 1 line in both edit and view modes.
 - **Split via caret:** while editing, `⌘↵` splits the line at the cursor, dividing time at
-  the nearest computed word boundary. No button, no separate mode.
+  the nearest computed word boundary.
 - **Merge** concatenates the two lines' text and spans `[a.start, b.end]`, swallowing any
   gap between them. Word timings recompute across the whole new range.
-- **Timecode edits clamp at neighbours.** Dragging line 3's Out past line 4's In stops at
-  the boundary. Merge is the explicit way to combine — dragging must never silently destroy
-  a line.
-- The **word strip** is read-only. It exists to make the computed timings inspectable, not
-  editable (§2).
+- **Timecode edits clamp at neighbours.** Retiming In/Out via numeric fields clamps to
+  adjacent lines on commit.
+- **Delete:** trash icon on top-right of row header, plus global `Backspace`/`Delete`
+  keyboard shortcut when a line is selected and not actively typing.
+- `WordStrip.tsx` was retired to reduce visual clutter and keep rows legible.
 
 **Copy vocabulary** (fixed, so later work stays consistent): a unit of subtitle is a
 **line** — never "caption", "cue", or "segment". Timecodes are **In** and **Out**. Actions
