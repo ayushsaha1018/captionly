@@ -29,7 +29,7 @@ export function SafeZones({ preset }: { preset: SafeZonePreset }) {
           bottom: `${z.insetY}%`,
         }}
       >
-        <span className="absolute -top-6 left-0 rounded bg-void/80 px-2 py-0.5 text-[10px] font-medium text-ink">
+        <span className="absolute top-1 left-1.5 rounded bg-void/80 px-2 py-0.5 text-[10px] font-medium text-ink">
           {z.label} safe zone
         </span>
       </div>

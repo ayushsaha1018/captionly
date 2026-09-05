@@ -1,5 +1,6 @@
 import type { SubtitleStyle, SafeZonePreset } from "@captionly/engine";
 import { SAFE_ZONES } from "./SafeZones";
+import { useStudioStore } from "@/store";
 
 type Props = {
   style: SubtitleStyle;
@@ -26,6 +27,14 @@ const FONTS = [
 ];
 
 export function StylePanel({ style, onStyleChange, safeZone, onSafeZoneChange }: Props) {
+  const video = useStudioStore((s) => s.video);
+  const targetCategory = video && video.width < video.height ? "9:16" : "16:9";
+
+  const recommendedEntries = Object.entries(SAFE_ZONES).filter(
+    ([, m]) => m.category === targetCategory,
+  );
+  const otherEntries = Object.entries(SAFE_ZONES).filter(([, m]) => m.category !== targetCategory);
+
   const set = <K extends keyof SubtitleStyle>(k: K, v: SubtitleStyle[K]) =>
     onStyleChange({ ...style, [k]: v });
 
@@ -226,11 +235,20 @@ export function StylePanel({ style, onStyleChange, safeZone, onSafeZoneChange }:
             className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
           >
             <option value="none">None</option>
-            {Object.entries(SAFE_ZONES).map(([key, meta]) => (
-              <option key={key} value={key}>
-                {meta.label}
-              </option>
-            ))}
+            <optgroup label={`Recommended (${targetCategory})`}>
+              {recommendedEntries.map(([key, meta]) => (
+                <option key={key} value={key}>
+                  {meta.label}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Other formats">
+              {otherEntries.map(([key, meta]) => (
+                <option key={key} value={key}>
+                  {meta.label}
+                </option>
+              ))}
+            </optgroup>
           </select>
         </Row>
       </div>
