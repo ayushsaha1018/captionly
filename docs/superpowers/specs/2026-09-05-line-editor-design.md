@@ -10,11 +10,20 @@
 
 ## 1. Goal
 
-The transcript becomes editable. A user goes from an uploaded video and an empty line
-list to a fully spotted set of lines — add, edit, delete, merge, split, retime — without
-touching a mouse more than incidentally. This is the largest sub-project in the frontend
-revamp program; see `docs/superpowers/ROADMAP-frontend-revamp.md` §4 (SP3) and §5 (agreed
-interaction rules, which this spec implements against, not redecides).
+The transcript becomes editable — add, edit, delete, merge, split, retime. This is the
+largest sub-project in the frontend revamp program; see
+`docs/superpowers/ROADMAP-frontend-revamp.md` §4 (SP3) and §5 (agreed interaction rules,
+which this spec implements against, not redecides).
+
+**Primary scenario (revised 2026-09-05):** a set of lines already exists (today: the demo
+fixture standing in for a future autotranscription source) and the user freely edits it —
+correcting text, merging misplaced splits, deleting extras, retiming boundaries, splitting
+runs that should be two lines. This is what SP3 is designed and tested against.
+
+**Secondary/fallback scenario:** an empty line list, populated by typing from scratch
+(keyboard-first: type, Enter, type, Enter...) via the interstitial's "Add line" affordance.
+This remains fully supported — the same primitives (§3) drive both scenarios — but it is
+not the showcased flow. See roadmap §1/§2/§7 for the program-level decision this revises.
 
 ---
 
@@ -181,11 +190,14 @@ inspecting computed word timings as they play — not a regression to guard agai
   pattern — reference-preservation for untouched lines, commit-before-mutate ordering
   (undo lands on the pre-change snapshot), coalescing behavior (rapid edits within 600ms
   merge, edits further apart don't).
-- **Manual browser verification** (this sub-project is UI-heavy): full keyboard cold-start
-  flow (type → Enter → type → Enter... to a fully spotted transcript, no mouse); click
-  select+seek; ⌘↵ split; merge across a real gap; retime via fields with neighbour
-  clamping; delete via icon and keyboard; playback-follow scroll/select without stealing
-  edit focus from a line being actively edited; undo/redo across all of the above.
+- **Manual browser verification** (this sub-project is UI-heavy). Primary scenario first:
+  load a video with a pre-populated multi-line fixture and freely edit it — correct a
+  line's text, merge two lines across a real gap, split a line via ⌘↵, delete a line via
+  icon and via keyboard, retime In/Out via fields with neighbour clamping, click
+  select+seek, playback-follow scroll/select without stealing edit focus from a line being
+  actively edited, undo/redo across all of the above. Then, as a fallback check: the
+  keyboard cold-start flow still works (empty list, type → Enter → type → Enter... to a
+  fully spotted transcript, no mouse).
 
 ---
 
@@ -204,8 +216,10 @@ Keeps the app running at every step; nothing depends on an action that doesn't e
 
 ---
 
-## 11. Out of scope (unchanged from roadmap §7)
+## 11. Out of scope
 
-Autotranscription, subtitle file import, per-line/per-word style overrides, per-word
-timing nudging (roadmap §2 — the algorithm's output is not hand-adjustable), drag-handle
-retiming (numeric fields only, per this spec §6), mobile/touch optimization.
+Autotranscription itself (planned as a future sub-project, not yet speced — SP3 only
+ensures the primitives work regardless of where lines come from), subtitle file import,
+per-line/per-word style overrides, per-word timing nudging (roadmap §2 — the algorithm's
+output is not hand-adjustable), drag-handle retiming (numeric fields only, per this spec
+§6), mobile/touch optimization.
