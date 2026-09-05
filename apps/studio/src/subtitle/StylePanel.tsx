@@ -1,4 +1,5 @@
 import type { SubtitleStyle, SafeZonePreset } from "@captionly/engine";
+import { SAFE_ZONES } from "./SafeZones";
 
 type Props = {
   style: SubtitleStyle;
@@ -225,9 +226,11 @@ export function StylePanel({ style, onStyleChange, safeZone, onSafeZoneChange }:
             className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
           >
             <option value="none">None</option>
-            <option value="instagram">Instagram</option>
-            <option value="tiktok">TikTok</option>
-            <option value="youtube">YouTube</option>
+            {Object.entries(SAFE_ZONES).map(([key, meta]) => (
+              <option key={key} value={key}>
+                {meta.label}
+              </option>
+            ))}
           </select>
         </Row>
       </div>

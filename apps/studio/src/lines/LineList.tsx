@@ -1,5 +1,6 @@
 import type { PlayerRef } from "@remotion/player";
 import { Fragment, useCallback, useEffect, useRef } from "react";
+import { Film } from "lucide-react";
 import { useStudioStore } from "@/store";
 import { FPS } from "@/lib/constants";
 import { LineRow } from "./LineRow";
@@ -45,6 +46,7 @@ function Rows({
 }
 
 export function LineList({ playerRef }: { playerRef: React.RefObject<PlayerRef | null> }) {
+  const video = useStudioStore((s) => s.video);
   const lines = useStudioStore((s) => s.lines);
   const select = useStudioStore((s) => s.select);
 
@@ -57,6 +59,18 @@ export function LineList({ playerRef }: { playerRef: React.RefObject<PlayerRef |
     },
     [select, playerRef],
   );
+
+  if (!video) {
+    return (
+      <div className="flex h-64 flex-col items-center justify-center rounded-xl border border-hairline bg-surface/50 p-8 text-center">
+        <Film className="mb-3 h-8 w-8 text-ink-muted/50" />
+        <p className="font-display text-sm font-medium text-ink">No video loaded</p>
+        <p className="mt-1 max-w-xs text-xs text-ink-muted">
+          Drop a video into the player rail or load the demo project to start spotting lines.
+        </p>
+      </div>
+    );
+  }
 
   if (lines.length === 0) {
     return (

@@ -1,21 +1,27 @@
 import type { SafeZonePreset } from "@captionly/engine";
 
-const ZONES: Record<
-  Exclude<SafeZonePreset, "none">,
-  { label: string; insetX: number; insetY: number; ratio?: string }
-> = {
-  instagram: { label: "Instagram 9:16", insetX: 6, insetY: 14 },
-  tiktok: { label: "TikTok 9:16", insetX: 6, insetY: 18 },
-  youtube: { label: "YouTube 16:9", insetX: 5, insetY: 10 },
+export interface SafeZoneMeta {
+  label: string;
+  category: "9:16" | "16:9";
+  insetX: number;
+  insetY: number;
+}
+
+export const SAFE_ZONES: Record<Exclude<SafeZonePreset, "none">, SafeZoneMeta> = {
+  tiktok: { label: "TikTok (9:16)", category: "9:16", insetX: 6, insetY: 18 },
+  instagram: { label: "Instagram Reels (9:16)", category: "9:16", insetX: 6, insetY: 14 },
+  youtube: { label: "YouTube (16:9)", category: "16:9", insetX: 5, insetY: 10 },
 };
 
 export function SafeZones({ preset }: { preset: SafeZonePreset }) {
   if (preset === "none") return null;
-  const z = ZONES[preset];
+  const z = SAFE_ZONES[preset];
+  if (!z) return null;
+
   return (
     <div className="pointer-events-none absolute inset-0 z-20">
       <div
-        className="absolute border-2 border-dashed border-[hsl(var(--accent-foreground)/0.7)] bg-[hsl(var(--accent)/0.05)]"
+        className="absolute border-2 border-dashed border-edit/70 bg-edit/5"
         style={{
           left: `${z.insetX}%`,
           right: `${z.insetX}%`,
@@ -23,7 +29,7 @@ export function SafeZones({ preset }: { preset: SafeZonePreset }) {
           bottom: `${z.insetY}%`,
         }}
       >
-        <span className="absolute -top-6 left-0 text-xs font-medium text-white/80 bg-black/40 px-2 py-0.5 rounded">
+        <span className="absolute -top-6 left-0 rounded bg-void/80 px-2 py-0.5 text-[10px] font-medium text-ink">
           {z.label} safe zone
         </span>
       </div>
