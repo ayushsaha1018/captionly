@@ -86,9 +86,11 @@ export function StudioShell() {
             </button>
             <button
               onClick={() => setExportOpen(true)}
+              disabled={!video}
               className="flex items-center gap-2 rounded-md bg-edit px-3 py-1.5 text-xs
                          font-semibold text-void transition-transform hover:scale-[1.02]
-                         active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2
+                         active:scale-95 disabled:pointer-events-none disabled:opacity-40
+                         focus-visible:outline-2 focus-visible:outline-offset-2
                          focus-visible:outline-edit"
             >
               <Download className="h-3.5 w-3.5" />
@@ -107,7 +109,7 @@ export function StudioShell() {
         <ExportDialog
           open={exportOpen}
           onOpenChange={setExportOpen}
-          videoSrc={video.src}
+          video={video}
           subtitles={{ lines, style, position, animation }}
         />
       )}

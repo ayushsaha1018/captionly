@@ -22,15 +22,16 @@ import { useVideoExport, type UseVideoExportReturn } from "./useVideoExport";
 import { useServerVideoExport } from "./useServerVideoExport";
 import { downloadBlob } from "./downloadBlob";
 import type { SubtitleExportData } from "./types";
+import type { VideoMeta } from "@/store/types";
 
 interface ExportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  videoSrc: string;
+  video: VideoMeta;
   subtitles: SubtitleExportData;
 }
 
-export function ExportDialog({ open, onOpenChange, videoSrc, subtitles }: ExportDialogProps) {
+export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDialogProps) {
   const [mode, setMode] = useState<"client" | "server">("client");
 
   const {
@@ -53,11 +54,13 @@ export function ExportDialog({ open, onOpenChange, videoSrc, subtitles }: Export
   const handleStartExport = async () => {
     setExportedBlob(null);
 
+    const source = video.file ?? video.src;
+
     try {
       const blob =
         mode === "client"
-          ? await clientExportVideo(videoSrc, subtitles)
-          : await serverExport.exportVideo(videoSrc, subtitles);
+          ? await clientExportVideo(source, subtitles)
+          : await serverExport.exportVideo(source, subtitles);
       if (blob) {
         setExportedBlob(blob);
       }
