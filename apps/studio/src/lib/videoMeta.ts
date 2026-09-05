@@ -10,6 +10,10 @@ export function isValidVideoType(mimeType: string): boolean {
  * Reads video duration, width, and height via an offscreen video element.
  */
 export async function extractVideoMetadata(fileOrUrl: File | string): Promise<VideoMeta> {
+  if (typeof document === "undefined") {
+    throw new Error("extractVideoMetadata is only supported in browser environments.");
+  }
+
   return new Promise((resolve, reject) => {
     const isFile = typeof fileOrUrl !== "string";
     if (isFile && fileOrUrl.type && !isValidVideoType(fileOrUrl.type)) {
@@ -38,7 +42,8 @@ export async function extractVideoMetadata(fileOrUrl: File | string): Promise<Vi
       clearTimeout(timer);
       video.removeEventListener("loadedmetadata", onLoaded);
       video.removeEventListener("error", onError);
-      video.src = "";
+      video.removeAttribute("src");
+      video.load();
     };
 
     const onLoaded = () => {
@@ -47,7 +52,7 @@ export async function extractVideoMetadata(fileOrUrl: File | string): Promise<Vi
       const height = video.videoHeight;
       cleanup();
 
-      if (!durationSec || isNaN(durationSec) || durationSec <= 0 || !width || !height) {
+      if (!Number.isFinite(durationSec) || durationSec <= 0 || !width || !height) {
         if (isFile) URL.revokeObjectURL(src);
         reject(new Error("Invalid video dimensions or duration."));
         return;
