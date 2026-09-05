@@ -311,10 +311,35 @@ describe("mergeLines", () => {
     expect(state.lines[0].start).toBe(0);
     expect(state.lines[0].end).toBe(5);
     expect(state.lines[0].words.map((w) => w.text)).toEqual(["hello", "world"]);
+    // The gap must be swallowed inside the recomputed WORD timings too, not just
+    // the line's start/end fields - a naive implementation that recomputes each
+    // original line's words over its own sub-range (instead of one call over the
+    // full merged span) would pass every assertion above while still leaving a
+    // 1s hole between the words themselves ("hello" ending at 2, "world"
+    // starting at 3). Contiguity is the guarantee computeWordTimings makes.
+    expect(state.lines[0].words[0].end).toBe(state.lines[0].words[1].start);
   });
 
-  it("records undo under the 'Merge lines' label", () => {
+  it("retargets selection/editing to the merged line if either pointed at the removed line", () => {
+    useStudioStore.setState({ selectedLineId: "b", editingLineId: "b" });
+    useStudioStore.getState().mergeLines("a", "b");
+    const state = useStudioStore.getState();
+    expect(state.selectedLineId).toBe("a");
+    expect(state.editingLineId).toBe("a");
+  });
+
+  it("leaves selection/editing alone if neither pointed at the removed line", () => {
+    useStudioStore.setState({ selectedLineId: "a", editingLineId: null });
+    useStudioStore.getState().mergeLines("a", "b");
+    const state = useStudioStore.getState();
+    expect(state.selectedLineId).toBe("a");
+    expect(state.editingLineId).toBeNull();
+  });
+
+  it("records undo under the 'Merge lines' label and restores both lines", () => {
     useStudioStore.getState().mergeLines("a", "b");
     expect(useStudioStore.getState().past[0].label).toBe("Merge lines");
+    useStudioStore.getState().undo();
+    expect(useStudioStore.getState().lines).toHaveLength(2);
   });
 });

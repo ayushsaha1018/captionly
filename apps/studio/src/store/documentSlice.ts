@@ -121,5 +121,9 @@ export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlic
 
     const lines = state.lines.filter((l) => l.id !== bId).map((l) => (l.id === aId ? merged : l));
     set({ lines });
+    // b no longer exists - retarget dangling selection/editing to the merged
+    // survivor (a), mirroring deleteLine's clear-on-removal handling.
+    if (state.selectedLineId === bId) get().select(aId);
+    if (state.editingLineId === bId) get().beginEdit(aId);
   },
 });
