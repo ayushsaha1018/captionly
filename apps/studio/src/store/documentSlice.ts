@@ -15,8 +15,8 @@ export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlic
 
   loadVideo: (meta: VideoMeta, lines?: SubtitleLine[]) => {
     const current = get();
-    // Revoke old blob URL to prevent browser memory leak
-    if (current.video?.src.startsWith("blob:")) {
+    // Revoke old blob URL to prevent browser memory leak (guard against self-revocation)
+    if (current.video?.src.startsWith("blob:") && current.video.src !== meta.src) {
       try {
         URL.revokeObjectURL(current.video.src);
       } catch {
@@ -28,6 +28,8 @@ export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlic
     set({
       video: meta,
       lines: lines ?? [],
+      selectedLineId: null,
+      editingLineId: null,
     });
   },
 

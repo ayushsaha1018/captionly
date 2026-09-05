@@ -14,7 +14,7 @@ export interface VideoMeta {
   isDemo?: boolean;
 }
 
-/** The serializable document. Undo snapshots this and only this. */
+/** The in-memory document state. Undo snapshots this and only this. Note: VideoMeta.file is held in memory for export and is not JSON-serializable. */
 export interface DocumentSnapshot {
   video: VideoMeta | null;
   lines: SubtitleLine[];
