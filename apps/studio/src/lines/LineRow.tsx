@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from "react";
 import type { PlayerRef } from "@remotion/player";
 import type { SubtitleLine } from "@captionly/engine";
+import { Trash2 } from "lucide-react";
 import { useStudioStore } from "@/store";
 import { formatTimecode } from "@/lib/timecode";
 import { DEFAULT_LINE_DURATION } from "@/lib/constants";
@@ -8,6 +9,7 @@ import { lineHeight } from "./geometry";
 import { RulerGutter } from "./RulerGutter";
 import { WordStrip } from "./WordStrip";
 import { Playhead } from "./Playhead";
+import { TimecodeField } from "./TimecodeField";
 
 interface LineRowProps {
   line: SubtitleLine;
@@ -38,6 +40,9 @@ export const LineRow = memo(function LineRow({
   const endEdit = useStudioStore((s) => s.endEdit);
   const splitLine = useStudioStore((s) => s.splitLine);
   const addLine = useStudioStore((s) => s.addLine);
+  const setLineIn = useStudioStore((s) => s.setLineIn);
+  const setLineOut = useStudioStore((s) => s.setLineOut);
+  const deleteLine = useStudioStore((s) => s.deleteLine);
 
   const [draft, setDraft] = useState(() => line.words.map((w) => w.text).join(" "));
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -84,17 +89,45 @@ export const LineRow = memo(function LineRow({
         className={`group relative flex w-full flex-col gap-2 rounded-md px-3 py-3
                     transition-colors ${selected ? "bg-raised" : "hover:bg-raised/50"}`}
       >
-        <div className="flex items-baseline justify-between">
-          <span className={`tabular text-xs ${active ? "text-now" : "text-ink-muted"}`}>
-            {formatTimecode(line.start)}
-          </span>
-          <span className="tabular text-xs text-ink-muted">{formatTimecode(line.end)}</span>
+        <div className="flex items-baseline justify-between gap-2">
+          {selected ? (
+            <TimecodeField
+              value={line.start}
+              onCommit={(v) => setLineIn(line.id, v)}
+              label="Line in"
+            />
+          ) : (
+            <span className={`tabular text-xs ${active ? "text-now" : "text-ink-muted"}`}>
+              {formatTimecode(line.start)}
+            </span>
+          )}
+          {selected ? (
+            <TimecodeField
+              value={line.end}
+              onCommit={(v) => setLineOut(line.id, v)}
+              label="Line out"
+            />
+          ) : (
+            <span className="tabular text-xs text-ink-muted">{formatTimecode(line.end)}</span>
+          )}
+          {selected && (
+            <button
+              type="button"
+              aria-label="Delete line"
+              onClick={() => deleteLine(line.id)}
+              className="text-ink-muted opacity-0 transition-opacity hover:text-edit
+                         group-hover:opacity-100 focus-visible:opacity-100"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
 
         {editing ? (
           <input
             ref={inputRef}
             value={draft}
+            aria-label={`Line ${formatTimecode(line.start)} to ${formatTimecode(line.end)}`}
             onChange={(e) => {
               setDraft(e.target.value);
               editLineText(line.id, e.target.value);
