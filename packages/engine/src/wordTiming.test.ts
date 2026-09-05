@@ -38,6 +38,19 @@ describe("computeWordTimings", () => {
     expect(computeWordTimings("   ", 0, 5)).toEqual([]);
   });
 
+  it("enforces the minimum for every word even with uneven weights that only fit after re-iterating", () => {
+    // 5 words: three 1-char, one 20-char, one 77-char (total=1.05s). n*0.2=1.0<=1.05,
+    // so the minimum IS satisfiable overall - but a single clamp-and-renormalize
+    // pass pushes the 20-char word to ~0.093s. Every word must still meet the floor.
+    const text = `a b c ${"d".repeat(20)} ${"e".repeat(77)}`;
+    const words = computeWordTimings(text, 0, 1.05);
+    for (const w of words) {
+      expect(w.end - w.start).toBeGreaterThanOrEqual(0.2 - 1e-9);
+    }
+    expect(words[0].start).toBe(0);
+    expect(words.at(-1)!.end).toBe(1.05);
+  });
+
   it("assigns each word a unique id", () => {
     const words = computeWordTimings("a a a", 0, 3);
     const ids = new Set(words.map((w) => w.id));
