@@ -64,4 +64,34 @@ export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlic
     const words = computeWordTimings(text, line.start, line.end);
     set({ lines: state.lines.map((l) => (l.id === id ? { ...l, words } : l)) });
   },
+
+  setLineIn: (id, seconds) => {
+    const state = get();
+    const idx = state.lines.findIndex((l) => l.id === id);
+    if (idx === -1) return;
+    const line = state.lines[idx];
+    const prev = state.lines[idx - 1];
+    const min = prev ? prev.end : 0;
+    const start = Math.min(Math.max(seconds, min), line.end - 0.01);
+
+    state.commit("Retime line", { coalesceKey: `retime:${id}:in` });
+    const text = line.words.map((w) => w.text).join(" ");
+    const updated: SubtitleLine = { ...line, start, words: computeWordTimings(text, start, line.end) };
+    set({ lines: state.lines.map((l) => (l.id === id ? updated : l)) });
+  },
+
+  setLineOut: (id, seconds) => {
+    const state = get();
+    const idx = state.lines.findIndex((l) => l.id === id);
+    if (idx === -1) return;
+    const line = state.lines[idx];
+    const next = state.lines[idx + 1];
+    const max = next ? next.start : (state.video?.durationSec ?? Infinity);
+    const end = Math.max(Math.min(seconds, max), line.start + 0.01);
+
+    state.commit("Retime line", { coalesceKey: `retime:${id}:out` });
+    const text = line.words.map((w) => w.text).join(" ");
+    const updated: SubtitleLine = { ...line, end, words: computeWordTimings(text, line.start, end) };
+    set({ lines: state.lines.map((l) => (l.id === id ? updated : l)) });
+  },
 });

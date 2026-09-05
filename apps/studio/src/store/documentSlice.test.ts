@@ -191,3 +191,54 @@ describe("editLineText", () => {
     expect(useStudioStore.getState().past.length).toBe(1);
   });
 });
+
+describe("setLineIn / setLineOut", () => {
+  beforeEach(() => {
+    useStudioStore.setState({
+      video: { src: "/test.mp4", durationSec: 10, width: 1920, height: 1080 },
+      lines: [
+        { id: "a", start: 0, end: 2, words: [] },
+        { id: "b", start: 2, end: 4, words: [] },
+      ],
+      past: [],
+      future: [],
+    });
+  });
+
+  it("setLineIn clamps to the previous line's end", () => {
+    useStudioStore.getState().setLineIn("b", 1); // before "a" ends at 2
+    expect(useStudioStore.getState().lines[1].start).toBe(2);
+  });
+
+  it("setLineIn clamps below its own end", () => {
+    useStudioStore.getState().setLineIn("b", 4.5); // past its own end at 4
+    const line = useStudioStore.getState().lines[1];
+    expect(line.start).toBeLessThan(line.end);
+  });
+
+  it("setLineOut clamps to the next line's start", () => {
+    useStudioStore.getState().setLineOut("a", 3); // past "b" starting at 2
+    expect(useStudioStore.getState().lines[0].end).toBe(2);
+  });
+
+  it("setLineOut clamps to video duration for the last line", () => {
+    useStudioStore.getState().setLineOut("b", 999);
+    expect(useStudioStore.getState().lines[1].end).toBe(10);
+  });
+
+  it("recomputes words to fill the new span", () => {
+    useStudioStore.getState().editLineText("a", "hi");
+    useStudioStore.getState().setLineOut("a", 1);
+    const line = useStudioStore.getState().lines[0];
+    expect(line.words.at(-1)!.end).toBe(1);
+  });
+
+  it("coalesces rapid retimes to the same line and field, not across fields", () => {
+    useStudioStore.getState().setLineOut("a", 1.5);
+    useStudioStore.getState().setLineOut("a", 1.8);
+    expect(useStudioStore.getState().past.length).toBe(1);
+
+    useStudioStore.getState().setLineIn("a", 0.1);
+    expect(useStudioStore.getState().past.length).toBe(2);
+  });
+});

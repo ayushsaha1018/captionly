@@ -35,6 +35,8 @@ export interface DocumentSlice extends DocumentSnapshot {
   addLine: (afterLineId: string | null, startAt: number, endAt: number) => void;
   /** Recomputes the line's words from `text` via computeWordTimings. */
   editLineText: (id: string, text: string) => void;
+  setLineIn: (id: string, seconds: number) => void;
+  setLineOut: (id: string, seconds: number) => void;
 }
 
 export type WorkTab = "lines" | "style";
