@@ -16,20 +16,37 @@ function Rows({
 }) {
   const lines = useStudioStore((s) => s.lines);
   const selectedLineId = useStudioStore((s) => s.selectedLineId);
+  const durationSec = useStudioStore((s) => s.video?.durationSec ?? 0);
   const activeId = useActiveLineId(playerRef);
   const activeRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll keyed on the active id, so this fires once per line change
-  // rather than once per frame.
   useEffect(() => {
     activeRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [activeId]);
 
+  const leadingGapSec = lines.length > 0 ? lines[0].start : durationSec;
+  const trailingGapSec = lines.length > 0 ? durationSec - lines[lines.length - 1].end : 0;
+
   return (
     <>
+      {(lines.length === 0 || leadingGapSec > 0.001) && (
+        <Interstitial
+          gapSec={leadingGapSec}
+          gapStart={0}
+          prevLineId={null}
+          nextLineId={lines[0]?.id ?? null}
+        />
+      )}
       {lines.map((line, i) => (
         <Fragment key={line.id}>
-          {i > 0 && <Interstitial gapSec={line.start - lines[i - 1].end} />}
+          {i > 0 && (
+            <Interstitial
+              gapSec={line.start - lines[i - 1].end}
+              gapStart={lines[i - 1].end}
+              prevLineId={lines[i - 1].id}
+              nextLineId={line.id}
+            />
+          )}
           <div ref={line.id === activeId ? activeRef : undefined}>
             <LineRow
               line={line}
@@ -41,23 +58,31 @@ function Rows({
           </div>
         </Fragment>
       ))}
+      {lines.length > 0 && trailingGapSec > 0.001 && (
+        <Interstitial
+          gapSec={trailingGapSec}
+          gapStart={lines[lines.length - 1].end}
+          prevLineId={lines[lines.length - 1].id}
+          nextLineId={null}
+        />
+      )}
     </>
   );
 }
 
 export function LineList({ playerRef }: { playerRef: React.RefObject<PlayerRef | null> }) {
   const video = useStudioStore((s) => s.video);
-  const lines = useStudioStore((s) => s.lines);
   const select = useStudioStore((s) => s.select);
+  const beginEdit = useStudioStore((s) => s.beginEdit);
 
-  // One click selects AND seeks — spec §"one click does everything".
+  // One click selects, seeks, AND begins editing - spec §5 "one click does everything".
   const onSelect = useCallback(
     (id: string) => {
-      select(id);
+      beginEdit(id);
       const line = useStudioStore.getState().lines.find((l) => l.id === id);
       if (line) playerRef.current?.seekTo(Math.round(line.start * FPS));
     },
-    [select, playerRef],
+    [beginEdit, playerRef],
   );
 
   if (!video) {
@@ -68,15 +93,6 @@ export function LineList({ playerRef }: { playerRef: React.RefObject<PlayerRef |
         <p className="mt-1 max-w-xs text-xs text-ink-muted">
           Drop a video into the player rail or load the demo project to start spotting lines.
         </p>
-      </div>
-    );
-  }
-
-  if (lines.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-hairline p-12 text-center">
-        <p className="font-display text-lg">No lines yet.</p>
-        <p className="mt-1 text-sm text-ink-muted">Add one at the playhead, or load the demo.</p>
       </div>
     );
   }
