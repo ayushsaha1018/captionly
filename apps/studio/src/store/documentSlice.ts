@@ -1,7 +1,33 @@
 import type { StateCreator } from "zustand";
-import type { SubtitleLine } from "@captionly/engine";
+import type { SubtitleLine, Word } from "@captionly/engine";
 import { defaultStyle, defaultPosition, defaultAnimation, computeWordTimings } from "@captionly/engine";
 import type { DocumentSlice, StudioState, VideoMeta } from "./types";
+
+/** Returns how many of `words` go in the first half after splitting at the
+ *  boundary nearest `caretIndex` (an offset into words.map(w=>w.text).join(" ")).
+ *  Returns -1 if there are fewer than two words (no boundary exists). */
+function findNearestWordBoundary(words: Word[], caretIndex: number): number {
+  if (words.length < 2) return -1;
+
+  let offset = 0;
+  const boundaries: number[] = [];
+  for (const w of words) {
+    offset += w.text.length;
+    boundaries.push(offset); // offset right after this word's text
+    offset += 1; // the joining space
+  }
+
+  let best = 0;
+  let bestDist = Infinity;
+  for (let i = 0; i < words.length - 1; i++) {
+    const dist = Math.abs(boundaries[i] - caretIndex);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = i;
+    }
+  }
+  return best + 1;
+}
 
 export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlice> = (
   set,
@@ -125,5 +151,40 @@ export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlic
     // survivor (a), mirroring deleteLine's clear-on-removal handling.
     if (state.selectedLineId === bId) get().select(aId);
     if (state.editingLineId === bId) get().beginEdit(aId);
+  },
+
+  splitLine: (id, caretIndex) => {
+    const state = get();
+    const idx = state.lines.findIndex((l) => l.id === id);
+    if (idx === -1) return;
+    const line = state.lines[idx];
+
+    const text = line.words.map((w) => w.text).join(" ");
+    if (caretIndex <= 0 || caretIndex >= text.length) return;
+
+    const splitAt = findNearestWordBoundary(line.words, caretIndex);
+    if (splitAt < 1) return;
+
+    const firstWords = line.words.slice(0, splitAt);
+    const secondWords = line.words.slice(splitAt);
+    const splitTime = firstWords[firstWords.length - 1].end;
+
+    state.commit("Split line");
+
+    const firstLine: SubtitleLine = {
+      ...line,
+      end: splitTime,
+      words: computeWordTimings(firstWords.map((w) => w.text).join(" "), line.start, splitTime),
+    };
+    const secondLine: SubtitleLine = {
+      id: crypto.randomUUID(),
+      start: splitTime,
+      end: line.end,
+      words: computeWordTimings(secondWords.map((w) => w.text).join(" "), splitTime, line.end),
+    };
+
+    const lines = [...state.lines];
+    lines.splice(idx, 1, firstLine, secondLine);
+    set({ lines });
   },
 });

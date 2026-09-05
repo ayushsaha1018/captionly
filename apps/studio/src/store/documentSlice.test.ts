@@ -343,3 +343,65 @@ describe("mergeLines", () => {
     expect(useStudioStore.getState().lines).toHaveLength(2);
   });
 });
+
+describe("splitLine", () => {
+  beforeEach(() => {
+    useStudioStore.setState({
+      video: { src: "/test.mp4", durationSec: 10, width: 1920, height: 1080 },
+      lines: [
+        {
+          id: "a",
+          start: 0,
+          end: 4,
+          // joined text: "hello there friend" (offsets: h=0, t=6, f=12)
+          words: [
+            { id: "w1", text: "hello", start: 0, end: 1 },
+            { id: "w2", text: "there", start: 1, end: 2 },
+            { id: "w3", text: "friend", start: 2, end: 4 },
+          ],
+        },
+      ],
+      past: [],
+      future: [],
+    });
+  });
+
+  it("splits at the nearest word boundary to the caret", () => {
+    // caret at index 7 ("hello t|here friend") is nearest the boundary
+    // after "hello" (index 5) vs after "there" (index 11) - nearest is 5.
+    useStudioStore.getState().splitLine("a", 7);
+    const state = useStudioStore.getState();
+    expect(state.lines).toHaveLength(2);
+    expect(state.lines[0].id).toBe("a");
+    expect(state.lines[0].words.map((w) => w.text)).toEqual(["hello"]);
+    expect(state.lines[1].words.map((w) => w.text)).toEqual(["there", "friend"]);
+    // Contiguous: the split time is the shared boundary.
+    expect(state.lines[0].end).toBe(state.lines[1].start);
+    expect(state.lines[0].start).toBe(0);
+    expect(state.lines[1].end).toBe(4);
+  });
+
+  it("no-ops when the caret is at the very start of the text", () => {
+    useStudioStore.getState().splitLine("a", 0);
+    expect(useStudioStore.getState().lines).toHaveLength(1);
+  });
+
+  it("no-ops when the caret is at the very end of the text", () => {
+    const text = "hello there friend";
+    useStudioStore.getState().splitLine("a", text.length);
+    expect(useStudioStore.getState().lines).toHaveLength(1);
+  });
+
+  it("no-ops on a single-word line", () => {
+    useStudioStore.setState({
+      lines: [{ id: "a", start: 0, end: 2, words: [{ id: "w1", text: "hi", start: 0, end: 2 }] }],
+    });
+    useStudioStore.getState().splitLine("a", 1);
+    expect(useStudioStore.getState().lines).toHaveLength(1);
+  });
+
+  it("records undo under the 'Split line' label", () => {
+    useStudioStore.getState().splitLine("a", 7);
+    expect(useStudioStore.getState().past[0].label).toBe("Split line");
+  });
+});
