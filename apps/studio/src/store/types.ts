@@ -37,6 +37,7 @@ export interface DocumentSlice extends DocumentSnapshot {
   editLineText: (id: string, text: string) => void;
   setLineIn: (id: string, seconds: number) => void;
   setLineOut: (id: string, seconds: number) => void;
+  deleteLine: (id: string) => void;
 }
 
 export type WorkTab = "lines" | "style";

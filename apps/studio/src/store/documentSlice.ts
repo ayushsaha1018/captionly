@@ -94,4 +94,12 @@ export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlic
     const updated: SubtitleLine = { ...line, end, words: computeWordTimings(text, line.start, end) };
     set({ lines: state.lines.map((l) => (l.id === id ? updated : l)) });
   },
+
+  deleteLine: (id) => {
+    const state = get();
+    state.commit("Delete line");
+    set({ lines: state.lines.filter((l) => l.id !== id) });
+    if (state.selectedLineId === id) get().select(null);
+    if (state.editingLineId === id) get().endEdit();
+  },
 });

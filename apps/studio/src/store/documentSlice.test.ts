@@ -242,3 +242,40 @@ describe("setLineIn / setLineOut", () => {
     expect(useStudioStore.getState().past.length).toBe(2);
   });
 });
+
+describe("deleteLine", () => {
+  beforeEach(() => {
+    useStudioStore.setState({
+      video: { src: "/test.mp4", durationSec: 10, width: 1920, height: 1080 },
+      lines: [
+        { id: "a", start: 0, end: 2, words: [] },
+        { id: "b", start: 2, end: 4, words: [] },
+      ],
+      past: [],
+      future: [],
+      selectedLineId: "b",
+      editingLineId: "b",
+    });
+  });
+
+  it("removes the line and clears selection/editing if it was selected", () => {
+    useStudioStore.getState().deleteLine("b");
+    const state = useStudioStore.getState();
+    expect(state.lines).toHaveLength(1);
+    expect(state.lines[0].id).toBe("a");
+    expect(state.selectedLineId).toBeNull();
+    expect(state.editingLineId).toBeNull();
+  });
+
+  it("leaves selection alone when deleting a different line", () => {
+    useStudioStore.getState().deleteLine("a");
+    expect(useStudioStore.getState().selectedLineId).toBe("b");
+  });
+
+  it("records undo", () => {
+    useStudioStore.getState().deleteLine("b");
+    expect(useStudioStore.getState().past[0].label).toBe("Delete line");
+    useStudioStore.getState().undo();
+    expect(useStudioStore.getState().lines).toHaveLength(2);
+  });
+});
