@@ -47,17 +47,22 @@ export const LineRow = memo(function LineRow({
   const [draft, setDraft] = useState(() => line.words.map((w) => w.text).join(" "));
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Reset the draft to the store's text whenever editing (re)starts, so
-  // reopening a line after an undo (or a different line) doesn't show stale
-  // text, and focus it (roadmap: one click selects, seeks, AND focuses text).
+  // Focus on entry only. Deliberately NOT tied to the resync below, so an
+  // external store change (or every keystroke) can't steal focus back.
   useEffect(() => {
-    if (editing) {
-      setDraft(line.words.map((w) => w.text).join(" "));
-      inputRef.current?.focus();
-    }
-    // Intentionally omit `line` from deps - only re-sync on an edit-mode transition.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (editing) inputRef.current?.focus();
   }, [editing, line.id]);
+
+  // Resync the draft when the STORE's text for this line diverges from what we
+  // typed. Splits/merges/undo can rewrite this same id's words while it is
+  // still the editing line; without this the next keystroke would commit stale
+  // text over them. Comparing against the normalized draft means an echo of our
+  // own typing (incl. a trailing space mid-word) is not treated as external.
+  useEffect(() => {
+    if (!editing) return;
+    const storeText = line.words.map((w) => w.text).join(" ");
+    if (storeText !== draft.trim().replace(/\s+/g, " ")) setDraft(storeText);
+  }, [editing, line.words, draft]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") {
@@ -133,6 +138,13 @@ export const LineRow = memo(function LineRow({
               editLineText(line.id, e.target.value);
             }}
             onKeyDown={handleKeyDown}
+            // Clicking away must clear editingLineId (keyboard-delete and
+            // playhead-follow both gate on it). Read live state: Enter's
+            // endEdit -> addLine -> beginEdit(newId) cascade unmounts this
+            // input, whose blur would otherwise clear the NEW line's id.
+            onBlur={() => {
+              if (useStudioStore.getState().editingLineId === line.id) endEdit();
+            }}
             placeholder="Type the line…"
             className="w-full bg-transparent text-base leading-snug text-ink outline-none
                        placeholder:text-ink-muted"
