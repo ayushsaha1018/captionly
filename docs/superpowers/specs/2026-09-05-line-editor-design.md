@@ -1,0 +1,190 @@
+# SP3 — Line Editor — Design
+
+**Date:** 2026-09-05
+**Status:** approved, ready for implementation plan
+**Branch:** `feat/studio-line-editor` (branches from `feat/studio-video-in`)
+**Scope:** `apps/studio/src/lines/`, `apps/studio/src/store/`, `apps/studio/src/app/`,
+`apps/studio/src/lib/timecode.ts`, `packages/engine/src/`
+
+---
+
+## 1. Goal
+
+The transcript becomes editable. A user goes from an uploaded video and an empty line
+list to a fully spotted set of lines — add, edit, delete, merge, split, retime — without
+touching a mouse more than incidentally. This is the largest sub-project in the frontend
+revamp program; see `docs/superpowers/ROADMAP-frontend-revamp.md` §4 (SP3) and §5 (agreed
+interaction rules, which this spec implements against, not redecides).
+
+---
+
+## 2. Word-timing algorithm
+
+New pure function in `packages/engine/src/wordTiming.ts`:
+
+```ts
+function computeWordTimings(text: string, start: number, end: number): Word[]
+```
+
+- Split `text` on whitespace into words.
+- Weight each word by character count, plus a fixed pause bonus added to the weight of
+  any word ending in `.`, `,`, `!`, or `?` (sentence/clause boundaries read as pauses).
+- Distribute `end - start` across words proportionally to weight.
+- Enforce a per-word minimum duration by clamping any word below the floor up to it,
+  then re-normalizing the remainder proportionally among the words still above the
+  floor. **If the floor itself is unsatisfiable** (`wordCount × minDuration > end - start`),
+  drop the minimum entirely and fall back to plain proportional split — never emit a
+  negative-width word.
+- Force `words[0].start = start` and `words.at(-1).end = end` exactly after normalizing,
+  so the range is filled exactly regardless of float drift.
+- Assign each word a stable `id` (`crypto.randomUUID()`, consistent with existing id
+  generation in the codebase).
+
+This is the single source of word timings (roadmap §2). It is called by every store
+action that changes a line's text or span (§4).
+
+**Test** (`packages/engine/src/wordTiming.test.ts`):
+- `words[0].start === line.start` and `words.at(-1).end === line.end` exactly.
+- Words are monotonic and non-overlapping.
+- Unsatisfiable-minimum case falls back to proportional split with no negative widths.
+- Punctuation-terminated words receive more time than a same-length word without.
+
+---
+
+## 3. Store actions
+
+All new actions live on `documentSlice` and follow the existing `loadVideo` contract
+exactly: `commit(label, {coalesceKey})` **before** mutating, then `set()` with a new
+`lines` array that **preserves object reference for every untouched line** (required by
+`LineRow`'s memo, and to never mutate the `sampleSubtitles` fixture in place — it is
+aliased by reference into the store in demo mode).
+
+| Action | Behavior |
+|---|---|
+| `addLine(afterLineId: string \| null, startAt: number)` | Inserts a new line of fixed default duration (3s, clamped to not exceed the gap) at `startAt`, empty text, `words: []`. Calls `beginEdit(newId)`. Commit label `"Add line"`. |
+| `editLineText(id, text)` | Recomputes `words` via `computeWordTimings(text, line.start, line.end)`. Coalesce key `` `text:${id}` ``. |
+| `setLineIn(id, seconds)` | Clamps to `[prevLine?.end ?? 0, line.end)`. Recomputes words. Coalesce key `` `retime:${id}:in` ``. |
+| `setLineOut(id, seconds)` | Clamps to `(line.start, nextLine?.start ?? duration]`. Recomputes words. Coalesce key `` `retime:${id}:out` ``. |
+| `deleteLine(id)` | Removes the line. No gap-fill needed — the interstitial recomputes the gap from neighbours automatically. Commit label `"Delete line"`. |
+| `mergeLines(aId, bId)` | Concatenates `a.text + " " + b.text`, spans `[a.start, b.end]`, recomputes words across the full range, removes `b`. Commit label `"Merge lines"`. |
+| `splitLine(id, caretIndex)` | Finds the nearest computed word boundary to `caretIndex`. Splits `[start, end]` and the text at that boundary into two lines, recomputes words for both. **No-ops** if the boundary is at the very start or end of the text (nothing to split). Commit label `"Split line"`. |
+
+---
+
+## 4. Interstitial wiring
+
+`Interstitial` (`apps/studio/src/lines/Interstitial.tsx`) gains props:
+
+```ts
+{ gapSec: number; gapStart: number; prevLineId: string | null; nextLineId: string | null }
+```
+
+`LineList.tsx`'s `Rows` renders three gap positions instead of one:
+- **Leading**: `0 → lines[0].start`, only when `lines[0].start > 0.001`. `prevLineId: null`.
+- **Between**: every adjacent pair, as today.
+- **Trailing**: `lastLine.end → duration`, shown when `duration - lastLine.end > 0.001`,
+  `nextLineId: null`. When `lines.length === 0`, this is the *only* row rendered, spanning
+  `0 → duration` — this replaces today's static "No lines yet" empty state in
+  `LineList.tsx`.
+
+Button visibility: butt joint (`gapSec ≤ 0.001`) → hairline, Merge only (already correct).
+A gap with `prevLineId === null` or `nextLineId === null` → "Add line" only, no Merge
+(nothing on that open side to merge with). A real gap between two lines → both.
+
+"Add line" calls `addLine(prevLineId, gapStart)`. "Merge" calls `mergeLines(prevLineId, nextLineId)`.
+
+---
+
+## 5. Editable row
+
+`LineRow` (`apps/studio/src/lines/LineRow.tsx`) drops `role="button"`/`tabIndex` from the
+outer wrapper — it becomes a plain container, since it will host a text input, two numeric
+fields, and a delete button, and nested interactives inside a button role is broken
+accessibility. The line text becomes the click/focus target directly.
+
+- **Click** the text → `onSelect` (select + seek, unchanged) → focuses an inline text
+  input for editing (roadmap: one click does everything).
+- **Esc** while editing → `endEdit()`. Blurs, keeps selection, no seek.
+- **⌘↵** while editing → `splitLine(id, caretPosition)`.
+- **Enter** while editing → commits the text (the input's change already drives
+  `editLineText` via onChange, so Enter's job is just to blur/exit edit mode), then:
+  - if free time remains immediately after this line (`nextGapSec > 0`, whether a real
+    gap or trailing gap with `duration - line.end > 0`), calls
+    `addLine(line.id, line.end)`;
+  - otherwise, Enter just blurs. No line is created past the end of the video.
+
+---
+
+## 6. Retime fields
+
+Two small tabular-mono numeric inputs (In / Out) next to the existing timecode labels,
+editable when the line is selected. `@/lib/timecode.ts` gains `parseTimecode(input: string): number | null`
+alongside the existing `formatTimecode`.
+
+Clamping against neighbours happens **on commit** (blur or Enter on the field), not per
+keystroke — so typing "1" then "12" doesn't fight the clamp mid-entry. An invalid parse
+leaves the field's value unchanged (no commit).
+
+---
+
+## 7. Delete
+
+A small delete affordance on the row (visible when selected or hovered), calling
+`deleteLine(id)` directly. **And** a global `Backspace`/`Delete` handler added to the
+existing keydown listener in `StudioShell.tsx` (same file as the ⌘Z undo/redo listener,
+same guard pattern): fires only when `selectedLineId` is set, `editingLineId` is `null`,
+and the event target isn't an INPUT/TEXTAREA/contentEditable element.
+
+---
+
+## 8. Playhead-follow (two-way sync)
+
+In `Rows` (`LineList.tsx`), the existing `useActiveLineId`-driven auto-scroll effect gains
+one line: when `activeId` changes and `editingLineId === null`, call `select(activeId)`.
+
+`select()` itself remains a pure state setter — the seek-on-select behavior stays exactly
+where it lives today, in `LineList.onSelect`. This means playback-follow updates
+`selectedLineId` (and therefore highlighting/scroll) without ever triggering a seek, so
+playback and the follow-selection never fight each other.
+
+**Accepted consequence:** `WordStrip` renders whenever a line is `selected`, so during
+playback it will now pop open row-by-row as the active line changes. This is intended —
+inspecting computed word timings as they play — not a regression to guard against.
+
+---
+
+## 9. Testing
+
+- **Engine**: `wordTiming.test.ts` per §2.
+- **Store**: one test per new action on the existing `documentSlice`/`historySlice`
+  pattern — reference-preservation for untouched lines, commit-before-mutate ordering
+  (undo lands on the pre-change snapshot), coalescing behavior (rapid edits within 600ms
+  merge, edits further apart don't).
+- **Manual browser verification** (this sub-project is UI-heavy): full keyboard cold-start
+  flow (type → Enter → type → Enter... to a fully spotted transcript, no mouse); click
+  select+seek; ⌘↵ split; merge across a real gap; retime via fields with neighbour
+  clamping; delete via icon and keyboard; playback-follow scroll/select without stealing
+  edit focus from a line being actively edited; undo/redo across all of the above.
+
+---
+
+## 10. Build order
+
+Keeps the app running at every step; nothing depends on an action that doesn't exist yet.
+
+1. `computeWordTimings` + test (engine, no UI dependents yet)
+2. Store actions (`addLine`, `editLineText`, `setLineIn`, `setLineOut`, `deleteLine`,
+   `mergeLines`, `splitLine`) + tests
+3. Interstitial wiring — leading/trailing gaps, Add/Merge buttons call the actions
+4. Editable row — click-to-edit, Enter/Esc/⌘↵
+5. In/Out numeric fields + `parseTimecode`
+6. Delete — icon + keyboard
+7. Playhead-follow (two-way sync)
+
+---
+
+## 11. Out of scope (unchanged from roadmap §7)
+
+Autotranscription, subtitle file import, per-line/per-word style overrides, per-word
+timing nudging (roadmap §2 — the algorithm's output is not hand-adjustable), drag-handle
+retiming (numeric fields only, per this spec §6), mobile/touch optimization.
