@@ -22,3 +22,6 @@ export { PaintOnAnimation } from "./animations/PaintOnAnimation";
 export { FlapBoardAnimation } from "./animations/FlapBoardAnimation";
 export { TickerAnimation } from "./animations/TickerAnimation";
 export { DigitalMatrixAnimation } from "./animations/DigitalMatrixAnimation";
+
+// Geometry & Layout
+export * from "./utils/geometry";
