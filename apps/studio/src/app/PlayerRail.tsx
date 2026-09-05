@@ -42,6 +42,8 @@ export function PlayerRail({
     setError(null);
     try {
       const meta = await extractVideoMetadata(file);
+      playerRef.current?.pause();
+      playerRef.current?.seekTo(0);
       loadVideo(meta);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to load video");
@@ -58,6 +60,8 @@ export function PlayerRail({
     setError(null);
     try {
       const meta = await extractVideoMetadata("/test1.mp4");
+      playerRef.current?.pause();
+      playerRef.current?.seekTo(0);
       loadVideo(meta, sampleSubtitles);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to load demo video");
@@ -80,7 +84,7 @@ export function PlayerRail({
       p.removeEventListener("play", onPlay);
       p.removeEventListener("pause", onPause);
     };
-  }, [playerRef]);
+  }, [playerRef, video]);
 
   const toggle = useCallback(() => playerRef.current?.toggle(), [playerRef]);
 
@@ -96,15 +100,29 @@ export function PlayerRail({
         />
 
         {error && (
-          <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive"
+          >
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         <div
+          role="button"
+          tabIndex={0}
+          aria-label="Upload video: Drop video file or press Enter to browse"
+          onKeyDown={(e) => {
+            if ((e.key === "Enter" || e.key === " ") && !isLoading) {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
           onDragOver={(e) => {
             e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
             setIsDragging(true);
           }}
           onDragLeave={(e) => {
@@ -115,6 +133,7 @@ export function PlayerRail({
           onDrop={(e) => {
             e.preventDefault();
             setIsDragging(false);
+            if (isLoading) return;
             const file = e.dataTransfer.files?.[0];
             if (file) {
               handleFile(file);
@@ -125,14 +144,14 @@ export function PlayerRail({
               fileInputRef.current?.click();
             }
           }}
-          className={`flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
+          className={`flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-edit ${
             isDragging
               ? "border-edit bg-edit/10"
               : "border-hairline bg-surface hover:border-edit/50 hover:bg-surface/80"
           }`}
         >
           {isLoading ? (
-            <div className="flex flex-col items-center gap-3">
+            <div role="status" aria-live="polite" className="flex flex-col items-center gap-3">
               <Loader2 className="h-8 w-8 animate-spin text-edit" />
               <p className="font-display text-sm font-medium text-ink">Reading video metadata...</p>
             </div>
@@ -188,7 +207,11 @@ export function PlayerRail({
       />
 
       {error && (
-        <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive"
+        >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
