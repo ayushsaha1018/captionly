@@ -108,11 +108,11 @@ with two different defaults**, resolved deliberately to avoid a conflict between
 
 `LineList.tsx`'s `Rows` renders three gap positions instead of one:
 - **Leading**: `0 → lines[0].start`, only when `lines[0].start > 0.001`. `prevLineId: null`.
+  When `lines.length === 0`, this is the *only* row rendered, spanning `0 → duration` —
+  this replaces today's static "No lines yet" empty state in `LineList.tsx`.
 - **Between**: every adjacent pair, as today.
-- **Trailing**: `lastLine.end → duration`, shown when `duration - lastLine.end > 0.001`,
-  `nextLineId: null`. When `lines.length === 0`, this is the *only* row rendered, spanning
-  `0 → duration` — this replaces today's static "No lines yet" empty state in
-  `LineList.tsx`.
+- **Trailing**: `lastLine.end → duration`, shown when `lines.length > 0 && duration - lastLine.end > 0.001`,
+  `nextLineId: null`.
 
 Button visibility: butt joint (`gapSec ≤ 0.001`) → hairline, Merge only (already correct).
 A gap with `prevLineId === null` or `nextLineId === null` → "Add line" only, no Merge
@@ -147,8 +147,8 @@ accessibility. The line text becomes the click/focus target directly.
 
 ## 6. Retime fields
 
-Two small tabular-mono numeric inputs (In / Out) next to the existing timecode labels,
-editable when the line is selected. `@/lib/timecode.ts` gains `parseTimecode(input: string): number | null`
+Two small tabular-mono numeric inputs (In / Out) replacing the plain timecode labels
+when the line is selected (editable), reverting to plain labels otherwise. `@/lib/timecode.ts` gains `parseTimecode(input: string): number | null`
 alongside the existing `formatTimecode`.
 
 Clamping against neighbours happens **on commit** (blur or Enter on the field), not per
