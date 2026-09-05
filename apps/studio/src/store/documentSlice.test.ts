@@ -124,3 +124,70 @@ describe("documentSlice loadVideo", () => {
     revokeSpy.mockRestore();
   });
 });
+
+describe("addLine", () => {
+  beforeEach(() => {
+    useStudioStore.setState({
+      video: { src: "/test.mp4", durationSec: 10, width: 1920, height: 1080 },
+      lines: [{ id: "a", start: 0, end: 2, words: [] }],
+      past: [],
+      future: [],
+      selectedLineId: null,
+      editingLineId: null,
+    });
+  });
+
+  it("inserts a new empty line at the given range and begins editing it", () => {
+    useStudioStore.getState().addLine("a", 2, 4);
+    const state = useStudioStore.getState();
+    expect(state.lines).toHaveLength(2);
+    expect(state.lines[1].start).toBe(2);
+    expect(state.lines[1].end).toBe(4);
+    expect(state.lines[1].words).toEqual([]);
+    expect(state.editingLineId).toBe(state.lines[1].id);
+    expect(state.selectedLineId).toBe(state.lines[1].id);
+  });
+
+  it("inserts at the front when afterLineId is null", () => {
+    useStudioStore.getState().addLine(null, 0, 0);
+    // won't collide in this test - just checking position
+    const state = useStudioStore.getState();
+    expect(state.lines[0].id).not.toBe("a");
+    expect(state.lines[1].id).toBe("a");
+  });
+
+  it("preserves object reference for the untouched line and records undo", () => {
+    const before = useStudioStore.getState().lines[0];
+    useStudioStore.getState().addLine("a", 2, 4);
+    const after = useStudioStore.getState();
+    expect(after.lines[0]).toBe(before);
+    expect(after.past.length).toBe(1);
+    expect(after.past[0].label).toBe("Add line");
+  });
+});
+
+describe("editLineText", () => {
+  beforeEach(() => {
+    useStudioStore.setState({
+      video: { src: "/test.mp4", durationSec: 10, width: 1920, height: 1080 },
+      lines: [{ id: "a", start: 0, end: 2, words: [] }],
+      past: [],
+      future: [],
+    });
+  });
+
+  it("recomputes words to fill the line's existing span", () => {
+    useStudioStore.getState().editLineText("a", "hello world");
+    const line = useStudioStore.getState().lines[0];
+    expect(line.words.map((w) => w.text)).toEqual(["hello", "world"]);
+    expect(line.words[0].start).toBe(0);
+    expect(line.words.at(-1)!.end).toBe(2);
+  });
+
+  it("coalesces rapid edits to the same line into one undo entry", () => {
+    useStudioStore.getState().editLineText("a", "h");
+    useStudioStore.getState().editLineText("a", "he");
+    useStudioStore.getState().editLineText("a", "hel");
+    expect(useStudioStore.getState().past.length).toBe(1);
+  });
+});
