@@ -16,6 +16,8 @@ function Rows({
 }) {
   const lines = useStudioStore((s) => s.lines);
   const selectedLineId = useStudioStore((s) => s.selectedLineId);
+  const editingLineId = useStudioStore((s) => s.editingLineId);
+  const select = useStudioStore((s) => s.select);
   const durationSec = useStudioStore((s) => s.video?.durationSec ?? 0);
   const activeId = useActiveLineId(playerRef);
   const activeRef = useRef<HTMLDivElement | null>(null);
@@ -23,6 +25,14 @@ function Rows({
   useEffect(() => {
     activeRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [activeId]);
+
+  // Playback drives selection (two-way sync, spec §8) - but never while a
+  // different line is being actively edited, so playback can't steal focus
+  // from someone typing. select() is a pure state setter; the seek-on-select
+  // behavior stays in LineList's onSelect below, so this never triggers a seek.
+  useEffect(() => {
+    if (activeId && editingLineId === null) select(activeId);
+  }, [activeId, editingLineId, select]);
 
   const leadingGapSec = lines.length > 0 ? lines[0].start : durationSec;
   const trailingGapSec = lines.length > 0 ? durationSec - lines[lines.length - 1].end : 0;
