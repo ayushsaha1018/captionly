@@ -61,13 +61,31 @@ aliased by reference into the store in demo mode).
 
 | Action | Behavior |
 |---|---|
-| `addLine(afterLineId: string \| null, startAt: number)` | Inserts a new line of fixed default duration (3s, clamped to not exceed the gap) at `startAt`, empty text, `words: []`. Calls `beginEdit(newId)`. Commit label `"Add line"`. |
+| `addLine(afterLineId: string \| null, startAt: number, endAt: number)` | Inserts a new line spanning `[startAt, endAt]` exactly (the caller decides the span — see below), empty text, `words: []`. Calls `beginEdit(newId)`. Commit label `"Add line"`. |
 | `editLineText(id, text)` | Recomputes `words` via `computeWordTimings(text, line.start, line.end)`. Coalesce key `` `text:${id}` ``. |
 | `setLineIn(id, seconds)` | Clamps to `[prevLine?.end ?? 0, line.end)`. Recomputes words. Coalesce key `` `retime:${id}:in` ``. |
 | `setLineOut(id, seconds)` | Clamps to `(line.start, nextLine?.start ?? duration]`. Recomputes words. Coalesce key `` `retime:${id}:out` ``. |
 | `deleteLine(id)` | Removes the line. No gap-fill needed — the interstitial recomputes the gap from neighbours automatically. Commit label `"Delete line"`. |
 | `mergeLines(aId, bId)` | Concatenates `a.text + " " + b.text`, spans `[a.start, b.end]`, recomputes words across the full range, removes `b`. Commit label `"Merge lines"`. |
 | `splitLine(id, caretIndex)` | Finds the nearest computed word boundary to `caretIndex`. Splits `[start, end]` and the text at that boundary into two lines, recomputes words for both. **No-ops** if the boundary is at the very start or end of the text (nothing to split). Commit label `"Split line"`. |
+
+`addLine` takes an explicit range rather than a fixed duration because it has **two callers
+with two different defaults**, resolved deliberately to avoid a conflict between them:
+
+- **Interstitial "Add line" click** (§4) — you're looking at a specific, already-visible
+  gap and want to claim it. Passes `endAt = gapStart + gapSec`: fills the *entire* gap.
+- **Enter while editing** (§5) — rapid sequential authoring. Passes a **fixed short
+  default duration** (3s, clamped to not exceed the remaining gap), not the whole gap.
+  If Enter also filled the entire remaining gap, the very first line created this way
+  would consume all remaining free time, and every subsequent Enter would have nothing
+  left to create a line into — breaking the "type, Enter, type, Enter..." cold-start flow
+  (roadmap exit criterion: reach a fully spotted transcript via keyboard). Fixed duration
+  keeps that flow going; filling the whole gap on explicit click is fine because it's a
+  single deliberate action, not a repeated one.
+- A user who wants to type a whole transcript into one line and then carve it into
+  individual lines can still do so: click "Add line" once on the full-duration gap, type
+  everything, then split repeatedly with `⌘↵` at each boundary (§3 `splitLine`). Both
+  workflows are supported; neither is forced.
 
 ---
 
@@ -91,7 +109,8 @@ Button visibility: butt joint (`gapSec ≤ 0.001`) → hairline, Merge only (alr
 A gap with `prevLineId === null` or `nextLineId === null` → "Add line" only, no Merge
 (nothing on that open side to merge with). A real gap between two lines → both.
 
-"Add line" calls `addLine(prevLineId, gapStart)`. "Merge" calls `mergeLines(prevLineId, nextLineId)`.
+"Add line" calls `addLine(prevLineId, gapStart, gapStart + gapSec)` — fills the entire
+visible gap. "Merge" calls `mergeLines(prevLineId, nextLineId)`.
 
 ---
 
@@ -110,7 +129,9 @@ accessibility. The line text becomes the click/focus target directly.
   `editLineText` via onChange, so Enter's job is just to blur/exit edit mode), then:
   - if free time remains immediately after this line (`nextGapSec > 0`, whether a real
     gap or trailing gap with `duration - line.end > 0`), calls
-    `addLine(line.id, line.end)`;
+    `addLine(line.id, line.end, Math.min(line.end + DEFAULT_LINE_DURATION, line.end + nextGapSec))` —
+    a fixed short default duration (`DEFAULT_LINE_DURATION`, 3s), clamped to the gap, **not**
+    the whole remaining gap (see §3's note on `addLine`'s two callers);
   - otherwise, Enter just blurs. No line is created past the end of the video.
 
 ---
