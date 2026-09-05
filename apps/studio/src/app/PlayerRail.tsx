@@ -4,12 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useStudioStore } from "@/store";
 import { StudioPlayer } from "@/subtitle/StudioPlayer";
-import { formatTimecode } from "@/lib/timecode";
 import { FPS } from "@/lib/constants";
 import type { SafeZonePreset } from "@captionly/engine";
 import { sampleSubtitles } from "@captionly/engine";
 import { extractVideoMetadata } from "@/lib/videoMeta";
 import { SAFE_ZONES } from "@/subtitle/SafeZones";
+import { PlayerScrubber } from "./PlayerScrubber";
 
 export function PlayerRail({
   playerRef,
@@ -230,21 +230,18 @@ export function PlayerRail({
         />
       </div>
 
+      <PlayerScrubber playerRef={playerRef} durationSec={video.durationSec} />
+
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={toggle}
-            aria-label={playing ? "Pause" : "Play"}
-            className="grid h-9 w-9 place-items-center rounded-full bg-edit text-void
-                       transition-transform hover:scale-105 active:scale-95
-                       focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-edit"
-          >
-            {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          </button>
-          <span className="tabular text-xs text-ink-muted">
-            {formatTimecode(video.durationSec)}
-          </span>
-        </div>
+        <button
+          onClick={toggle}
+          aria-label={playing ? "Pause" : "Play"}
+          className="grid h-9 w-9 place-items-center rounded-full bg-edit text-void
+                     transition-transform hover:scale-105 active:scale-95
+                     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-edit"
+        >
+          {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+        </button>
 
         <button
           type="button"
