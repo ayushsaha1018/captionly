@@ -226,15 +226,12 @@ Modify `apps/studio/src/store/types.ts` — in the `DocumentSlice` interface, af
   addLine: (afterLineId: string | null, startAt: number, endAt: number) => void;
   /** Recomputes the line's words from `text` via computeWordTimings. */
   editLineText: (id: string, text: string) => void;
-  setLineIn: (id: string, seconds: number) => void;
-  setLineOut: (id: string, seconds: number) => void;
-  deleteLine: (id: string) => void;
-  mergeLines: (aId: string, bId: string) => void;
-  splitLine: (id: string, caretIndex: number) => void;
 ```
 
-(All seven are declared now so `types.ts` only needs one edit across this plan; Tasks
-3–6 implement the remaining five in `documentSlice.ts`.)
+(Only these two are declared now. Tasks 3–6 each add their own action's signature to
+this same interface, immediately before implementing it, so the interface and its
+implementation stay in lockstep — the project must typecheck at the end of every task,
+not just at the end of the whole plan.)
 
 - [ ] **Step 2: Write the failing tests**
 
@@ -408,6 +405,7 @@ git commit -m "feat(studio): add addLine and editLineText store actions"
 ## Task 3: Store actions — `setLineIn` and `setLineOut`
 
 **Files:**
+- Modify: `apps/studio/src/store/types.ts`
 - Modify: `apps/studio/src/store/documentSlice.ts`
 - Modify: `apps/studio/src/store/documentSlice.test.ts`
 
@@ -416,7 +414,17 @@ git commit -m "feat(studio): add addLine and editLineText store actions"
 - Produces: `setLineIn(id: string, seconds: number): void`,
   `setLineOut(id: string, seconds: number): void`. Task 9 (TimecodeField) calls these.
 
-- [ ] **Step 1: Write the failing tests**
+- [ ] **Step 1: Add the action signatures to `DocumentSlice`**
+
+Modify `apps/studio/src/store/types.ts` — in the `DocumentSlice` interface, after
+`editLineText`:
+
+```ts
+  setLineIn: (id: string, seconds: number) => void;
+  setLineOut: (id: string, seconds: number) => void;
+```
+
+- [ ] **Step 2: Write the failing tests**
 
 Add to `apps/studio/src/store/documentSlice.test.ts`:
 
@@ -473,12 +481,12 @@ describe("setLineIn / setLineOut", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 3: Run tests to verify they fail**
 
 Run: `cd apps/studio && bun test src/store/documentSlice.test.ts`
 Expected: FAIL — `setLineIn`/`setLineOut` are not functions.
 
-- [ ] **Step 3: Implement both actions**
+- [ ] **Step 4: Implement both actions**
 
 Add to the `createDocumentSlice` object in `apps/studio/src/store/documentSlice.ts`,
 after `editLineText`:
@@ -515,15 +523,15 @@ after `editLineText`:
   },
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 5: Run tests to verify they pass**
 
 Run: `cd apps/studio && bun test src/store/documentSlice.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add apps/studio/src/store/documentSlice.ts apps/studio/src/store/documentSlice.test.ts
+git add apps/studio/src/store/types.ts apps/studio/src/store/documentSlice.ts apps/studio/src/store/documentSlice.test.ts
 git commit -m "feat(studio): add setLineIn and setLineOut store actions"
 ```
 
@@ -532,6 +540,7 @@ git commit -m "feat(studio): add setLineIn and setLineOut store actions"
 ## Task 4: Store action — `deleteLine`
 
 **Files:**
+- Modify: `apps/studio/src/store/types.ts`
 - Modify: `apps/studio/src/store/documentSlice.ts`
 - Modify: `apps/studio/src/store/documentSlice.test.ts`
 
@@ -539,7 +548,16 @@ git commit -m "feat(studio): add setLineIn and setLineOut store actions"
 - Produces: `deleteLine(id: string): void`. Task 9 (delete button, global keyboard
   handler) calls this.
 
-- [ ] **Step 1: Write the failing tests**
+- [ ] **Step 1: Add the action signature to `DocumentSlice`**
+
+Modify `apps/studio/src/store/types.ts` — in the `DocumentSlice` interface, after
+`setLineOut`:
+
+```ts
+  deleteLine: (id: string) => void;
+```
+
+- [ ] **Step 2: Write the failing tests**
 
 Add to `apps/studio/src/store/documentSlice.test.ts`:
 
@@ -582,12 +600,12 @@ describe("deleteLine", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 3: Run tests to verify they fail**
 
 Run: `cd apps/studio && bun test src/store/documentSlice.test.ts`
 Expected: FAIL — `deleteLine` is not a function.
 
-- [ ] **Step 3: Implement the action**
+- [ ] **Step 4: Implement the action**
 
 Add to the `createDocumentSlice` object, after `setLineOut`:
 
@@ -601,15 +619,15 @@ Add to the `createDocumentSlice` object, after `setLineOut`:
   },
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 5: Run tests to verify they pass**
 
 Run: `cd apps/studio && bun test src/store/documentSlice.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add apps/studio/src/store/documentSlice.ts apps/studio/src/store/documentSlice.test.ts
+git add apps/studio/src/store/types.ts apps/studio/src/store/documentSlice.ts apps/studio/src/store/documentSlice.test.ts
 git commit -m "feat(studio): add deleteLine store action"
 ```
 
@@ -618,6 +636,7 @@ git commit -m "feat(studio): add deleteLine store action"
 ## Task 5: Store action — `mergeLines`
 
 **Files:**
+- Modify: `apps/studio/src/store/types.ts`
 - Modify: `apps/studio/src/store/documentSlice.ts`
 - Modify: `apps/studio/src/store/documentSlice.test.ts`
 
@@ -625,7 +644,16 @@ git commit -m "feat(studio): add deleteLine store action"
 - Produces: `mergeLines(aId: string, bId: string): void`. Task 7 (interstitial wiring)
   calls this.
 
-- [ ] **Step 1: Write the failing tests**
+- [ ] **Step 1: Add the action signature to `DocumentSlice`**
+
+Modify `apps/studio/src/store/types.ts` — in the `DocumentSlice` interface, after
+`deleteLine`:
+
+```ts
+  mergeLines: (aId: string, bId: string) => void;
+```
+
+- [ ] **Step 2: Write the failing tests**
 
 Add to `apps/studio/src/store/documentSlice.test.ts`:
 
@@ -670,12 +698,12 @@ describe("mergeLines", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 3: Run tests to verify they fail**
 
 Run: `cd apps/studio && bun test src/store/documentSlice.test.ts`
 Expected: FAIL — `mergeLines` is not a function.
 
-- [ ] **Step 3: Implement the action**
+- [ ] **Step 4: Implement the action**
 
 Add to the `createDocumentSlice` object, after `deleteLine`:
 
@@ -701,15 +729,15 @@ Add to the `createDocumentSlice` object, after `deleteLine`:
   },
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 5: Run tests to verify they pass**
 
 Run: `cd apps/studio && bun test src/store/documentSlice.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add apps/studio/src/store/documentSlice.ts apps/studio/src/store/documentSlice.test.ts
+git add apps/studio/src/store/types.ts apps/studio/src/store/documentSlice.ts apps/studio/src/store/documentSlice.test.ts
 git commit -m "feat(studio): add mergeLines store action"
 ```
 
@@ -718,6 +746,7 @@ git commit -m "feat(studio): add mergeLines store action"
 ## Task 6: Store action — `splitLine`
 
 **Files:**
+- Modify: `apps/studio/src/store/types.ts`
 - Modify: `apps/studio/src/store/documentSlice.ts`
 - Modify: `apps/studio/src/store/documentSlice.test.ts`
 
@@ -725,7 +754,16 @@ git commit -m "feat(studio): add mergeLines store action"
 - Produces: `splitLine(id: string, caretIndex: number): void`. Task 8 (editable row,
   ⌘↵ handler) calls this.
 
-- [ ] **Step 1: Write the failing tests**
+- [ ] **Step 1: Add the action signature to `DocumentSlice`**
+
+Modify `apps/studio/src/store/types.ts` — in the `DocumentSlice` interface, after
+`mergeLines`:
+
+```ts
+  splitLine: (id: string, caretIndex: number) => void;
+```
+
+- [ ] **Step 2: Write the failing tests**
 
 Add to `apps/studio/src/store/documentSlice.test.ts`:
 
@@ -793,12 +831,12 @@ describe("splitLine", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 3: Run tests to verify they fail**
 
 Run: `cd apps/studio && bun test src/store/documentSlice.test.ts`
 Expected: FAIL — `splitLine` is not a function.
 
-- [ ] **Step 3: Implement the helper and the action**
+- [ ] **Step 4: Implement the helper and the action**
 
 Add to `apps/studio/src/store/documentSlice.ts`, above `createDocumentSlice`:
 
@@ -871,16 +909,16 @@ Add to the `createDocumentSlice` object, after `mergeLines`:
   },
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 5: Run tests to verify they pass**
 
 Run: `cd apps/studio && bun test src/store/documentSlice.test.ts`
 Expected: PASS, all tests in the file (this is the last store-action task — run the
 whole file to confirm nothing earlier regressed).
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add apps/studio/src/store/documentSlice.ts apps/studio/src/store/documentSlice.test.ts
+git add apps/studio/src/store/types.ts apps/studio/src/store/documentSlice.ts apps/studio/src/store/documentSlice.test.ts
 git commit -m "feat(studio): add splitLine store action"
 ```
 
@@ -1033,7 +1071,6 @@ function Rows({
               line={line}
               selected={line.id === selectedLineId}
               active={line.id === activeId}
-              nextBoundary={lines[i + 1]?.start ?? durationSec}
               onSelect={onSelect}
               playerRef={playerRef}
             />
@@ -1053,10 +1090,9 @@ function Rows({
 }
 ```
 
-Note the new `nextBoundary` prop on `LineRow` — this isn't consumed until Task 8, but
-the type will be added there; TypeScript will flag it as an excess prop until then, which
-is fine within this task (the plan builds it in the next task, per the spec's build
-order — the app still runs since React ignores unknown props at runtime).
+`LineRow`'s call site here deliberately does not yet pass a `nextBoundary` prop — that
+prop and its consumer (the Enter handler) are both introduced together in Task 8, so
+neither task leaves the other half of an interface stranded mid-task.
 
 Then remove the empty-list early return in `LineList` (keep the `!video` branch):
 
@@ -1126,13 +1162,15 @@ git commit -m "feat(studio): wire interstitial Add line / Merge lines buttons"
 
 **Files:**
 - Modify: `apps/studio/src/lines/LineRow.tsx`
+- Modify: `apps/studio/src/lines/LineList.tsx`
 - Modify: `apps/studio/src/lib/constants.ts`
 
 **Interfaces:**
 - Consumes: `editLineText`, `splitLine`, `addLine` (Tasks 2, 6), `endEdit` (existing
-  `editorSlice`), `nextBoundary` prop (Task 7).
-- Produces: `LineRow` now takes an `editing: boolean` prop in addition to its existing
-  props. Task 9 (retime fields, delete) and Task 11 (playhead-follow) build on this.
+  `editorSlice`).
+- Produces: `LineRow` now takes a `nextBoundary: number` prop and reads `editingLineId`
+  itself from the store. Task 9 (retime fields, delete) and Task 11 (playhead-follow)
+  build on this.
 
 - [ ] **Step 1: Add the default line duration constant**
 
@@ -1299,7 +1337,24 @@ display) rather than staying on the row container — nested interactives inside
 role is broken accessibility, and Task 9 adds a delete button and two numeric fields
 inside this same row.
 
-- [ ] **Step 3: Manually verify in the browser**
+- [ ] **Step 3: Pass `nextBoundary` from `Rows`**
+
+Modify `apps/studio/src/lines/LineList.tsx` — in `Rows`'s JSX, add the new prop to the
+`<LineRow>` call (this is the same `Rows` function Task 7 last edited; add one line to
+its existing `<LineRow ...>` element, do not rewrite the whole function):
+
+```tsx
+            <LineRow
+              line={line}
+              selected={line.id === selectedLineId}
+              active={line.id === activeId}
+              nextBoundary={lines[i + 1]?.start ?? durationSec}
+              onSelect={onSelect}
+              playerRef={playerRef}
+            />
+```
+
+- [ ] **Step 4: Manually verify in the browser**
 
 Load the demo video. Click a line's text: confirm it becomes an input with the cursor
 focused and the existing text present. Type a change and confirm the word strip
@@ -1313,10 +1368,10 @@ and undo (⌘Z) restores the original single line. Test Enter at the end of a li
 has free time after it (e.g. click "Add line" on the trailing gap first, then type text
 and press Enter): confirm a new 3s line appears in edit mode.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add apps/studio/src/lines/LineRow.tsx apps/studio/src/lib/constants.ts
+git add apps/studio/src/lines/LineRow.tsx apps/studio/src/lines/LineList.tsx apps/studio/src/lib/constants.ts
 git commit -m "feat(studio): make LineRow editable (click, Enter, Esc, cmd-enter split)"
 ```
 
@@ -1533,7 +1588,8 @@ git commit -m "feat(studio): delete the selected line with Backspace/Delete"
 
 - [ ] **Step 1: Add the follow effect to `Rows`**
 
-Modify `apps/studio/src/lines/LineList.tsx` — in `Rows`, add the `select` and
+Modify `apps/studio/src/lines/LineList.tsx` — replace the entire `Rows` function (last
+edited in Tasks 7 and 8) with this complete version, which adds the `select` and
 `editingLineId` subscriptions and a second effect alongside the existing auto-scroll one:
 
 ```tsx
@@ -1564,7 +1620,52 @@ function Rows({
     if (activeId && editingLineId === null) select(activeId);
   }, [activeId, editingLineId, select]);
 
-  // ...rest unchanged from Task 7 (leadingGapSec/trailingGapSec and the JSX)
+  const leadingGapSec = lines.length > 0 ? lines[0].start : durationSec;
+  const trailingGapSec = lines.length > 0 ? durationSec - lines[lines.length - 1].end : 0;
+
+  return (
+    <>
+      {(lines.length === 0 || leadingGapSec > 0.001) && (
+        <Interstitial
+          gapSec={leadingGapSec}
+          gapStart={0}
+          prevLineId={null}
+          nextLineId={lines[0]?.id ?? null}
+        />
+      )}
+      {lines.map((line, i) => (
+        <Fragment key={line.id}>
+          {i > 0 && (
+            <Interstitial
+              gapSec={line.start - lines[i - 1].end}
+              gapStart={lines[i - 1].end}
+              prevLineId={lines[i - 1].id}
+              nextLineId={line.id}
+            />
+          )}
+          <div ref={line.id === activeId ? activeRef : undefined}>
+            <LineRow
+              line={line}
+              selected={line.id === selectedLineId}
+              active={line.id === activeId}
+              nextBoundary={lines[i + 1]?.start ?? durationSec}
+              onSelect={onSelect}
+              playerRef={playerRef}
+            />
+          </div>
+        </Fragment>
+      ))}
+      {lines.length > 0 && trailingGapSec > 0.001 && (
+        <Interstitial
+          gapSec={trailingGapSec}
+          gapStart={lines[lines.length - 1].end}
+          prevLineId={lines[lines.length - 1].id}
+          nextLineId={null}
+        />
+      )}
+    </>
+  );
+}
 ```
 
 - [ ] **Step 2: Manually verify in the browser**
@@ -1609,6 +1710,13 @@ git commit -m "feat(studio): playhead drives line selection during playback"
   "similar to Task N" or left as prose-only instructions.
 - **Type consistency:** `addLine(afterLineId, startAt, endAt)` matches across Task 2's
   interface declaration, Task 2's implementation, Task 7's Interstitial call site, and
-  Task 8's Enter handler. `nextBoundary` is introduced on `LineRow`'s props in Task 7's
-  `Rows` call site and consumed starting Task 8 — the one deliberate task-boundary gap,
-  called out explicitly in Task 7's step 2 so it isn't mistaken for an oversight.
+  Task 8's Enter handler. `nextBoundary` is declared on `LineRow`'s props and passed from
+  `Rows` both within Task 8 (revised during pre-flight review so no task leaves the
+  other half of an interface unconsumed), keeping every task's end state typechecking
+  cleanly on its own.
+- **Pre-flight fixes (see ledger for the full rulings):** `DocumentSlice`'s seven action
+  signatures were originally declared all at once in Task 2, which would have left the
+  interface unsatisfied by `documentSlice.ts`'s implementation from Task 2 through Task 5
+  — each of Tasks 3–6 now adds its own signature immediately before implementing it.
+  Task 11's `Rows` step originally elided the unchanged parts of the function with a
+  comment ("...rest unchanged from Task 7") — replaced with the complete function body.
