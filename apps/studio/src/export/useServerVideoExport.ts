@@ -32,6 +32,12 @@ export function useServerVideoExport(): UseServerVideoExportReturn {
     setError(null);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
+
   const exportVideo = useCallback(
     async (
       videoSource: File | Blob | string,

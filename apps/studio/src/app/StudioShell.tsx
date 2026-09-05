@@ -49,6 +49,12 @@ export function StudioShell() {
     return () => window.removeEventListener("keydown", onKey);
   }, [undo, redo]);
 
+  useEffect(() => {
+    if (!video && exportOpen) {
+      setExportOpen(false);
+    }
+  }, [video, exportOpen]);
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-void text-ink">
       <header className="shrink-0 border-b border-hairline bg-void/80 backdrop-blur">
@@ -57,7 +63,7 @@ export function StudioShell() {
             <span className="font-display text-lg font-semibold tracking-tight">Captionly</span>
             {video && (
               <span className="tabular text-xs text-ink-muted">
-                {video.src.split("/").pop()} · {video.width}×{video.height} ·{" "}
+                {video.file?.name ?? video.src.split("/").pop()} · {video.width}×{video.height} ·{" "}
                 {formatTimecode(video.durationSec)}
               </span>
             )}
