@@ -1,7 +1,16 @@
 export const BASE_REFERENCE_DIMENSION = 1080;
+export const DEFAULT_BOX_WIDTH = 1400;
+export const MAX_SUBTITLE_WIDTH_RATIO = 0.88;
+
+export interface SubtitleLayout {
+  scale: number;
+  maxWidth: number;
+}
 
 export function getResolutionScale(width: number, height: number): number {
-  if (width <= 0 || height <= 0) return 1.0;
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    return 1.0;
+  }
   const baseDim = Math.min(width, height);
   return baseDim / BASE_REFERENCE_DIMENSION;
 }
@@ -9,11 +18,11 @@ export function getResolutionScale(width: number, height: number): number {
 export function calculateSubtitleLayout(
   width: number,
   height: number,
-  boxWidthSetting: number = 1400,
-): { scale: number; maxWidth: number } {
+  boxWidthSetting: number = DEFAULT_BOX_WIDTH,
+): SubtitleLayout {
   const scale = getResolutionScale(width, height);
-  const targetBoxWidth = (boxWidthSetting || 1400) * scale;
-  const maxAllowedWidth = width * 0.88;
+  const targetBoxWidth = (boxWidthSetting || DEFAULT_BOX_WIDTH) * scale;
+  const maxAllowedWidth = width * MAX_SUBTITLE_WIDTH_RATIO;
   const maxWidth = Math.min(targetBoxWidth, maxAllowedWidth);
 
   return {

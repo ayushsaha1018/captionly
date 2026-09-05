@@ -51,4 +51,17 @@ describe("calculateSubtitleLayout", () => {
     const { maxWidth } = calculateSubtitleLayout(1920, 1080);
     expect(maxWidth).toBe(1400);
   });
+
+  it("handles non-finite or non-positive dimensions gracefully", () => {
+    expect(getResolutionScale(0, 1080)).toBe(1.0);
+    expect(getResolutionScale(-100, 1080)).toBe(1.0);
+    expect(getResolutionScale(NaN, 1080)).toBe(1.0);
+    expect(getResolutionScale(1920, Infinity)).toBe(1.0);
+  });
+
+  it("respects smaller custom boxWidth", () => {
+    const { maxWidth } = calculateSubtitleLayout(1920, 1080, 800);
+    expect(maxWidth).toBe(800);
+  });
 });
+
