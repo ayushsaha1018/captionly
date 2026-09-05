@@ -52,6 +52,7 @@ function Rows({
               line={line}
               selected={line.id === selectedLineId}
               active={line.id === activeId}
+              nextBoundary={lines[i + 1]?.start ?? durationSec}
               onSelect={onSelect}
               playerRef={playerRef}
             />
