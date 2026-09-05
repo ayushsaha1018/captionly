@@ -1,7 +1,7 @@
 # Frontend Revamp — Program Roadmap
 
 **Created:** 2026-09-02
-**Status:** sub-projects 1 & 2 complete; 3–4 not yet specced
+**Status:** sub-projects 1 & 2 complete; 3 specced (line editor, in progress); 4 not yet specced
 **Scope:** `apps/studio` (with narrow, named exceptions in `packages/engine`)
 
 This is the program-level document for the frontend revamp. Each sub-project gets its
@@ -20,8 +20,12 @@ twice.
 An editor where you bring your own video and your own subtitle lines, type them against
 the footage, spot their timings, and style animated captions — then export.
 
-**Deliberately not building:** autotranscription, and subtitle file import. The user types
-lines. This is a product decision, not a deferral (see §2).
+**Deliberately not building:** subtitle file import (SRT/VTT/JSON). **Autotranscription is
+planned** as a future sub-project (not yet scheduled or speced) — decided 2026-09-05,
+reopening the original "user types lines only" decision below. Lines may arrive already
+populated (from autotranscription or any other source) or be typed manually; the editor
+must support both, with free editing of a pre-populated transcript as the primary
+scenario and manual typing as the fallback (see §2, and SP3's spec).
 
 The starting point was a demo harness: one route, a hardcoded video path, hardcoded sample
 subtitles, and no editor of any kind.
@@ -37,7 +41,7 @@ not a sub-project one.
 |---|---|
 | **Styling is global only.** One `SubtitleStyle` for the whole project, with a deep control surface rather than per-line overrides. | `SubtitleStyle` stays a flat object; `packages/engine` types are untouched; the line editor is purely text and timing. |
 | **Any aspect ratio, derived from the uploaded file.** | Style values must become resolution-independent — SP2's work, touching `SubtitleOverlay`, `subtitleDrawer`, and `SafeZones`. |
-| **Subtitles are typed manually.** No SRT/VTT/JSON import, no autotranscription. | The cold-start path must be fast and keyboard-driven; there is no "import and fix up" flow to fall back on. |
+| **Lines may arrive already populated (autotranscription, planned) or be typed manually.** No SRT/VTT/JSON import. | SP3's primary designed-and-tested scenario is free editing (edit text, merge, split, delete, retime) of a set of lines that already exists. Manual keyboard-driven typing from an empty list remains supported as a fallback, not the showcased flow. Autotranscription itself is not yet speced. |
 | **Word timings are computed, never typed.** Character-weighted distribution, punctuation pause bonuses, a per-word minimum, normalized to fill the line's range exactly. | The algorithm is the single source of word timings. The word strip exists so its output is visible and checkable. |
 | **No per-word timing nudging.** | Revisit only if the algorithm proves insufficient in practice. |
 | **Server render is the source of truth for export.** | The client WebCodecs path must be gated or labelled to what it can honestly render (see §6). |
@@ -205,10 +209,14 @@ keep their name through the flow: the control says *Merge lines*, the undo entry
 
 ## 7. Explicitly out of scope for the whole program
 
-Autotranscription · subtitle file import (SRT/VTT/JSON) · per-line or per-word style
-overrides · per-word timing nudging · a light theme · mobile/touch optimization of the line
-editor (it is a desktop tool; the shell degrades to stacked below `md`) · persistence to
-disk or server (the document lives in memory).
+Subtitle file import (SRT/VTT/JSON) · per-line or per-word style overrides · per-word
+timing nudging · a light theme · mobile/touch optimization of the line editor (it is a
+desktop tool; the shell degrades to stacked below `md`) · persistence to disk or server
+(the document lives in memory).
 
 Each of these is a decision recorded in §2, not an oversight. Reopening one is a
 program-level conversation.
+
+**Autotranscription** is no longer on this list — reopened 2026-09-05 as planned future
+work (see §1, §2). It is not yet scheduled or speced; SP3 is designed so lines may arrive
+from any source, autotranscription included, without further rework.
