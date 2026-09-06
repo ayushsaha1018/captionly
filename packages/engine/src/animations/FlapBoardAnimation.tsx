@@ -24,10 +24,20 @@ export const FlapBoardAnimation: React.FC<AnimationProps> = ({
   const progress = Math.max(0, Math.min(1, (currentTime - line.start) / duration));
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-1 text-center font-mono">
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "0.25rem",
+        textAlign: "center",
+        fontFamily: "monospace",
+      }}
+    >
       {fullText.split("").map((targetChar, index) => {
         if (targetChar === " ") {
-          return <span key={index} className="w-4" />;
+          return <span key={index} style={{ width: "1rem" }} />;
         }
 
         const charProgress = Math.max(0, Math.min(1, progress * fullText.length - index));
@@ -44,8 +54,13 @@ export const FlapBoardAnimation: React.FC<AnimationProps> = ({
         return (
           <span
             key={index}
-            className="inline-flex items-center justify-center rounded px-1"
             style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "0.25rem",
+              paddingLeft: "0.25rem",
+              paddingRight: "0.25rem",
               backgroundColor: isSettled ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.4)",
               minWidth: "1.1em",
               ...resolveWordFillCss(style, isSettled),

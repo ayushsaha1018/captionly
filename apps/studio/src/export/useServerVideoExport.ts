@@ -11,6 +11,9 @@ export interface UseServerVideoExportReturn {
   exportVideo: (
     videoSource: File | Blob | string,
     subtitles: SubtitleExportData,
+    durationSec: number,
+    width: number,
+    height: number,
   ) => Promise<Blob | null>;
   cancelExport: () => void;
   downloadBlob: (blob: Blob, filename?: string) => void;
@@ -42,6 +45,9 @@ export function useServerVideoExport(): UseServerVideoExportReturn {
     async (
       videoSource: File | Blob | string,
       subtitles: SubtitleExportData,
+      durationSec: number,
+      width: number,
+      height: number,
     ): Promise<Blob | null> => {
       setIsExporting(true);
       setError(null);
@@ -63,6 +69,10 @@ export function useServerVideoExport(): UseServerVideoExportReturn {
           form.append("video", videoSource, "input.mp4");
         }
         form.append("subtitles", JSON.stringify(subtitles));
+        form.append("width", String(width));
+        form.append("height", String(height));
+        form.append("durationSec", String(durationSec));
+        form.append("fps", "30");
 
         setPhase("rendering");
         const res = await fetch(`${RENDER_SERVER_URL}/render`, {

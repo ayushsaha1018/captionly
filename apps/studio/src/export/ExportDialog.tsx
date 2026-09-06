@@ -21,7 +21,6 @@ import { Progress } from "@/components/ui/progress";
 import { useVideoExport, type UseVideoExportReturn } from "./useVideoExport";
 import { useServerVideoExport } from "./useServerVideoExport";
 import { downloadBlob } from "./downloadBlob";
-import { isClientExportSupported } from "./exportCapability";
 import type { SubtitleExportData } from "./types";
 import type { VideoMeta } from "@/store/types";
 
@@ -60,8 +59,8 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
     try {
       const blob =
         mode === "client"
-          ? await clientExportVideo(source, subtitles)
-          : await serverExport.exportVideo(source, subtitles);
+          ? await clientExportVideo(source, subtitles, video.durationSec, video.width, video.height)
+          : await serverExport.exportVideo(source, subtitles, video.durationSec, video.width, video.height);
       if (blob) {
         setExportedBlob(blob);
       }
@@ -89,8 +88,6 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
 
   const percent = Math.round((progress?.progress ?? 0) * 100);
   const clientBlocked = mode === "client" && !isSupported;
-  const fidelity = isClientExportSupported(subtitles.style, subtitles.animation);
-  const clientFidelityWarning = mode === "client" && !clientBlocked && !fidelity.supported;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -106,7 +103,7 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
                 {mode === "client"
-                  ? "Zero-backend, hardware-accelerated in-browser render"
+                  ? "Renders your exact Remotion composition in-browser — no upload needed"
                   : "Uploads to a render service and returns the finished file"}
               </DialogDescription>
             </div>
@@ -119,13 +116,9 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs font-medium">
                   <span className="capitalize text-foreground">
-                    {progress?.phase === "demuxing"
-                      ? "Demuxing Video Tracks..."
-                      : progress?.phase === "rendering"
-                        ? "Compositing Subtitles & Encoding..."
-                        : progress?.phase === "muxing"
-                          ? "Finalizing MP4 Container..."
-                          : "Processing..."}
+                    {progress?.phase === "rendering"
+                      ? "Rendering & Encoding..."
+                      : "Processing..."}
                   </span>
                   <span className="tabular-nums font-semibold text-primary">{percent}%</span>
                 </div>
@@ -159,7 +152,7 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
 
               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground justify-center">
                 <Zap className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
-                <span>Rendering on local GPU Web Worker</span>
+                <span>Rendering with @remotion/web-renderer</span>
               </div>
             </div>
           ) : (
@@ -241,20 +234,14 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
                     <ServerIcon className="h-3.5 w-3.5 text-primary" />
                   )}
                   <span>
-                    {mode === "client" ? "Client-Side Fast Export" : "Server-Side Export"}
+                    {mode === "client" ? "Client-Side Export" : "Server-Side Export"}
                   </span>
                 </div>
                 <p className="text-[11px] leading-relaxed">
                   {mode === "client"
-                    ? "Video frames and subtitle animations are rendered directly in your browser via WebCodecs. No video is uploaded to external servers."
+                    ? "Your Remotion composition — all animations, styles, and effects — is rendered directly in your browser. No video is uploaded to any server."
                     : "Your video is uploaded temporarily to a render service, processed there, and the finished file is sent back to you."}
                 </p>
-                {clientFidelityWarning && (
-                  <p className="mt-1.5 flex items-start gap-1.5 border-t border-border/60 pt-1.5 text-[11px] font-medium leading-relaxed text-foreground">
-                    <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-muted-foreground" />
-                    <span>{fidelity.reason}</span>
-                  </p>
-                )}
               </div>
             )}
           </div>

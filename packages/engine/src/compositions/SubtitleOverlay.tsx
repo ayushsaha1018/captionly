@@ -1,8 +1,14 @@
 import React from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
+import { loadFont } from "@remotion/google-fonts/Inter";
 import type { SubtitleOverlayProps } from "../types";
 import { SubtitleAnimationRenderer } from "../animations/registry";
 import { calculateSubtitleLayout } from "../utils/geometry";
+
+loadFont("normal", {
+  weights: ["400", "600", "700", "900"],
+  subsets: ["latin"],
+});
 
 export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
   lines,

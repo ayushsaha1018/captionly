@@ -42,7 +42,13 @@ export const WipeAnimation: React.FC<AnimationProps> = ({
   const text = line.words.map((w) => w.text).join(" ");
 
   return (
-    <div className="relative text-center whitespace-pre-wrap">
+    <div
+      style={{
+        position: "relative",
+        textAlign: "center",
+        whiteSpace: "pre-wrap",
+      }}
+    >
       {/* Background Dim Layer */}
       <span
         style={{
@@ -56,8 +62,12 @@ export const WipeAnimation: React.FC<AnimationProps> = ({
 
       {/* Wiped Highlight Layer */}
       <span
-        className="absolute inset-0"
         style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
           clipPath,
           ...resolveWordFillCss(style, true),
           ...resolveWordStrokeCss(style),

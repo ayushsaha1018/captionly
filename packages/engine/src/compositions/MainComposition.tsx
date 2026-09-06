@@ -1,5 +1,6 @@
 import React from "react";
-import { AbsoluteFill, Video } from "remotion";
+import { AbsoluteFill } from "remotion";
+import { Video } from "@remotion/media";
 import type { SubtitleCompositionProps } from "../types";
 import { SubtitleOverlay } from "./SubtitleOverlay";
 
@@ -8,12 +9,13 @@ export const MainComposition: React.FC<SubtitleCompositionProps> = ({
   subtitles,
 }) => {
   return (
-    <AbsoluteFill className="bg-black">
+    <AbsoluteFill style={{ backgroundColor: "#000000" }}>
       {/* Underlying Video */}
       {videoSrc && (
         <Video
           src={videoSrc}
-          className="w-full h-full object-contain"
+          style={{ width: "100%", height: "100%" }}
+          objectFit="contain"
         />
       )}
 

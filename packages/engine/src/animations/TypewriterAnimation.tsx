@@ -33,8 +33,10 @@ export const TypewriterAnimation: React.FC<AnimationProps> = ({
 
   return (
     <div
-      className="text-center font-mono whitespace-pre-wrap"
       style={{
+        textAlign: "center",
+        fontFamily: "monospace",
+        whiteSpace: "pre-wrap",
         ...resolveWordFillCss(style, false),
         ...resolveWordStrokeCss(style),
         ...resolveWordShadowCss(style, false),

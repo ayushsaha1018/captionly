@@ -1,5 +1,6 @@
 import React from "react";
 import { registerRoot, Composition } from "remotion";
+import { loadFont } from "@remotion/google-fonts/Inter";
 import {
   MainComposition,
   sampleSubtitles,
@@ -7,6 +8,11 @@ import {
   defaultPosition,
   defaultAnimation,
 } from "@captionly/engine";
+
+loadFont("normal", {
+  weights: ["400", "600", "700", "900"],
+  subsets: ["latin"],
+});
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -17,6 +23,14 @@ export const RemotionRoot: React.FC = () => {
       fps={30}
       width={1920}
       height={1080}
+      calculateMetadata={({ props }: { props: any }) => {
+        return {
+          width: props?.width ?? 1920,
+          height: props?.height ?? 1080,
+          fps: props?.fps ?? 30,
+          durationInFrames: props?.durationInFrames ?? 450,
+        };
+      }}
       defaultProps={{
         videoSrc: "",
         subtitles: {

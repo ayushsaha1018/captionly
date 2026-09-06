@@ -16,7 +16,11 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "react": "^19.2.0",
-    "remotion": "^4.0.0",
+    "remotion": "4.0.521",
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@remotion/google-fonts": "4.0.521",
+    "@remotion/media": "4.0.521"
   }
 }

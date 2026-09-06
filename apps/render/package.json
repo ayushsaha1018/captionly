@@ -18,11 +18,12 @@
   },
   "type": "module",
   "dependencies": {
+    "@captionly/engine": "workspace:*",
+    "@remotion/bundler": "4.0.521",
+    "@remotion/google-fonts": "4.0.521",
+    "@remotion/renderer": "4.0.521",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "remotion": "^4.0.0",
-    "@remotion/renderer": "^4.0.0",
-    "@remotion/bundler": "^4.0.0",
-    "@captionly/engine": "workspace:*"
+    "remotion": "4.0.521"
   }
 }
