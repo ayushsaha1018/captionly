@@ -72,17 +72,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Caption Studio — Word-Level Animated Subtitle Editor" },
+      { title: "Captionly — Subtitle Spotting Studio" },
       {
         name: "description",
         content:
-          "Modern word-by-word animated subtitle editor built with React, TypeScript and Fabric.js.",
+          "Type subtitle lines against your video, spot their timings, and style animated captions.",
       },
-      { property: "og:title", content: "Caption Studio" },
+      { property: "og:title", content: "Captionly" },
       {
         property: "og:description",
         content:
-          "Modern word-by-word animated subtitle editor built with React, TypeScript and Fabric.js.",
+          "Type subtitle lines against your video, spot their timings, and style animated captions.",
       },
       { property: "og:type", content: "website" },
     ],
@@ -101,7 +101,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>

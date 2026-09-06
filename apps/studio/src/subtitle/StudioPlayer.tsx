@@ -12,6 +12,8 @@ interface StudioPlayerProps {
   subtitles: SubtitleCompositionProps["subtitles"];
   safeZone?: SafeZonePreset;
   durationInFrames?: number;
+  compositionWidth: number;
+  compositionHeight: number;
   fps?: number;
   playerRef?: React.RefObject<PlayerRef | null>;
   className?: string;
@@ -22,13 +24,15 @@ export function StudioPlayer({
   subtitles,
   safeZone = "none",
   durationInFrames = 450,
+  compositionWidth,
+  compositionHeight,
   fps = 30,
   playerRef,
   className = "",
 }: StudioPlayerProps) {
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-xl bg-black shadow-2xl ring-1 ring-white/10 select-none aspect-video ${className}`}
+      className={`relative w-full h-full overflow-hidden rounded-xl bg-black shadow-2xl ring-1 ring-white/10 select-none ${className}`}
     >
       <Player
         ref={playerRef}
@@ -38,10 +42,9 @@ export function StudioPlayer({
           subtitles,
         }}
         durationInFrames={durationInFrames}
-        compositionWidth={1920}
-        compositionHeight={1080}
+        compositionWidth={compositionWidth}
+        compositionHeight={compositionHeight}
         fps={fps}
-        controls
         loop
         className="w-full h-full"
         style={{
