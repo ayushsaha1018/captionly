@@ -1,6 +1,6 @@
 import type { PlayerRef } from "@remotion/player";
 import { useCallback, useEffect, useRef } from "react";
-import { Film, Plus } from "lucide-react";
+import { Film, Plus, Sparkles } from "lucide-react";
 import { useStudioStore } from "@/store";
 import { DEFAULT_LINE_DURATION, FPS } from "@/lib/constants";
 import { LineRow } from "./LineRow";
@@ -9,11 +9,14 @@ import { useActiveLineId } from "./Playhead";
 function Rows({
   playerRef,
   onSelect,
+  onOpenTranscribe,
 }: {
   playerRef: React.RefObject<PlayerRef | null>;
   onSelect: (id: string) => void;
+  onOpenTranscribe?: () => void;
 }) {
   const lines = useStudioStore((s) => s.lines);
+  const videoFile = useStudioStore((s) => s.video?.file);
   const selectedLineId = useStudioStore((s) => s.selectedLineId);
   const editingLineId = useStudioStore((s) => s.editingLineId);
   const select = useStudioStore((s) => s.select);
@@ -39,16 +42,28 @@ function Rows({
       <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-hairline bg-surface/30 p-6 text-center">
         <p className="text-sm font-medium text-ink">No subtitles spotted yet</p>
         <p className="mt-1 max-w-xs text-xs text-ink-muted">
-          Add your first subtitle line to get started.
+          Add your first subtitle line or auto-transcribe from video with local AI.
         </p>
-        <button
-          type="button"
-          onClick={() => addLine(null, 0, Math.min(DEFAULT_LINE_DURATION, durationSec))}
-          className="mt-4 flex items-center gap-1.5 rounded-md bg-edit px-3 py-1.5 text-xs font-semibold text-void transition-opacity hover:opacity-90"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Add first line
-        </button>
+        <div className="mt-4 flex items-center gap-2">
+          {videoFile && onOpenTranscribe && (
+            <button
+              type="button"
+              onClick={onOpenTranscribe}
+              className="flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-400 transition-colors hover:bg-emerald-500/25 hover:text-emerald-300"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Auto-transcribe
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => addLine(null, 0, Math.min(DEFAULT_LINE_DURATION, durationSec))}
+            className="flex items-center gap-1.5 rounded-md bg-edit px-3 py-1.5 text-xs font-semibold text-void transition-opacity hover:opacity-90"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add first line
+          </button>
+        </div>
       </div>
     );
   }
@@ -74,7 +89,13 @@ function Rows({
   );
 }
 
-export function LineList({ playerRef }: { playerRef: React.RefObject<PlayerRef | null> }) {
+export function LineList({
+  playerRef,
+  onOpenTranscribe,
+}: {
+  playerRef: React.RefObject<PlayerRef | null>;
+  onOpenTranscribe?: () => void;
+}) {
   const video = useStudioStore((s) => s.video);
   const beginEdit = useStudioStore((s) => s.beginEdit);
 
@@ -102,7 +123,7 @@ export function LineList({ playerRef }: { playerRef: React.RefObject<PlayerRef |
 
   return (
     <div className="relative pt-2 pb-6">
-      <Rows playerRef={playerRef} onSelect={onSelect} />
+      <Rows playerRef={playerRef} onSelect={onSelect} onOpenTranscribe={onOpenTranscribe} />
     </div>
   );
 }

@@ -160,7 +160,11 @@ export function StylePanel({
         />
       ) : (
         <div className="grid grid-cols-2 gap-3">
-          <ColorField label="Inactive color" value={style.color} onChange={(v) => set("color", v)} />
+          <ColorField
+            label="Inactive color"
+            value={style.color}
+            onChange={(v) => set("color", v)}
+          />
           <ColorField
             label="Active color"
             value={style.activeColor}

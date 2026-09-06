@@ -64,6 +64,14 @@ export const createDocumentSlice: StateCreator<StudioState, [], [], DocumentSlic
     });
   },
 
+  setLines: (lines) => {
+    set({
+      lines,
+      selectedLineId: lines[0]?.id ?? null,
+      editingLineId: null,
+    });
+  },
+
   setStyle: (patch) => set((s) => ({ style: { ...s.style, ...patch } })),
   setAnimation: (animation) => set({ animation }),
   setPosition: (position) => set({ position }),
