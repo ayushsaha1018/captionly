@@ -24,6 +24,16 @@ export type SubtitleStyle = {
   strokeWidth: number;
   activeScale: number;
   shadowBlur: number;
+  shadowColor: string; // hex, base (non-active) shadow/glow color
+  shadowOffsetX: number; // px
+  shadowOffsetY: number; // px
+  // Text-fill gradient (opt-in). Gradient runs from `color` to `textGradientTo`;
+  // the active word always stays a flat `activeColor`, never gradient.
+  textGradientEnabled: boolean;
+  textGradientTo: string; // hex
+  textGradientAngle: number; // degrees, CSS linear-gradient angle
+  // Multiplies shadowBlur only while a word is in its active/highlighted state.
+  activeGlowMultiplier: number;
   // Layout
   boxWidth: number; // wrap width in px (at 1920x1080 canvas scale)
   boxAnchor: BoxAnchor;
