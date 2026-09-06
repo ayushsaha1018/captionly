@@ -81,6 +81,11 @@ All 9 files in `packages/engine/src/animations/` (`ColorFillAnimation`, `PopOnAn
 fix for the duplicated, inconsistent inline CSS found while reading them — one place computes
 "what does a word actually look like," which §7 (export gating) also depends on.
 
+As a consequence of centralizing on `resolveWordShadowCss`, `RollUpAnimation`, `PaintOnAnimation`,
+`FlapBoardAnimation`, and `TickerAnimation` gain a text shadow for the first time — they
+previously rendered no shadow at all and silently ignored the existing `shadowBlur` control.
+This is intentional, not a bug.
+
 ---
 
 ## 4. Presets

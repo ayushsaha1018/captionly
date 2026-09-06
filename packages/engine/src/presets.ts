@@ -65,7 +65,7 @@ export const PRESETS: Record<string, StylePreset> = {
     style: {
       ...defaultStyle,
       color: "#ffffff",
-      activeColor: "#ff3b30",
+      activeColor: "#ffffff",
       bgColor: "#ff3b30",
       bgOpacity: 1,
       bgRadius: 0,
@@ -78,7 +78,7 @@ export const PRESETS: Record<string, StylePreset> = {
     style: {
       ...defaultStyle,
       fontFamily: "'Courier New', monospace",
-      color: "#0f0",
+      color: "#00ff00",
       activeColor: "#00ff66",
     },
     animation: { type: "digitalMatrix", options: { glitchAmplitude: 4, glowIntensity: 0.9 } },
