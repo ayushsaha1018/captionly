@@ -1,5 +1,6 @@
 import React from "react";
 import type { SubtitleLine, SubtitleStyle, RollUpOptions } from "../types";
+import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -15,14 +16,6 @@ export const RollUpAnimation: React.FC<AnimationProps> = ({
   style,
   currentTime,
 }) => {
-  const strokeStyle =
-    style.strokeWidth > 0
-      ? {
-          WebkitTextStroke: `${style.strokeWidth}px ${style.stroke}`,
-          paintOrder: "stroke fill",
-        }
-      : {};
-
   return (
     <div
       style={{
@@ -38,17 +31,17 @@ export const RollUpAnimation: React.FC<AnimationProps> = ({
     >
       {line.words.map((word) => {
         const isActive = currentTime >= word.start && currentTime <= word.end;
-        const color = isActive ? style.activeColor : style.color;
 
         return (
           <span
             key={word.id}
             style={{
-              color,
               display: "inline-block",
               margin: "0 0.12em",
               transition: "all 0.15s ease-out",
-              ...strokeStyle,
+              ...resolveWordFillCss(style, isActive),
+              ...resolveWordStrokeCss(style),
+              ...resolveWordShadowCss(style, isActive),
             }}
           >
             {word.text}
