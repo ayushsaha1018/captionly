@@ -1,5 +1,6 @@
 import React from "react";
 import type { SubtitleLine, SubtitleStyle, TypewriterOptions } from "../types";
+import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -26,33 +27,17 @@ export const TypewriterAnimation: React.FC<AnimationProps> = ({
   const charCount = Math.floor(ratio * fullText.length);
   const visibleText = fullText.slice(0, charCount);
 
-  // Blinking cursor calculation
   const blinkRate = options.blinkRate || 1.4;
   const cursorBlink = Math.floor((frame / fps) * blinkRate * 2) % 2 === 0;
   const cursorChar = options.cursor || "|";
-
-  const strokeStyle =
-    style.strokeWidth > 0
-      ? {
-          WebkitTextStroke: `${style.strokeWidth}px ${style.stroke}`,
-          paintOrder: "stroke fill",
-        }
-      : {};
-
-  const shadowStyle =
-    style.shadowBlur > 0
-      ? {
-          textShadow: `0 0 ${style.shadowBlur}px rgba(0,0,0,0.8)`,
-        }
-      : {};
 
   return (
     <div
       className="text-center font-mono whitespace-pre-wrap"
       style={{
-        color: style.color,
-        ...strokeStyle,
-        ...shadowStyle,
+        ...resolveWordFillCss(style, false),
+        ...resolveWordStrokeCss(style),
+        ...resolveWordShadowCss(style, false),
       }}
     >
       <span>{visibleText}</span>

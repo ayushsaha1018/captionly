@@ -1,6 +1,7 @@
 import React from "react";
 import { spring } from "remotion";
 import type { SubtitleLine, SubtitleStyle, PopOnOptions } from "../types";
+import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -62,35 +63,19 @@ export const PopOnAnimation: React.FC<AnimationProps> = ({
         });
 
         const currentScale = progress * (isActive ? popScale : 1);
-        const color = isActive ? style.activeColor : style.color;
-
-        const strokeStyle =
-          style.strokeWidth > 0
-            ? {
-                WebkitTextStroke: `${style.strokeWidth}px ${style.stroke}`,
-                paintOrder: "stroke fill",
-              }
-            : {};
-
-        const shadowStyle =
-          style.shadowBlur > 0
-            ? {
-                textShadow: `0 0 ${style.shadowBlur}px ${isActive ? style.activeColor : "rgba(0,0,0,0.8)"}`,
-              }
-            : {};
 
         return (
           <span
             key={word.id}
             style={{
-              color,
               opacity: Math.min(1, progress * 1.5),
               transform: `scale(${currentScale})`,
               transformOrigin: "center center",
               display: "inline-block",
               margin: "0 0.12em",
-              ...strokeStyle,
-              ...shadowStyle,
+              ...resolveWordFillCss(style, isActive),
+              ...resolveWordStrokeCss(style),
+              ...resolveWordShadowCss(style, isActive),
             }}
           >
             {word.text}
