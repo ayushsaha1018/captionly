@@ -44,9 +44,10 @@ export function WorkSurface({
     <Tabs
       value={activeTab}
       onValueChange={(v) => setTab(v as "lines" | "style")}
-      className="min-w-0 flex-1"
+      className="flex min-h-0 min-w-0 flex-1 flex-col"
     >
-      <div className="mb-4 flex items-center justify-between">
+      {/* Tabs and the line count stay put; only the panel below scrolls. */}
+      <div className="mb-4 flex shrink-0 items-center justify-between">
         <TabsList>
           <TabsTrigger value="lines">Lines</TabsTrigger>
           <TabsTrigger value="style">Style</TabsTrigger>
@@ -54,11 +55,14 @@ export function WorkSurface({
         <span className="tabular text-xs text-ink-muted">{lineCount} lines</span>
       </div>
 
-      <TabsContent value="lines">
+      <TabsContent value="lines" className="min-h-0 flex-1 overflow-y-auto pr-1">
         <LineList playerRef={playerRef} />
       </TabsContent>
 
-      <TabsContent value="style" className="flex flex-col gap-4">
+      <TabsContent
+        value="style"
+        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1"
+      >
         <AnimationPanel animation={animation} onChange={changeAnimation} />
         <StylePanel
           style={style}

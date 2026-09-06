@@ -18,3 +18,5 @@ apps/renderer/files/*.mp4
 
 # OS
 .DS_Store
+
+.superpowers/

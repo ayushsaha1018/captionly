@@ -49,15 +49,21 @@ export function StudioShell() {
     return () => window.removeEventListener("keydown", onKey);
   }, [undo, redo]);
 
+  useEffect(() => {
+    if (!video && exportOpen) {
+      setExportOpen(false);
+    }
+  }, [video, exportOpen]);
+
   return (
-    <div className="min-h-screen bg-void text-ink">
-      <header className="sticky top-0 z-30 border-b border-hairline bg-void/80 backdrop-blur">
+    <div className="flex h-screen flex-col overflow-hidden bg-void text-ink">
+      <header className="shrink-0 border-b border-hairline bg-void/80 backdrop-blur">
         <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-6 py-3">
           <div className="flex items-baseline gap-3">
             <span className="font-display text-lg font-semibold tracking-tight">Captionly</span>
             {video && (
               <span className="tabular text-xs text-ink-muted">
-                {video.src.split("/").pop()} · {video.width}×{video.height} ·{" "}
+                {video.file?.name ?? video.src.split("/").pop()} · {video.width}×{video.height} ·{" "}
                 {formatTimecode(video.durationSec)}
               </span>
             )}
@@ -86,9 +92,11 @@ export function StudioShell() {
             </button>
             <button
               onClick={() => setExportOpen(true)}
+              disabled={!video}
               className="flex items-center gap-2 rounded-md bg-edit px-3 py-1.5 text-xs
                          font-semibold text-void transition-transform hover:scale-[1.02]
-                         active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2
+                         active:scale-95 disabled:pointer-events-none disabled:opacity-40
+                         focus-visible:outline-2 focus-visible:outline-offset-2
                          focus-visible:outline-edit"
             >
               <Download className="h-3.5 w-3.5" />
@@ -98,7 +106,7 @@ export function StudioShell() {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[1600px] items-start gap-8 px-6 py-6">
+      <div className="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 gap-8 px-6 py-6">
         <PlayerRail playerRef={playerRef} safeZone={safeZone} onSafeZoneChange={setSafeZone} />
         <WorkSurface playerRef={playerRef} safeZone={safeZone} onSafeZoneChange={setSafeZone} />
       </div>
@@ -107,7 +115,7 @@ export function StudioShell() {
         <ExportDialog
           open={exportOpen}
           onOpenChange={setExportOpen}
-          videoSrc={video.src}
+          video={video}
           subtitles={{ lines, style, position, animation }}
         />
       )}

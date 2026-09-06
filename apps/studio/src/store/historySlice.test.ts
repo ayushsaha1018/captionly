@@ -1,8 +1,17 @@
 import { test, expect, beforeEach } from "bun:test";
+import { defaultStyle, defaultPosition, defaultAnimation } from "@captionly/engine";
 import { useStudioStore, COALESCE_MS, MAX_HISTORY } from "./index";
-import { SP1_FIXTURE } from "./fixture";
 
-const reset = () => useStudioStore.setState({ ...SP1_FIXTURE, past: [], future: [] });
+const reset = () =>
+  useStudioStore.setState({
+    video: { src: "/test.mp4", durationSec: 10, width: 1920, height: 1080 },
+    lines: [],
+    style: defaultStyle,
+    animation: defaultAnimation,
+    position: defaultPosition,
+    past: [],
+    future: [],
+  });
 
 beforeEach(reset);
 

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { downloadBlob } from "./downloadBlob";
 import type { SubtitleExportData } from "./types";
 
@@ -32,6 +32,12 @@ export function useServerVideoExport(): UseServerVideoExportReturn {
     setError(null);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
+
   const exportVideo = useCallback(
     async (
       videoSource: File | Blob | string,
@@ -45,17 +51,17 @@ export function useServerVideoExport(): UseServerVideoExportReturn {
       abortRef.current = controller;
 
       try {
-        let videoBlob: Blob;
-        if (typeof videoSource === "string") {
+        const form = new FormData();
+        if (videoSource instanceof File) {
+          form.append("video", videoSource, videoSource.name);
+        } else if (typeof videoSource === "string") {
           const res = await fetch(videoSource, { signal: controller.signal });
           if (!res.ok) throw new Error(`Failed to load video from URL: ${res.statusText}`);
-          videoBlob = await res.blob();
+          const videoBlob = await res.blob();
+          form.append("video", videoBlob, "input.mp4");
         } else {
-          videoBlob = videoSource;
+          form.append("video", videoSource, "input.mp4");
         }
-
-        const form = new FormData();
-        form.append("video", videoBlob, "input.mp4");
         form.append("subtitles", JSON.stringify(subtitles));
 
         setPhase("rendering");

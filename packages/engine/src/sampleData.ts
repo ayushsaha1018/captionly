@@ -10,7 +10,7 @@ export const sampleSubtitles: SubtitleLine[] = [
   {
     id: "line-1",
     start: 0.2,
-    end: 4.5,
+    end: 5.0,
     words: [
       { id: "w1", text: "This", start: 0.2, end: 0.7 },
       { id: "w2", text: "is", start: 0.7, end: 1.0 },
@@ -24,7 +24,7 @@ export const sampleSubtitles: SubtitleLine[] = [
   {
     id: "line-2",
     start: 5.0,
-    end: 9.5,
+    end: 10.0,
     words: [
       { id: "w8", text: "Smooth", start: 5.0, end: 5.7 },
       { id: "w9", text: "word", start: 5.7, end: 6.2 },

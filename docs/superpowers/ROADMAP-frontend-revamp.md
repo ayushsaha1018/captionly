@@ -1,7 +1,7 @@
 # Frontend Revamp — Program Roadmap
 
 **Created:** 2026-09-02
-**Status:** sub-project 1 complete and pushed; 2–4 not yet specced
+**Status:** sub-projects 1 & 2 complete; 3–4 not yet specced
 **Scope:** `apps/studio` (with narrow, named exceptions in `packages/engine`)
 
 This is the program-level document for the frontend revamp. Each sub-project gets its
@@ -76,6 +76,21 @@ Ordered so the app runs at every step and no UI is built twice. The visual pass 
 deliberately **first**, not last — building the line editor and then redesigning it is
 double work.
 
+### Branching & Delivery: Stacked PR Strategy
+
+We are delivering the revamp using a **stacked pull request (stacked PR)** strategy so each
+sub-project has an isolated, reviewable diff without waiting for upstream merges:
+
+1. **PR 1 (SP1):** `main` ← `feat/studio-shell-and-document-store` *(Open — created and managed manually by user)*
+2. **PR 2 (SP2):** `feat/studio-shell-and-document-store` ← `feat/studio-video-in` *(Open — created and managed manually by user)*
+3. **PR 3 (SP3):** `feat/studio-video-in` ← `feat/studio-line-editor` *(Upcoming)*
+4. **PR 4 (SP4):** `feat/studio-line-editor` ← `feat/studio-style-system` *(Upcoming)*
+
+> [!NOTE]
+> **Manual PR Management:** All GitHub pull requests are created, retargeted, and updated manually by the user. Agents branch from the head of the preceding sub-project and focus purely on local implementation, testing, and documentation.
+
+---
+
 ### SP1 — Shell + document store ✅ COMPLETE
 
 Visual language, `zustand` store in three slices, snapshot undo/redo with edit coalescing,
@@ -85,32 +100,24 @@ player code.
 - Spec: `specs/2026-08-31-studio-shell-and-document-store-design.md`
 - Plan: `plans/2026-08-31-studio-shell-and-document-store.md`
 - Branch: `feat/studio-shell-and-document-store` (18 commits, pushed)
+- PR: Open to `main` (PR 1)
 - Gates at completion: lint 0 errors, build passes uncached, 17 tests pass.
 - **Outstanding:** manual browser verification — playback, the playhead sweep,
   click-to-seek, `⌘Z`, focus rings, reduced motion, export, and the React DevTools
   **Profiler re-render check**. The build environment had no browser tooling. The
   re-render architecture has been verified by reading code, never by watching it run.
 
-### SP2 — Video in
+### SP2 — Video in ✅ COMPLETE
 
-**Goal:** the user's own file drives the editor, at whatever shape it is.
+The user's own file drives the editor, at whatever shape it is. Upload → object URL,
+metadata extraction, composition dimensions derived from the file, resolution-independent
+style scaling, safe zones, and empty states with demo mode.
 
-- Upload → object URL; `duration`, `videoWidth`, `videoHeight` from `loadedmetadata`.
-- Composition dimensions derived from the file, replacing the SP1 fixture.
-- **Resolution-independent style units.** Style values are currently absolute px "at
-  1920×1080 scale" — `fontSize`, `boxWidth`, padding, and the safe-zone insets all assume
-  it. A 1080×1920 upload breaks every one. This is the real work of SP2 and it touches
-  `packages/engine`'s `SubtitleOverlay`, plus `subtitleDrawer` and `SafeZones`.
-- Empty states, and a **Load demo** affordance so the editor is explorable before
-  committing a file.
-
-**Exit criteria:** a vertical 9:16 upload renders correctly, captions sized sensibly,
-safe zones correct, and `store/fixture.ts` deleted.
-
-**Entry notes:** `store/fixture.ts` is isolated precisely so its removal is unambiguous.
-`PlayerRail` already guards on `video === null` — that guard is what stops
-`durationInFrames={0}` reappearing when the fixture goes. Both export hooks already accept
-`File | Blob | string`, so pass the `File` rather than a blob URL.
+- Spec: `specs/2026-09-05-video-in-design.md`
+- Plan: `plans/2026-09-05-video-in.md`
+- Branch: `feat/studio-video-in`
+- PR: Open to `feat/studio-shell-and-document-store` (PR 2)
+- All exit criteria met (fixture deleted, dynamic resolution scaling, in-place dropzone & demo mode, 37 passing tests).
 
 ### SP3 — Line editor
 
