@@ -1,7 +1,7 @@
 # Frontend Revamp — Program Roadmap
 
 **Created:** 2026-09-02
-**Status:** sub-projects 1 & 2 complete; 3 specced (line editor, in progress); 4 not yet specced
+**Status:** sub-projects 1, 2 & 3 complete; 4 specced (style system, not yet implemented)
 **Scope:** `apps/studio` (with narrow, named exceptions in `packages/engine`)
 
 This is the program-level document for the frontend revamp. Each sub-project gets its
@@ -145,14 +145,25 @@ style scaling, safe zones, and empty states with demo mode.
 - Rework `StylePanel` and `AnimationPanel` onto shadcn components. They are currently raw
   `<select>`, `<input type=range>`, and `<input type=color>` despite the full library being
   installed.
-- Presets.
-- The expanded style surface the global-only decision bought us — gradients, per-word
-  emphasis treatments, outline/glow/shadow stacks.
+- Built-in curated presets (style + animation bundles); no save/custom-preset feature.
+- The expanded style surface the global-only decision bought us — text-fill gradients, a
+  richer active-word glow (`activeGlowMultiplier`), and a fuller outline/glow/shadow control
+  set (`shadowColor`/`shadowOffsetX`/`shadowOffsetY` alongside the existing `shadowBlur`).
+  "Per-word emphasis" resolved to *richer active-word treatment*, not per-word manual
+  overrides — styling stays global-only.
+- Per-field undo coalescing (see entry note) and export-path gating/labeling for the
+  client WebCodecs renderer, which already mis-renders 8 of 9 animation types today
+  (pre-existing debt, widened by this sub-project — see §6).
 
-**Entry note:** SP1 wired `commit()` into the style handlers with a single coalesce key per
-surface (`"style"`, `"animation"`), so a slider drag collapses into one undo entry. Once the
-panels are reworked, key per-property instead, so two deliberate tweaks inside 600ms stop
-merging.
+**Entry note (resolved by this spec):** SP1 wired `commit()` into the style handlers with a
+single coalesce key per surface (`"style"`, `"animation"`), so a slider drag collapses into
+one undo entry. The panel rework keys per-property instead, so two deliberate tweaks inside
+600ms stop merging.
+
+- Spec: `specs/2026-09-06-style-system-design.md`
+- Plan: not yet written
+- Branch: `feat/studio-style-system` (branches from `feat/studio-line-editor`)
+- PR: Not yet opened — will be PR 4 (see "Branching & Delivery" above)
 
 ---
 
