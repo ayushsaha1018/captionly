@@ -30,5 +30,17 @@ export function isClientExportSupported(
         "The client export can't draw gradient text yet. Use server export for an accurate result.",
     };
   }
+  if (
+    style.shadowColor !== "#000000" ||
+    style.shadowOffsetX !== 0 ||
+    style.shadowOffsetY !== 0 ||
+    style.activeGlowMultiplier !== 1
+  ) {
+    return {
+      supported: false,
+      reason:
+        "The client export draws a fixed black shadow and ignores shadow color, offset, and active-glow boost. Use server export for an accurate result.",
+    };
+  }
   return { supported: true };
 }

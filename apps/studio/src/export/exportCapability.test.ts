@@ -32,3 +32,11 @@ test("enabled text gradient is unsupported even with colorFill hardCut", () => {
   expect(result.reason).toBeDefined();
   expect(result.reason!.length).toBeGreaterThan(0);
 });
+
+test("non-default activeGlowMultiplier is unsupported even with colorFill hardCut and no gradient", () => {
+  const style = { ...defaultStyle, activeGlowMultiplier: 2 };
+  const result = isClientExportSupported(style, defaultAnimation);
+  expect(result.supported).toBe(false);
+  expect(result.reason).toBeDefined();
+  expect(result.reason!.length).toBeGreaterThan(0);
+});
