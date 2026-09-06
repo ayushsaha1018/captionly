@@ -27,7 +27,6 @@ export function resolveWordFillCss(style: SubtitleStyle, emphasize: boolean): CS
     WebkitBackgroundClip: "text",
     backgroundClip: "text",
     WebkitTextFillColor: "transparent",
-    color: "transparent",
   };
 }
 
