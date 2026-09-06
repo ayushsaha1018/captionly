@@ -29,27 +29,27 @@ describe("getResolutionScale", () => {
 });
 
 describe("calculateSubtitleLayout", () => {
-  it("preserves 1400px boxWidth on 1920x1080 landscape", () => {
-    const { scale, maxWidth } = calculateSubtitleLayout(1920, 1080, 1400);
+  it("preserves 1800px boxWidth on 1920x1080 landscape", () => {
+    const { scale, maxWidth } = calculateSubtitleLayout(1920, 1080, 1800);
     expect(scale).toBe(1.0);
-    expect(maxWidth).toBe(1400);
+    expect(maxWidth).toBe(1800);
   });
 
-  it("clamps boxWidth to 88% width on 1080x1920 vertical video", () => {
-    const { scale, maxWidth } = calculateSubtitleLayout(1080, 1920, 1400);
+  it("clamps boxWidth to 95% width on 1080x1920 vertical video", () => {
+    const { scale, maxWidth } = calculateSubtitleLayout(1080, 1920, 1800);
     expect(scale).toBe(1.0);
-    expect(maxWidth).toBe(950.4);
+    expect(maxWidth).toBe(1026);
   });
 
-  it("scales boxWidth proportionally on 4K without exceeding 88% width", () => {
-    const { scale, maxWidth } = calculateSubtitleLayout(3840, 2160, 1400);
+  it("scales boxWidth proportionally on 4K without exceeding max ratio width", () => {
+    const { scale, maxWidth } = calculateSubtitleLayout(3840, 2160, 1800);
     expect(scale).toBe(2.0);
-    expect(maxWidth).toBe(2800);
+    expect(maxWidth).toBe(3600);
   });
 
-  it("handles undefined boxWidth by defaulting to 1400 base", () => {
+  it("handles undefined boxWidth by defaulting to 1800 base", () => {
     const { maxWidth } = calculateSubtitleLayout(1920, 1080);
-    expect(maxWidth).toBe(1400);
+    expect(maxWidth).toBe(1800);
   });
 
   it("handles non-finite or non-positive dimensions gracefully", () => {

@@ -52,6 +52,7 @@ export type SafeZonePreset = "none" | "instagram" | "tiktok" | "youtube";
 // ===== Animation Configuration =====
 
 export type AnimationType =
+  | "none"
   | "colorFill"
   | "popOn"
   | "typewriter"
@@ -62,6 +63,7 @@ export type AnimationType =
   | "digitalMatrix";
 
 export const ANIMATION_LABELS: Record<AnimationType, string> = {
+  none: "None (Simple SRT)",
   colorFill: "Color Fill (Word by Word)",
   popOn: "Pop On (Bounce In)",
   typewriter: "Typewriter",
@@ -71,6 +73,8 @@ export const ANIMATION_LABELS: Record<AnimationType, string> = {
   flapBoard: "Split Flap Board",
   digitalMatrix: "Digital Matrix Glitch",
 };
+
+export type NoneOptions = Record<string, never>;
 
 export type ColorFillOptions = {
   transition: "hardCut" | "gradient";
@@ -113,6 +117,7 @@ export type DigitalMatrixOptions = {
 };
 
 export type AnimationConfig =
+  | { type: "none"; options?: NoneOptions }
   | { type: "colorFill"; options: ColorFillOptions }
   | { type: "popOn"; options: PopOnOptions }
   | { type: "typewriter"; options: TypewriterOptions }

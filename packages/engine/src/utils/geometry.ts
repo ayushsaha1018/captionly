@@ -1,6 +1,6 @@
 export const BASE_REFERENCE_DIMENSION = 1080;
-export const DEFAULT_BOX_WIDTH = 1400;
-export const MAX_SUBTITLE_WIDTH_RATIO = 0.88;
+export const DEFAULT_BOX_WIDTH = 1800;
+export const MAX_SUBTITLE_WIDTH_RATIO = 0.95;
 
 export interface SubtitleLayout {
   scale: number;

@@ -36,6 +36,7 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
 );
 
 const ANIM_TYPES: AnimationType[] = [
+  "none",
   "colorFill",
   "typewriter",
   "rollUp",
@@ -70,6 +71,12 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
           </SelectContent>
         </Select>
       </Row>
+
+      {animation.type === "none" && (
+        <p className="text-xs text-muted-foreground italic">
+          Subtitles display statically without word animations or active highlights.
+        </p>
+      )}
 
       {animation.type === "colorFill" && (
         <Row label="Transition">

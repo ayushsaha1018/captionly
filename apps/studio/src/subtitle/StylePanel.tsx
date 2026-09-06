@@ -1,6 +1,7 @@
 import {
   type SubtitleStyle,
   type SubtitlePosition,
+  type AnimationType,
   getGoogleFontNames,
   POPULAR_GOOGLE_FONTS,
   findGoogleFont,
@@ -26,6 +27,7 @@ type Props = {
     key: K,
     value: SubtitlePosition[K],
   ) => void;
+  animationType?: AnimationType;
 };
 
 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
@@ -85,7 +87,14 @@ function ColorField({
   );
 }
 
-export function StylePanel({ style, onFieldChange, position, onPositionFieldChange }: Props) {
+export function StylePanel({
+  style,
+  onFieldChange,
+  position,
+  onPositionFieldChange,
+  animationType,
+}: Props) {
+  const isStatic = animationType === "none";
   const set = <K extends keyof SubtitleStyle>(k: K, v: SubtitleStyle[K]) => onFieldChange(k, v);
 
   return (
@@ -131,23 +140,34 @@ export function StylePanel({ style, onFieldChange, position, onPositionFieldChan
         <Row label="Size">
           <NumberField
             value={style.fontSize}
-            min={32}
+            min={24}
             max={160}
-            step={2}
+            step={1}
             suffix="px"
             onChange={(v) => set("fontSize", v)}
           />
         </Row>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <ColorField label="Inactive color" value={style.color} onChange={(v) => set("color", v)} />
+      {isStatic ? (
         <ColorField
-          label="Active color"
-          value={style.activeColor}
-          onChange={(v) => set("activeColor", v)}
+          label="Color"
+          value={style.color}
+          onChange={(v) => {
+            set("color", v);
+            set("activeColor", v);
+          }}
         />
-      </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          <ColorField label="Inactive color" value={style.color} onChange={(v) => set("color", v)} />
+          <ColorField
+            label="Active color"
+            value={style.activeColor}
+            onChange={(v) => set("activeColor", v)}
+          />
+        </div>
+      )}
 
       <div className="border-t border-border pt-4 grid grid-cols-2 gap-3">
         <ColorField label="Stroke color" value={style.stroke} onChange={(v) => set("stroke", v)} />
@@ -163,16 +183,18 @@ export function StylePanel({ style, onFieldChange, position, onPositionFieldChan
         </Row>
       </div>
 
-      <Row label="Active scale">
-        <NumberField
-          value={style.activeScale}
-          min={1}
-          max={2}
-          step={0.05}
-          suffix="x"
-          onChange={(v) => set("activeScale", v)}
-        />
-      </Row>
+      {!isStatic && (
+        <Row label="Active scale">
+          <NumberField
+            value={style.activeScale}
+            min={1}
+            max={2}
+            step={0.05}
+            suffix="x"
+            onChange={(v) => set("activeScale", v)}
+          />
+        </Row>
+      )}
 
       <div className="border-t border-border pt-4 flex flex-col gap-4">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-card-foreground">
@@ -217,16 +239,18 @@ export function StylePanel({ style, onFieldChange, position, onPositionFieldChan
             />
           </Row>
         </div>
-        <Row label="Active glow boost">
-          <NumberField
-            value={style.activeGlowMultiplier}
-            min={1}
-            max={4}
-            step={0.1}
-            suffix="x"
-            onChange={(v) => set("activeGlowMultiplier", v)}
-          />
-        </Row>
+        {!isStatic && (
+          <Row label="Active glow boost">
+            <NumberField
+              value={style.activeGlowMultiplier}
+              min={1}
+              max={4}
+              step={0.1}
+              suffix="x"
+              onChange={(v) => set("activeGlowMultiplier", v)}
+            />
+          </Row>
+        )}
       </div>
 
       <div className="border-t border-border pt-4 flex flex-col gap-4">

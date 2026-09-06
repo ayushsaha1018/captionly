@@ -108,6 +108,7 @@ export function WorkSurface({
           onFieldChange={changeStyleField}
           position={position}
           onPositionFieldChange={changePositionField}
+          animationType={animation.type}
         />
       </TabsContent>
     </Tabs>

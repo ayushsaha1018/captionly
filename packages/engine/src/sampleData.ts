@@ -53,19 +53,19 @@ export const sampleSubtitles: SubtitleLine[] = [
 
 export const defaultStyle: SubtitleStyle = {
   fontFamily: "Inter",
-  fontWeight: 900,
-  fontSize: 84,
+  fontWeight: 600,
+  fontSize: 54,
   color: "#ffffff",
-  activeColor: "#FFD60A",
+  activeColor: "#ffffff",
   stroke: "#000000",
   strokeWidth: 6,
-  activeScale: 1.25,
+  activeScale: 1,
   shadowBlur: 24,
   shadowColor: "#000000",
   shadowOffsetX: 0,
   shadowOffsetY: 0,
   activeGlowMultiplier: 1,
-  boxWidth: 1400,
+  boxWidth: 1800,
   boxAnchor: "bottom",
   bgColor: "#000000",
   bgOpacity: 0,
@@ -80,14 +80,16 @@ export const defaultPosition: SubtitlePosition = {
 };
 
 export const defaultAnimation: AnimationConfig = {
-  type: "colorFill",
-  options: { transition: "hardCut" },
+  type: "none",
+  options: {},
 };
 
 export const defaultOptionsFor = (
   type: AnimationType,
 ): AnimationConfig["options"] => {
   switch (type) {
+    case "none":
+      return {};
     case "colorFill":
       return { transition: "hardCut" };
     case "typewriter":

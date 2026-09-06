@@ -1,5 +1,6 @@
 import React from "react";
 import type { SubtitleLine, SubtitleStyle, AnimationConfig } from "../types";
+import { NoneAnimation } from "./NoneAnimation";
 import { ColorFillAnimation } from "./ColorFillAnimation";
 import { PopOnAnimation } from "./PopOnAnimation";
 import { TypewriterAnimation } from "./TypewriterAnimation";
@@ -27,6 +28,17 @@ export const SubtitleAnimationRenderer: React.FC<SubtitleAnimationRendererProps>
   fps,
 }) => {
   switch (animation.type) {
+    case "none":
+      return (
+        <NoneAnimation
+          line={line}
+          style={style}
+          options={animation.options}
+          currentTime={currentTime}
+          frame={frame}
+          fps={fps}
+        />
+      );
     case "colorFill":
       return (
         <ColorFillAnimation

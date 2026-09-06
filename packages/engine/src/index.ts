@@ -15,6 +15,7 @@ export { SubtitleOverlay } from "./compositions/SubtitleOverlay";
 
 // Animations & Strategy Registry
 export { SubtitleAnimationRenderer } from "./animations/registry";
+export { NoneAnimation } from "./animations/NoneAnimation";
 export { ColorFillAnimation } from "./animations/ColorFillAnimation";
 export { PopOnAnimation } from "./animations/PopOnAnimation";
 export { TypewriterAnimation } from "./animations/TypewriterAnimation";
