@@ -6,13 +6,8 @@ import { FPS } from "@/lib/constants";
 
 /**
  * The playhead renders INSIDE the active row and positions itself as a
- * percentage of that row's own height.
- *
- * It deliberately does NOT compute an absolute offset by re-walking
- * lineHeight()/voidHeight(). LineRow sets `minHeight`, so a row whose content
- * exceeds the 72px floor — any selected short line, once the word strip
- * appears — is taller than geometry predicts, and every subsequent offset
- * drifts. Positioning within the row is correct by construction.
+ * percentage of that row's own height. Positioning within the row is
+ * correct by construction.
  *
  * This re-renders at fps by design, which is why it renders one element and
  * nothing else. No store writes here, and never call useCurrentPlayerFrame

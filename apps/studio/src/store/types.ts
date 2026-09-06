@@ -30,6 +30,16 @@ export interface DocumentSlice extends DocumentSnapshot {
   setPosition: (p: SubtitlePosition) => void;
   /** Used by history to restore. Does not itself record history. */
   replaceDocument: (doc: DocumentSnapshot) => void;
+  /** Inserts a new empty line spanning [startAt, endAt] after `afterLineId`
+   *  (null = insert at the very start) and begins editing it immediately. */
+  addLine: (afterLineId: string | null, startAt: number, endAt: number) => void;
+  /** Recomputes the line's words from `text` via computeWordTimings. */
+  editLineText: (id: string, text: string) => void;
+  setLineIn: (id: string, seconds: number) => void;
+  setLineOut: (id: string, seconds: number) => void;
+  deleteLine: (id: string) => void;
+  mergeLines: (aId: string, bId: string) => void;
+  splitLine: (id: string, caretIndex: number) => void;
 }
 
 export type WorkTab = "lines" | "style";

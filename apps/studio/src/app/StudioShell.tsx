@@ -30,19 +30,24 @@ export function StudioShell() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "z") return;
-
-      // Let text fields keep their native field-level undo.
       const el = e.target as HTMLElement | null;
-      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) {
+      const inTextField =
+        !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
+        if (inTextField) return; // let text fields keep their native field-level undo
+        e.preventDefault();
+        if (e.shiftKey) redo();
+        else undo();
         return;
       }
 
-      e.preventDefault();
-      if (e.shiftKey) {
-        redo();
-      } else {
-        undo();
+      if ((e.key === "Backspace" || e.key === "Delete") && !inTextField) {
+        const state = useStudioStore.getState();
+        if (state.selectedLineId && !state.editingLineId) {
+          e.preventDefault();
+          state.deleteLine(state.selectedLineId);
+        }
       }
     };
     window.addEventListener("keydown", onKey);

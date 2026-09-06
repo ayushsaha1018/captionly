@@ -25,3 +25,6 @@ export { DigitalMatrixAnimation } from "./animations/DigitalMatrixAnimation";
 
 // Geometry & Layout
 export * from "./utils/geometry";
+
+// Word timing
+export * from "./wordTiming";
