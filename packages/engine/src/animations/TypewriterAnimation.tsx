@@ -44,6 +44,7 @@ export const TypewriterAnimation: React.FC<AnimationProps> = ({
       <span
         style={{
           color: style.activeColor,
+          WebkitTextFillColor: style.activeColor,
           opacity: cursorBlink ? 1 : 0,
           marginLeft: "2px",
         }}
