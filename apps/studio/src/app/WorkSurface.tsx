@@ -1,5 +1,6 @@
 import type { PlayerRef } from "@remotion/player";
 import { useState } from "react";
+import { Sparkles } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useStudioStore } from "@/store";
 import { StylePanel } from "@/subtitle/StylePanel";
@@ -17,11 +18,14 @@ import type {
 
 export function WorkSurface({
   playerRef,
+  onOpenTranscribe,
 }: {
   playerRef: React.RefObject<PlayerRef | null>;
+  onOpenTranscribe?: () => void;
 }) {
   const activeTab = useStudioStore((s) => s.activeTab);
   const setTab = useStudioStore((s) => s.setTab);
+  const video = useStudioStore((s) => s.video);
   const style = useStudioStore((s) => s.style);
   const setStyle = useStudioStore((s) => s.setStyle);
   const animation = useStudioStore((s) => s.animation);
@@ -82,11 +86,23 @@ export function WorkSurface({
           <TabsTrigger value="lines">Lines</TabsTrigger>
           <TabsTrigger value="style">Style</TabsTrigger>
         </TabsList>
-        <span className="tabular text-xs text-ink-muted">{lineCount} lines</span>
+        <div className="flex items-center gap-2.5">
+          {activeTab === "lines" && video?.file && (
+            <button
+              type="button"
+              onClick={onOpenTranscribe}
+              className="flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 hover:text-emerald-300"
+            >
+              <Sparkles className="h-3 w-3" />
+              Auto-transcribe
+            </button>
+          )}
+          <span className="tabular text-xs text-ink-muted">{lineCount} lines</span>
+        </div>
       </div>
 
       <TabsContent value="lines" className="min-h-0 flex-1 overflow-y-auto pr-1">
-        <LineList playerRef={playerRef} />
+        <LineList playerRef={playerRef} onOpenTranscribe={onOpenTranscribe} />
       </TabsContent>
 
       <TabsContent

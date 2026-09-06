@@ -471,3 +471,43 @@ describe("splitLine", () => {
     expect(useStudioStore.getState().past[0].label).toBe("Split line");
   });
 });
+
+describe("documentSlice setLines", () => {
+  beforeEach(() => {
+    useStudioStore.setState({
+      video: null,
+      lines: [],
+      style: defaultStyle,
+      animation: defaultAnimation,
+      position: defaultPosition,
+      past: [],
+      future: [],
+      selectedLineId: null,
+      editingLineId: null,
+    });
+  });
+
+  it("updates lines, selects first line, and does NOT record an undo snapshot", () => {
+    const newLines = [
+      { id: "l1", start: 0, end: 2, words: [{ id: "w1", text: "Hello", start: 0, end: 2 }] },
+      { id: "l2", start: 2, end: 4, words: [{ id: "w2", text: "World", start: 2, end: 4 }] },
+    ];
+
+    useStudioStore.getState().setLines(newLines);
+
+    const state = useStudioStore.getState();
+    expect(state.lines).toEqual(newLines);
+    expect(state.selectedLineId).toBe("l1");
+    expect(state.editingLineId).toBeNull();
+    // No undo entry recorded
+    expect(state.past).toHaveLength(0);
+  });
+
+  it("handles empty lines array gracefully", () => {
+    useStudioStore.getState().setLines([]);
+    const state = useStudioStore.getState();
+    expect(state.lines).toEqual([]);
+    expect(state.selectedLineId).toBeNull();
+    expect(state.past).toHaveLength(0);
+  });
+});

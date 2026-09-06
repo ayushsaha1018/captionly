@@ -43,8 +43,7 @@ const VirtualizedCommand = ({
     if (!search.trim()) return options;
     const q = search.toLowerCase();
     return options.filter(
-      (option) =>
-        option.value.toLowerCase().includes(q) || option.label.toLowerCase().includes(q),
+      (option) => option.value.toLowerCase().includes(q) || option.label.toLowerCase().includes(q),
     );
   }, [options, search]);
 

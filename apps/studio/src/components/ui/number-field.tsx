@@ -32,9 +32,11 @@ export const NumberField = React.forwardRef<HTMLInputElement, NumberFieldProps>(
 
     const [editing, setEditing] = React.useState(false);
     const [draftText, setDraftText] = React.useState("");
-    const dragState = React.useRef<{ startX: number; startValue: number; dragging: boolean } | null>(
-      null,
-    );
+    const dragState = React.useRef<{
+      startX: number;
+      startValue: number;
+      dragging: boolean;
+    } | null>(null);
 
     const decimals = decimalsFromStep(step);
     const displayValue = `${value.toFixed(decimals)}${suffix}`;

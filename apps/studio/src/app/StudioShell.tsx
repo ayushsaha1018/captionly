@@ -4,6 +4,7 @@ import { Download, Undo2, Redo2 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useStudioStore } from "@/store";
 import { ExportDialog } from "@/export/ExportDialog";
+import { TranscribeModal } from "@/transcribe";
 import { PlayerRail } from "./PlayerRail";
 import { WorkSurface } from "./WorkSurface";
 import { formatTimecode } from "@/lib/timecode";
@@ -12,6 +13,7 @@ import type { SafeZonePreset } from "@captionly/engine";
 export function StudioShell() {
   const playerRef = useRef<PlayerRef | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [transcribeOpen, setTranscribeOpen] = useState(false);
   const [safeZone, setSafeZone] = useState<SafeZonePreset>("none");
 
   const { video, lines, style, animation, position } = useStudioStore(
@@ -112,8 +114,13 @@ export function StudioShell() {
       </header>
 
       <div className="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 gap-8 px-6 py-6">
-        <PlayerRail playerRef={playerRef} safeZone={safeZone} onSafeZoneChange={setSafeZone} />
-        <WorkSurface playerRef={playerRef} />
+        <PlayerRail
+          playerRef={playerRef}
+          safeZone={safeZone}
+          onSafeZoneChange={setSafeZone}
+          onOpenTranscribe={() => setTranscribeOpen(true)}
+        />
+        <WorkSurface playerRef={playerRef} onOpenTranscribe={() => setTranscribeOpen(true)} />
       </div>
 
       {video && (
@@ -124,6 +131,12 @@ export function StudioShell() {
           subtitles={{ lines, style, position, animation }}
         />
       )}
+
+      <TranscribeModal
+        open={transcribeOpen}
+        onOpenChange={setTranscribeOpen}
+        videoFile={video?.file}
+      />
     </div>
   );
 }

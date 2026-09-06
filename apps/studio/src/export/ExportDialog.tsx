@@ -60,7 +60,13 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
       const blob =
         mode === "client"
           ? await clientExportVideo(source, subtitles, video.durationSec, video.width, video.height)
-          : await serverExport.exportVideo(source, subtitles, video.durationSec, video.width, video.height);
+          : await serverExport.exportVideo(
+              source,
+              subtitles,
+              video.durationSec,
+              video.width,
+              video.height,
+            );
       if (blob) {
         setExportedBlob(blob);
       }
@@ -116,9 +122,7 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs font-medium">
                   <span className="capitalize text-foreground">
-                    {progress?.phase === "rendering"
-                      ? "Rendering & Encoding..."
-                      : "Processing..."}
+                    {progress?.phase === "rendering" ? "Rendering & Encoding..." : "Processing..."}
                   </span>
                   <span className="tabular-nums font-semibold text-primary">{percent}%</span>
                 </div>
@@ -233,9 +237,7 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
                   ) : (
                     <ServerIcon className="h-3.5 w-3.5 text-primary" />
                   )}
-                  <span>
-                    {mode === "client" ? "Client-Side Export" : "Server-Side Export"}
-                  </span>
+                  <span>{mode === "client" ? "Client-Side Export" : "Server-Side Export"}</span>
                 </div>
                 <p className="text-[11px] leading-relaxed">
                   {mode === "client"

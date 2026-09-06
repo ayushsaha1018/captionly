@@ -24,10 +24,12 @@ export function PlayerRail({
   playerRef,
   safeZone,
   onSafeZoneChange,
+  onOpenTranscribe,
 }: {
   playerRef: React.RefObject<PlayerRef | null>;
   safeZone: SafeZonePreset;
   onSafeZoneChange: (z: SafeZonePreset) => void;
+  onOpenTranscribe?: () => void;
 }) {
   const { video, lines, style, animation, position } = useStudioStore(
     useShallow((s) => ({
@@ -54,6 +56,7 @@ export function PlayerRail({
       playerRef.current?.pause();
       playerRef.current?.seekTo(0);
       loadVideo(meta);
+      onOpenTranscribe?.();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to load video");
     } finally {
