@@ -9,20 +9,16 @@ import { LineList } from "@/lines/LineList";
 import { cn } from "@/lib/utils";
 import { defaultOptionsFor, type StylePreset } from "@captionly/engine";
 import type {
-  SafeZonePreset,
   SubtitleStyle,
+  SubtitlePosition,
   AnimationConfig,
   AnimationType,
 } from "@captionly/engine";
 
 export function WorkSurface({
   playerRef,
-  safeZone,
-  onSafeZoneChange,
 }: {
   playerRef: React.RefObject<PlayerRef | null>;
-  safeZone: SafeZonePreset;
-  onSafeZoneChange: (z: SafeZonePreset) => void;
 }) {
   const activeTab = useStudioStore((s) => s.activeTab);
   const setTab = useStudioStore((s) => s.setTab);
@@ -30,6 +26,8 @@ export function WorkSurface({
   const setStyle = useStudioStore((s) => s.setStyle);
   const animation = useStudioStore((s) => s.animation);
   const setAnimation = useStudioStore((s) => s.setAnimation);
+  const position = useStudioStore((s) => s.position);
+  const setPosition = useStudioStore((s) => s.setPosition);
   const commit = useStudioStore((s) => s.commit);
   const lineCount = useStudioStore((s) => s.lines.length);
 
@@ -55,6 +53,14 @@ export function WorkSurface({
   const changeAnimationOption = (fieldKey: string, options: AnimationConfig["options"]) => {
     commit("Change animation", { coalesceKey: `animation:${animation.type}:${fieldKey}` });
     setAnimation({ ...animation, options } as AnimationConfig);
+  };
+
+  const changePositionField = <K extends keyof SubtitlePosition>(
+    key: K,
+    value: SubtitlePosition[K],
+  ) => {
+    commit("Change position", { coalesceKey: `position:${String(key)}` });
+    setPosition({ ...position, [key]: value });
   };
 
   const applyPreset = (preset: StylePreset) => {
@@ -100,8 +106,8 @@ export function WorkSurface({
         <StylePanel
           style={style}
           onFieldChange={changeStyleField}
-          safeZone={safeZone}
-          onSafeZoneChange={onSafeZoneChange}
+          position={position}
+          onPositionFieldChange={changePositionField}
         />
       </TabsContent>
     </Tabs>

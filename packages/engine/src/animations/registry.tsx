@@ -7,7 +7,6 @@ import { WipeAnimation } from "./WipeAnimation";
 import { RollUpAnimation } from "./RollUpAnimation";
 import { PaintOnAnimation } from "./PaintOnAnimation";
 import { FlapBoardAnimation } from "./FlapBoardAnimation";
-import { TickerAnimation } from "./TickerAnimation";
 import { DigitalMatrixAnimation } from "./DigitalMatrixAnimation";
 
 interface SubtitleAnimationRendererProps {
@@ -103,15 +102,6 @@ export const SubtitleAnimationRenderer: React.FC<SubtitleAnimationRendererProps>
           currentTime={currentTime}
           frame={frame}
           fps={fps}
-        />
-      );
-    case "ticker":
-      return (
-        <TickerAnimation
-          line={line}
-          style={style}
-          options={animation.options}
-          currentTime={currentTime}
         />
       );
     case "digitalMatrix":

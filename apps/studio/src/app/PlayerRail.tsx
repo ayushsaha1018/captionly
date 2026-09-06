@@ -10,6 +10,15 @@ import { sampleSubtitles } from "@captionly/engine";
 import { extractVideoMetadata } from "@/lib/videoMeta";
 import { SAFE_ZONES } from "@/subtitle/SafeZones";
 import { PlayerScrubber } from "./PlayerScrubber";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function PlayerRail({
   playerRef,
@@ -258,27 +267,30 @@ export function PlayerRail({
         <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-ink-muted">
           Safe zone
         </span>
-        <select
-          value={safeZone}
-          onChange={(e) => onSafeZoneChange(e.target.value as SafeZonePreset)}
-          className="rounded-md border border-border bg-surface px-3 py-2 text-sm text-ink"
-        >
-          <option value="none">None</option>
-          <optgroup label={`Recommended (${targetCategory})`}>
-            {recommendedEntries.map(([key, meta]) => (
-              <option key={key} value={key}>
-                {meta.label}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label="Other formats">
-            {otherEntries.map(([key, meta]) => (
-              <option key={key} value={key}>
-                {meta.label}
-              </option>
-            ))}
-          </optgroup>
-        </select>
+        <Select value={safeZone} onValueChange={(v) => onSafeZoneChange(v as SafeZonePreset)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">None</SelectItem>
+            <SelectGroup>
+              <SelectLabel>{`Recommended (${targetCategory})`}</SelectLabel>
+              {recommendedEntries.map(([key, meta]) => (
+                <SelectItem key={key} value={key}>
+                  {meta.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+            <SelectGroup>
+              <SelectLabel>Other formats</SelectLabel>
+              {otherEntries.map(([key, meta]) => (
+                <SelectItem key={key} value={key}>
+                  {meta.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </label>
     </aside>
   );

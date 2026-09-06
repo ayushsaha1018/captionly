@@ -27,11 +27,6 @@ export type SubtitleStyle = {
   shadowColor: string; // hex, base (non-active) shadow/glow color
   shadowOffsetX: number; // px
   shadowOffsetY: number; // px
-  // Text-fill gradient (opt-in). Gradient runs from `color` to `textGradientTo`;
-  // the active word always stays a flat `activeColor`, never gradient.
-  textGradientEnabled: boolean;
-  textGradientTo: string; // hex
-  textGradientAngle: number; // degrees, CSS linear-gradient angle
   // Multiplies shadowBlur only while a word is in its active/highlighted state.
   activeGlowMultiplier: number;
   // Layout
@@ -46,8 +41,10 @@ export type SubtitleStyle = {
 };
 
 export type SubtitlePosition = {
-  x: number; // Center X in composition pixels (e.g. 960)
-  y: number; // Baseline / Anchor Y in composition pixels (e.g. 880)
+  // <=100 is treated as a percentage of composition width/height; >100 is an
+  // absolute pixel value against the 1920x1080 reference composition.
+  x: number; // Anchor X (e.g. 50 = centered)
+  y: number; // Anchor Y (e.g. 92 = 92% down; combined with boxAnchor "bottom" this sets the bottom gap)
 };
 
 export type SafeZonePreset = "none" | "instagram" | "tiktok" | "youtube";
@@ -62,7 +59,6 @@ export type AnimationType =
   | "rollUp"
   | "paintOn"
   | "flapBoard"
-  | "ticker"
   | "digitalMatrix";
 
 export const ANIMATION_LABELS: Record<AnimationType, string> = {
@@ -73,7 +69,6 @@ export const ANIMATION_LABELS: Record<AnimationType, string> = {
   rollUp: "Roll Up (Karaoke)",
   paintOn: "Paint On (Fade Reveal)",
   flapBoard: "Split Flap Board",
-  ticker: "Ticker Tape Marquee",
   digitalMatrix: "Digital Matrix Glitch",
 };
 
@@ -112,11 +107,6 @@ export type FlapBoardOptions = {
   cyclesPerChar: number;
 };
 
-export type TickerOptions = {
-  speed: number;
-  gap: number;
-};
-
 export type DigitalMatrixOptions = {
   glitchAmplitude: number;
   glowIntensity: number;
@@ -130,7 +120,6 @@ export type AnimationConfig =
   | { type: "rollUp"; options: RollUpOptions }
   | { type: "paintOn"; options: PaintOnOptions }
   | { type: "flapBoard"; options: FlapBoardOptions }
-  | { type: "ticker"; options: TickerOptions }
   | { type: "digitalMatrix"; options: DigitalMatrixOptions };
 
 export interface SubtitleExportData {

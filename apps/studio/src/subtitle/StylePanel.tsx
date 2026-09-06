@@ -1,25 +1,23 @@
-import type { SubtitleStyle, SafeZonePreset } from "@captionly/engine";
-import { SAFE_ZONES } from "./SafeZones";
-import { useStudioStore } from "@/store";
+import type { SubtitleStyle, SubtitlePosition } from "@captionly/engine";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
+import { NumberField } from "@/components/ui/number-field";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 
 type Props = {
   style: SubtitleStyle;
   onFieldChange: <K extends keyof SubtitleStyle>(key: K, value: SubtitleStyle[K]) => void;
-  safeZone: SafeZonePreset;
-  onSafeZoneChange: (z: SafeZonePreset) => void;
+  position: SubtitlePosition;
+  onPositionFieldChange: <K extends keyof SubtitlePosition>(
+    key: K,
+    value: SubtitlePosition[K],
+  ) => void;
 };
 
 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
@@ -80,15 +78,7 @@ function ColorField({
   );
 }
 
-export function StylePanel({ style, onFieldChange, safeZone, onSafeZoneChange }: Props) {
-  const video = useStudioStore((s) => s.video);
-  const targetCategory = video && video.width < video.height ? "9:16" : "16:9";
-
-  const recommendedEntries = Object.entries(SAFE_ZONES).filter(
-    ([, m]) => m.category === targetCategory,
-  );
-  const otherEntries = Object.entries(SAFE_ZONES).filter(([, m]) => m.category !== targetCategory);
-
+export function StylePanel({ style, onFieldChange, position, onPositionFieldChange }: Props) {
   const set = <K extends keyof SubtitleStyle>(k: K, v: SubtitleStyle[K]) => onFieldChange(k, v);
 
   return (
@@ -130,13 +120,14 @@ export function StylePanel({ style, onFieldChange, safeZone, onSafeZoneChange }:
             </SelectContent>
           </Select>
         </Row>
-        <Row label={`Size (${style.fontSize}px)`}>
-          <Slider
-            value={[style.fontSize]}
+        <Row label="Size">
+          <NumberField
+            value={style.fontSize}
             min={32}
             max={160}
             step={2}
-            onValueChange={([v]) => set("fontSize", v)}
+            suffix="px"
+            onChange={(v) => set("fontSize", v)}
           />
         </Row>
       </div>
@@ -152,24 +143,26 @@ export function StylePanel({ style, onFieldChange, safeZone, onSafeZoneChange }:
 
       <div className="border-t border-border pt-4 grid grid-cols-2 gap-3">
         <ColorField label="Stroke color" value={style.stroke} onChange={(v) => set("stroke", v)} />
-        <Row label={`Stroke width (${style.strokeWidth}px)`}>
-          <Slider
-            value={[style.strokeWidth]}
+        <Row label="Stroke width">
+          <NumberField
+            value={style.strokeWidth}
             min={0}
             max={20}
             step={1}
-            onValueChange={([v]) => set("strokeWidth", v)}
+            suffix="px"
+            onChange={(v) => set("strokeWidth", v)}
           />
         </Row>
       </div>
 
-      <Row label={`Active scale (${style.activeScale.toFixed(2)}x)`}>
-        <Slider
-          value={[style.activeScale]}
+      <Row label="Active scale">
+        <NumberField
+          value={style.activeScale}
           min={1}
           max={2}
           step={0.05}
-          onValueChange={([v]) => set("activeScale", v)}
+          suffix="x"
+          onChange={(v) => set("activeScale", v)}
         />
       </Row>
 
@@ -183,85 +176,60 @@ export function StylePanel({ style, onFieldChange, safeZone, onSafeZoneChange }:
             value={style.shadowColor}
             onChange={(v) => set("shadowColor", v)}
           />
-          <Row label={`Blur (${style.shadowBlur}px)`}>
-            <Slider
-              value={[style.shadowBlur]}
+          <Row label="Blur">
+            <NumberField
+              value={style.shadowBlur}
               min={0}
               max={64}
               step={2}
-              onValueChange={([v]) => set("shadowBlur", v)}
+              suffix="px"
+              onChange={(v) => set("shadowBlur", v)}
             />
           </Row>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Row label={`Offset X (${style.shadowOffsetX}px)`}>
-            <Slider
-              value={[style.shadowOffsetX]}
+          <Row label="Offset X">
+            <NumberField
+              value={style.shadowOffsetX}
               min={-40}
               max={40}
               step={1}
-              onValueChange={([v]) => set("shadowOffsetX", v)}
+              suffix="px"
+              onChange={(v) => set("shadowOffsetX", v)}
             />
           </Row>
-          <Row label={`Offset Y (${style.shadowOffsetY}px)`}>
-            <Slider
-              value={[style.shadowOffsetY]}
+          <Row label="Offset Y">
+            <NumberField
+              value={style.shadowOffsetY}
               min={-40}
               max={40}
               step={1}
-              onValueChange={([v]) => set("shadowOffsetY", v)}
+              suffix="px"
+              onChange={(v) => set("shadowOffsetY", v)}
             />
           </Row>
         </div>
-        <Row label={`Active glow boost (${style.activeGlowMultiplier.toFixed(1)}x)`}>
-          <Slider
-            value={[style.activeGlowMultiplier]}
+        <Row label="Active glow boost">
+          <NumberField
+            value={style.activeGlowMultiplier}
             min={1}
             max={4}
             step={0.1}
-            onValueChange={([v]) => set("activeGlowMultiplier", v)}
+            suffix="x"
+            onChange={(v) => set("activeGlowMultiplier", v)}
           />
         </Row>
       </div>
 
       <div className="border-t border-border pt-4 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-card-foreground">
-            Text gradient
-          </h3>
-          <Switch
-            checked={style.textGradientEnabled}
-            onCheckedChange={(v) => set("textGradientEnabled", v)}
-          />
-        </div>
-        {style.textGradientEnabled && (
-          <div className="grid grid-cols-2 gap-3">
-            <ColorField
-              label="Gradient to"
-              value={style.textGradientTo}
-              onChange={(v) => set("textGradientTo", v)}
-            />
-            <Row label={`Angle (${style.textGradientAngle}°)`}>
-              <Slider
-                value={[style.textGradientAngle]}
-                min={0}
-                max={360}
-                step={5}
-                onValueChange={([v]) => set("textGradientAngle", v)}
-              />
-            </Row>
-          </div>
-        )}
-      </div>
-
-      <div className="border-t border-border pt-4 flex flex-col gap-4">
-        <Row label={`Box width (${style.boxWidth}px)`}>
-          <Slider
-            value={[style.boxWidth]}
+        <Row label="Box width">
+          <NumberField
+            value={style.boxWidth}
             min={300}
             max={1900}
             step={20}
-            onValueChange={([v]) => set("boxWidth", v)}
+            suffix="px"
+            onChange={(v) => set("boxWidth", v)}
           />
         </Row>
         <Row label="Wrap grows from">
@@ -279,6 +247,16 @@ export function StylePanel({ style, onFieldChange, safeZone, onSafeZoneChange }:
             </SelectContent>
           </Select>
         </Row>
+        <Row label="Vertical position">
+          <NumberField
+            value={position.y}
+            min={50}
+            max={98}
+            step={1}
+            suffix="%"
+            onChange={(v) => onPositionFieldChange("y", v)}
+          />
+        </Row>
       </div>
 
       <div className="border-t border-border pt-4 flex flex-col gap-4">
@@ -287,74 +265,48 @@ export function StylePanel({ style, onFieldChange, safeZone, onSafeZoneChange }:
         </h3>
         <div className="grid grid-cols-2 gap-3">
           <ColorField label="Color" value={style.bgColor} onChange={(v) => set("bgColor", v)} />
-          <Row label={`Opacity (${style.bgOpacity.toFixed(2)})`}>
-            <Slider
-              value={[style.bgOpacity]}
+          <Row label="Opacity">
+            <NumberField
+              value={style.bgOpacity}
               min={0}
               max={1}
               step={0.05}
-              onValueChange={([v]) => set("bgOpacity", v)}
+              onChange={(v) => set("bgOpacity", v)}
             />
           </Row>
         </div>
-        <Row label={`Corner radius (${style.bgRadius}px)`}>
-          <Slider
-            value={[style.bgRadius]}
+        <Row label="Corner radius">
+          <NumberField
+            value={style.bgRadius}
             min={0}
             max={64}
             step={1}
-            onValueChange={([v]) => set("bgRadius", v)}
+            suffix="px"
+            onChange={(v) => set("bgRadius", v)}
           />
         </Row>
         <div className="grid grid-cols-2 gap-3">
-          <Row label={`Padding X (${style.bgPaddingX}px)`}>
-            <Slider
-              value={[style.bgPaddingX]}
+          <Row label="Padding X">
+            <NumberField
+              value={style.bgPaddingX}
               min={0}
               max={80}
               step={2}
-              onValueChange={([v]) => set("bgPaddingX", v)}
+              suffix="px"
+              onChange={(v) => set("bgPaddingX", v)}
             />
           </Row>
-          <Row label={`Padding Y (${style.bgPaddingY}px)`}>
-            <Slider
-              value={[style.bgPaddingY]}
+          <Row label="Padding Y">
+            <NumberField
+              value={style.bgPaddingY}
               min={0}
               max={60}
               step={2}
-              onValueChange={([v]) => set("bgPaddingY", v)}
+              suffix="px"
+              onChange={(v) => set("bgPaddingY", v)}
             />
           </Row>
         </div>
-      </div>
-
-      <div className="border-t border-border pt-4">
-        <Row label="Safe zone overlay">
-          <Select value={safeZone} onValueChange={(v) => onSafeZoneChange(v as SafeZonePreset)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">None</SelectItem>
-              <SelectGroup>
-                <SelectLabel>{`Recommended (${targetCategory})`}</SelectLabel>
-                {recommendedEntries.map(([key, meta]) => (
-                  <SelectItem key={key} value={key}>
-                    {meta.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-              <SelectGroup>
-                <SelectLabel>Other formats</SelectLabel>
-                {otherEntries.map(([key, meta]) => (
-                  <SelectItem key={key} value={key}>
-                    {meta.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </Row>
       </div>
     </aside>
   );

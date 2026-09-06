@@ -11,23 +11,12 @@ export function resolveWordStrokeCss(style: SubtitleStyle): CSSProperties {
 }
 
 /**
- * Fill color CSS: flat color, gradient (when enabled), or the flat active
- * color. `emphasize` means "render in the active/highlighted state" — each
- * animation maps its own isActive/isVisible/isSettled concept onto it. The
- * active color always stays flat; the gradient only affects the
- * non-emphasized state, so the highlight never fights a two-tone fill (and,
- * as a consequence, an animation whose words are always emphasized — e.g.
- * TickerAnimation — never visibly shows the gradient; that's expected).
+ * Fill color CSS: flat `color`, or flat `activeColor` while emphasized.
+ * `emphasize` means "render in the active/highlighted state" — each
+ * animation maps its own isActive/isVisible/isSettled concept onto it.
  */
 export function resolveWordFillCss(style: SubtitleStyle, emphasize: boolean): CSSProperties {
-  if (emphasize) return { color: style.activeColor };
-  if (!style.textGradientEnabled) return { color: style.color };
-  return {
-    backgroundImage: `linear-gradient(${style.textGradientAngle}deg, ${style.color}, ${style.textGradientTo})`,
-    WebkitBackgroundClip: "text",
-    backgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-  };
+  return { color: emphasize ? style.activeColor : style.color };
 }
 
 /**

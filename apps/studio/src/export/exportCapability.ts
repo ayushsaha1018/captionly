@@ -23,13 +23,6 @@ export function isClientExportSupported(
         "The client export renders a fixed word-reveal look and ignores the selected animation. Use server export for an accurate result.",
     };
   }
-  if (style.textGradientEnabled) {
-    return {
-      supported: false,
-      reason:
-        "The client export can't draw gradient text yet. Use server export for an accurate result.",
-    };
-  }
   if (
     style.shadowColor !== "#000000" ||
     style.shadowOffsetX !== 0 ||

@@ -6,9 +6,6 @@ describe("defaultStyle", () => {
     expect(defaultStyle.shadowColor).toBe("#000000");
     expect(defaultStyle.shadowOffsetX).toBe(0);
     expect(defaultStyle.shadowOffsetY).toBe(0);
-    expect(defaultStyle.textGradientEnabled).toBe(false);
-    expect(defaultStyle.textGradientTo).toBe("#FFD60A");
-    expect(defaultStyle.textGradientAngle).toBe(90);
     expect(defaultStyle.activeGlowMultiplier).toBe(1);
   });
 });

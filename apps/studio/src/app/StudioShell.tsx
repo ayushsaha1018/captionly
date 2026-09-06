@@ -113,7 +113,7 @@ export function StudioShell() {
 
       <div className="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 gap-8 px-6 py-6">
         <PlayerRail playerRef={playerRef} safeZone={safeZone} onSafeZoneChange={setSafeZone} />
-        <WorkSurface playerRef={playerRef} safeZone={safeZone} onSafeZoneChange={setSafeZone} />
+        <WorkSurface playerRef={playerRef} />
       </div>
 
       {video && (

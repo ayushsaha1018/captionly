@@ -21,7 +21,6 @@ export { WipeAnimation } from "./animations/WipeAnimation";
 export { RollUpAnimation } from "./animations/RollUpAnimation";
 export { PaintOnAnimation } from "./animations/PaintOnAnimation";
 export { FlapBoardAnimation } from "./animations/FlapBoardAnimation";
-export { TickerAnimation } from "./animations/TickerAnimation";
 export { DigitalMatrixAnimation } from "./animations/DigitalMatrixAnimation";
 
 // Geometry & Layout

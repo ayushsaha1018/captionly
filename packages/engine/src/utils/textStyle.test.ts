@@ -15,29 +15,14 @@ describe("resolveWordStrokeCss", () => {
 });
 
 describe("resolveWordFillCss", () => {
-  it("emphasized words are always the flat active color, gradient or not", () => {
-    const style = { ...defaultStyle, textGradientEnabled: true, activeColor: "#FFD60A" };
+  it("emphasized words are the flat active color", () => {
+    const style = { ...defaultStyle, activeColor: "#FFD60A" };
     expect(resolveWordFillCss(style, true)).toEqual({ color: "#FFD60A" });
   });
 
-  it("non-emphasized words are the flat color when gradient is disabled", () => {
-    const style = { ...defaultStyle, textGradientEnabled: false, color: "#ffffff" };
+  it("non-emphasized words are the flat color", () => {
+    const style = { ...defaultStyle, color: "#ffffff" };
     expect(resolveWordFillCss(style, false)).toEqual({ color: "#ffffff" });
-  });
-
-  it("non-emphasized words gradient-fill from color to textGradientTo when enabled", () => {
-    const style = {
-      ...defaultStyle,
-      textGradientEnabled: true,
-      color: "#ffffff",
-      textGradientTo: "#ff00ff",
-      textGradientAngle: 45,
-    };
-    const css = resolveWordFillCss(style, false);
-    expect(css.backgroundImage).toBe("linear-gradient(45deg, #ffffff, #ff00ff)");
-    expect(css.WebkitBackgroundClip).toBe("text");
-    expect(css.backgroundClip).toBe("text");
-    expect(css.WebkitTextFillColor).toBe("transparent");
   });
 });
 

@@ -22,7 +22,11 @@ export const PaintOnAnimation: React.FC<AnimationProps> = ({
   const charsRevealed = Math.floor(progress * fullText.length);
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center">
+    // Plain inline text flow, not flex: each char is its own span for the
+    // per-character reveal, but a flex container's gap would apply uniformly
+    // between every char (including the literal " " word-boundary span) and
+    // trims that space's own width away, erasing the word gap entirely.
+    <div className="whitespace-pre-wrap text-center" style={{ lineHeight: 1.4 }}>
       {fullText.split("").map((char, index) => {
         const isVisible = index <= charsRevealed;
         return (

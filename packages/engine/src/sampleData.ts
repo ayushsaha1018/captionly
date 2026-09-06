@@ -64,9 +64,6 @@ export const defaultStyle: SubtitleStyle = {
   shadowColor: "#000000",
   shadowOffsetX: 0,
   shadowOffsetY: 0,
-  textGradientEnabled: false,
-  textGradientTo: "#FFD60A", // matches activeColor above — a visible two-tone default the moment it's enabled
-  textGradientAngle: 90,
   activeGlowMultiplier: 1,
   boxWidth: 1400,
   boxAnchor: "bottom",
@@ -78,8 +75,8 @@ export const defaultStyle: SubtitleStyle = {
 };
 
 export const defaultPosition: SubtitlePosition = {
-  x: 960,
-  y: 880,
+  x: 50, // % from left, center
+  y: 92, // % from top; with boxAnchor "bottom" this leaves an 8% gap below the caption
 };
 
 export const defaultAnimation: AnimationConfig = {
@@ -105,8 +102,6 @@ export const defaultOptionsFor = (
       return { direction: "ltr" };
     case "flapBoard":
       return { flapDuration: 0.5, cyclesPerChar: 8 };
-    case "ticker":
-      return { speed: 220, gap: 200 };
     case "digitalMatrix":
       return { glitchAmplitude: 3, glowIntensity: 0.8 };
   }

@@ -9,7 +9,6 @@ import {
   type PopOnOptions,
   type WipeOptions,
   type FlapBoardOptions,
-  type TickerOptions,
   type DigitalMatrixOptions,
 } from "@captionly/engine";
 import {
@@ -19,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
+import { NumberField } from "@/components/ui/number-field";
 
 type Props = {
   animation: AnimationConfig;
@@ -44,7 +43,6 @@ const ANIM_TYPES: AnimationType[] = [
   "popOn",
   "wipe",
   "flapBoard",
-  "ticker",
   "digitalMatrix",
 ];
 
@@ -116,24 +114,24 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               </SelectContent>
             </Select>
           </Row>
-          <Row label={`Blink rate (${animation.options.blinkRate.toFixed(1)} Hz)`}>
-            <Slider
-              value={[animation.options.blinkRate]}
+          <Row label="Blink rate">
+            <NumberField
+              value={animation.options.blinkRate}
               min={0}
               max={4}
               step={0.1}
-              onValueChange={([v]) =>
-                onOptionChange("blinkRate", { ...animation.options, blinkRate: v })
-              }
+              suffix=" Hz"
+              onChange={(v) => onOptionChange("blinkRate", { ...animation.options, blinkRate: v })}
             />
           </Row>
-          <Row label={`Max speed cap (${animation.options.maxCps} chars/s)`}>
-            <Slider
-              value={[animation.options.maxCps]}
+          <Row label="Max speed cap">
+            <NumberField
+              value={animation.options.maxCps}
               min={10}
               max={80}
               step={1}
-              onValueChange={([v]) => onOptionChange("maxCps", { ...animation.options, maxCps: v })}
+              suffix=" chars/s"
+              onChange={(v) => onOptionChange("maxCps", { ...animation.options, maxCps: v })}
             />
           </Row>
         </>
@@ -141,15 +139,13 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
 
       {animation.type === "rollUp" && (
         <>
-          <Row label={`Line limit (${animation.options.lineLimit})`}>
-            <Slider
-              value={[animation.options.lineLimit]}
+          <Row label="Line limit">
+            <NumberField
+              value={animation.options.lineLimit}
               min={1}
               max={5}
               step={1}
-              onValueChange={([v]) =>
-                onOptionChange("lineLimit", { ...animation.options, lineLimit: v })
-              }
+              onChange={(v) => onOptionChange("lineLimit", { ...animation.options, lineLimit: v })}
             />
           </Row>
           <Row label="Transition">
@@ -171,13 +167,14 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               </SelectContent>
             </Select>
           </Row>
-          <Row label={`Line spacing (${animation.options.lineSpacing}px)`}>
-            <Slider
-              value={[animation.options.lineSpacing]}
+          <Row label="Line spacing">
+            <NumberField
+              value={animation.options.lineSpacing}
               min={0}
               max={64}
               step={2}
-              onValueChange={([v]) =>
+              suffix="px"
+              onChange={(v) =>
                 onOptionChange("lineSpacing", { ...animation.options, lineSpacing: v })
               }
             />
@@ -206,13 +203,14 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               </SelectContent>
             </Select>
           </Row>
-          <Row label={`Max speed cap (${animation.options.maxCps} chars/s)`}>
-            <Slider
-              value={[animation.options.maxCps]}
+          <Row label="Max speed cap">
+            <NumberField
+              value={animation.options.maxCps}
               min={10}
               max={80}
               step={1}
-              onValueChange={([v]) => onOptionChange("maxCps", { ...animation.options, maxCps: v })}
+              suffix=" chars/s"
+              onChange={(v) => onOptionChange("maxCps", { ...animation.options, maxCps: v })}
             />
           </Row>
         </>
@@ -220,24 +218,24 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
 
       {animation.type === "popOn" && (
         <>
-          <Row label={`Pop scale (${animation.options.popScale.toFixed(2)}x)`}>
-            <Slider
-              value={[animation.options.popScale]}
+          <Row label="Pop scale">
+            <NumberField
+              value={animation.options.popScale}
               min={1}
               max={1.6}
               step={0.01}
-              onValueChange={([v]) =>
-                onOptionChange("popScale", { ...animation.options, popScale: v })
-              }
+              suffix="x"
+              onChange={(v) => onOptionChange("popScale", { ...animation.options, popScale: v })}
             />
           </Row>
-          <Row label={`Pop duration (${animation.options.popDuration.toFixed(2)}s)`}>
-            <Slider
-              value={[animation.options.popDuration]}
+          <Row label="Pop duration">
+            <NumberField
+              value={animation.options.popDuration}
               min={0.05}
               max={0.8}
               step={0.01}
-              onValueChange={([v]) =>
+              suffix="s"
+              onChange={(v) =>
                 onOptionChange("popDuration", { ...animation.options, popDuration: v })
               }
             />
@@ -268,55 +266,27 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
 
       {animation.type === "flapBoard" && (
         <>
-          <Row label={`Flap duration (${animation.options.flapDuration.toFixed(2)}s)`}>
-            <Slider
-              value={[animation.options.flapDuration]}
+          <Row label="Flap duration">
+            <NumberField
+              value={animation.options.flapDuration}
               min={0.1}
               max={2}
               step={0.05}
-              onValueChange={([v]) =>
-                onOptionChange("flapDuration", {
-                  ...animation.options,
-                  flapDuration: v,
-                })
+              suffix="s"
+              onChange={(v) =>
+                onOptionChange("flapDuration", { ...animation.options, flapDuration: v })
               }
             />
           </Row>
-          <Row label={`Cycles per char (${animation.options.cyclesPerChar})`}>
-            <Slider
-              value={[animation.options.cyclesPerChar]}
+          <Row label="Cycles per char">
+            <NumberField
+              value={animation.options.cyclesPerChar}
               min={2}
               max={20}
               step={1}
-              onValueChange={([v]) =>
-                onOptionChange("cyclesPerChar", {
-                  ...animation.options,
-                  cyclesPerChar: v,
-                })
+              onChange={(v) =>
+                onOptionChange("cyclesPerChar", { ...animation.options, cyclesPerChar: v })
               }
-            />
-          </Row>
-        </>
-      )}
-
-      {animation.type === "ticker" && (
-        <>
-          <Row label={`Scroll speed (${animation.options.speed} px/s)`}>
-            <Slider
-              value={[animation.options.speed]}
-              min={50}
-              max={600}
-              step={10}
-              onValueChange={([v]) => onOptionChange("speed", { ...animation.options, speed: v })}
-            />
-          </Row>
-          <Row label={`Gap (${animation.options.gap}px)`}>
-            <Slider
-              value={[animation.options.gap]}
-              min={0}
-              max={400}
-              step={10}
-              onValueChange={([v]) => onOptionChange("gap", { ...animation.options, gap: v })}
             />
           </Row>
         </>
@@ -324,31 +294,26 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
 
       {animation.type === "digitalMatrix" && (
         <>
-          <Row label={`Glow intensity (${animation.options.glowIntensity.toFixed(2)})`}>
-            <Slider
-              value={[animation.options.glowIntensity]}
+          <Row label="Glow intensity">
+            <NumberField
+              value={animation.options.glowIntensity}
               min={0}
               max={1}
               step={0.05}
-              onValueChange={([v]) =>
-                onOptionChange("glowIntensity", {
-                  ...animation.options,
-                  glowIntensity: v,
-                })
+              onChange={(v) =>
+                onOptionChange("glowIntensity", { ...animation.options, glowIntensity: v })
               }
             />
           </Row>
-          <Row label={`Glitch jitter (${animation.options.glitchAmplitude}px)`}>
-            <Slider
-              value={[animation.options.glitchAmplitude]}
+          <Row label="Glitch jitter">
+            <NumberField
+              value={animation.options.glitchAmplitude}
               min={0}
               max={12}
               step={1}
-              onValueChange={([v]) =>
-                onOptionChange("glitchAmplitude", {
-                  ...animation.options,
-                  glitchAmplitude: v,
-                })
+              suffix="px"
+              onChange={(v) =>
+                onOptionChange("glitchAmplitude", { ...animation.options, glitchAmplitude: v })
               }
             />
           </Row>
