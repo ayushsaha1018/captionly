@@ -32,7 +32,7 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
 );
 
 const FONTS = [
-  "Inter, system-ui, sans-serif",
+  "Inter, system-ui, -apple-system, sans-serif",
   "Georgia, serif",
   "'Courier New', monospace",
   "Impact, sans-serif",
@@ -66,7 +66,14 @@ function ColorField({
             onChange={(e) => onChange(e.target.value)}
             className="h-10 w-full cursor-pointer rounded-md border border-border bg-transparent"
           />
-          <Input value={value} onChange={(e) => onChange(e.target.value)} className="text-xs" />
+          <Input
+            value={value}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (/^#[0-9a-fA-F]{6}$/.test(v)) onChange(v);
+            }}
+            className="text-xs"
+          />
         </PopoverContent>
       </Popover>
     </Row>

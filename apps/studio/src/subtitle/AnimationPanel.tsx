@@ -49,10 +49,6 @@ const ANIM_TYPES: AnimationType[] = [
 ];
 
 export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Props) {
-  const setOptions = <T extends AnimationConfig["options"]>(fieldKey: string, opts: T) => {
-    onOptionChange(fieldKey, opts);
-  };
-
   return (
     <aside className="flex flex-col gap-5 rounded-xl border border-border bg-card p-5 shadow-lg h-fit">
       <div>
@@ -82,7 +78,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
           <Select
             value={animation.options.transition}
             onValueChange={(v) =>
-              setOptions<ColorFillOptions>("transition", {
+              onOptionChange("transition", {
                 transition: v as ColorFillOptions["transition"],
               })
             }
@@ -104,7 +100,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
             <Select
               value={animation.options.cursor}
               onValueChange={(v) =>
-                setOptions<TypewriterOptions>("cursor", {
+                onOptionChange("cursor", {
                   ...animation.options,
                   cursor: v as TypewriterOptions["cursor"],
                 })
@@ -127,7 +123,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               max={4}
               step={0.1}
               onValueChange={([v]) =>
-                setOptions<TypewriterOptions>("blinkRate", { ...animation.options, blinkRate: v })
+                onOptionChange("blinkRate", { ...animation.options, blinkRate: v })
               }
             />
           </Row>
@@ -137,9 +133,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               min={10}
               max={80}
               step={1}
-              onValueChange={([v]) =>
-                setOptions<TypewriterOptions>("maxCps", { ...animation.options, maxCps: v })
-              }
+              onValueChange={([v]) => onOptionChange("maxCps", { ...animation.options, maxCps: v })}
             />
           </Row>
         </>
@@ -154,7 +148,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               max={5}
               step={1}
               onValueChange={([v]) =>
-                setOptions<RollUpOptions>("lineLimit", { ...animation.options, lineLimit: v })
+                onOptionChange("lineLimit", { ...animation.options, lineLimit: v })
               }
             />
           </Row>
@@ -162,7 +156,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
             <Select
               value={animation.options.transition}
               onValueChange={(v) =>
-                setOptions<RollUpOptions>("transition", {
+                onOptionChange("transition", {
                   ...animation.options,
                   transition: v as RollUpOptions["transition"],
                 })
@@ -184,7 +178,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               max={64}
               step={2}
               onValueChange={([v]) =>
-                setOptions<RollUpOptions>("lineSpacing", { ...animation.options, lineSpacing: v })
+                onOptionChange("lineSpacing", { ...animation.options, lineSpacing: v })
               }
             />
           </Row>
@@ -197,7 +191,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
             <Select
               value={animation.options.direction}
               onValueChange={(v) =>
-                setOptions<PaintOnOptions>("direction", {
+                onOptionChange("direction", {
                   ...animation.options,
                   direction: v as PaintOnOptions["direction"],
                 })
@@ -218,9 +212,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               min={10}
               max={80}
               step={1}
-              onValueChange={([v]) =>
-                setOptions<PaintOnOptions>("maxCps", { ...animation.options, maxCps: v })
-              }
+              onValueChange={([v]) => onOptionChange("maxCps", { ...animation.options, maxCps: v })}
             />
           </Row>
         </>
@@ -235,7 +227,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               max={1.6}
               step={0.01}
               onValueChange={([v]) =>
-                setOptions<PopOnOptions>("popScale", { ...animation.options, popScale: v })
+                onOptionChange("popScale", { ...animation.options, popScale: v })
               }
             />
           </Row>
@@ -246,7 +238,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               max={0.8}
               step={0.01}
               onValueChange={([v]) =>
-                setOptions<PopOnOptions>("popDuration", { ...animation.options, popDuration: v })
+                onOptionChange("popDuration", { ...animation.options, popDuration: v })
               }
             />
           </Row>
@@ -258,7 +250,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
           <Select
             value={animation.options.direction}
             onValueChange={(v) =>
-              setOptions<WipeOptions>("direction", { direction: v as WipeOptions["direction"] })
+              onOptionChange("direction", { direction: v as WipeOptions["direction"] })
             }
           >
             <SelectTrigger>
@@ -283,7 +275,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               max={2}
               step={0.05}
               onValueChange={([v]) =>
-                setOptions<FlapBoardOptions>("flapDuration", {
+                onOptionChange("flapDuration", {
                   ...animation.options,
                   flapDuration: v,
                 })
@@ -297,7 +289,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               max={20}
               step={1}
               onValueChange={([v]) =>
-                setOptions<FlapBoardOptions>("cyclesPerChar", {
+                onOptionChange("cyclesPerChar", {
                   ...animation.options,
                   cyclesPerChar: v,
                 })
@@ -315,9 +307,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               min={50}
               max={600}
               step={10}
-              onValueChange={([v]) =>
-                setOptions<TickerOptions>("speed", { ...animation.options, speed: v })
-              }
+              onValueChange={([v]) => onOptionChange("speed", { ...animation.options, speed: v })}
             />
           </Row>
           <Row label={`Gap (${animation.options.gap}px)`}>
@@ -326,9 +316,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               min={0}
               max={400}
               step={10}
-              onValueChange={([v]) =>
-                setOptions<TickerOptions>("gap", { ...animation.options, gap: v })
-              }
+              onValueChange={([v]) => onOptionChange("gap", { ...animation.options, gap: v })}
             />
           </Row>
         </>
@@ -343,7 +331,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               max={1}
               step={0.05}
               onValueChange={([v]) =>
-                setOptions<DigitalMatrixOptions>("glowIntensity", {
+                onOptionChange("glowIntensity", {
                   ...animation.options,
                   glowIntensity: v,
                 })
@@ -357,7 +345,7 @@ export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Prop
               max={12}
               step={1}
               onValueChange={([v]) =>
-                setOptions<DigitalMatrixOptions>("glitchAmplitude", {
+                onOptionChange("glitchAmplitude", {
                   ...animation.options,
                   glitchAmplitude: v,
                 })

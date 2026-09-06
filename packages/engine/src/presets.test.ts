@@ -1,12 +1,36 @@
 import { describe, expect, it } from "bun:test";
 import { PRESETS } from "./presets";
+import type { SubtitleStyle } from "./types";
 
-const STYLE_KEYS = [
-  "fontFamily", "fontWeight", "fontSize", "color", "activeColor", "stroke", "strokeWidth",
-  "activeScale", "shadowBlur", "shadowColor", "shadowOffsetX", "shadowOffsetY",
-  "textGradientEnabled", "textGradientTo", "textGradientAngle", "activeGlowMultiplier",
-  "boxWidth", "boxAnchor", "bgColor", "bgOpacity", "bgRadius", "bgPaddingX", "bgPaddingY",
-] as const;
+// A missing or extra key here is a TypeScript error, so STYLE_KEYS can't
+// silently drift from SubtitleStyle when a field is added or removed.
+const STYLE_KEY_MAP: Record<keyof SubtitleStyle, true> = {
+  fontFamily: true,
+  fontWeight: true,
+  fontSize: true,
+  color: true,
+  activeColor: true,
+  stroke: true,
+  strokeWidth: true,
+  activeScale: true,
+  shadowBlur: true,
+  shadowColor: true,
+  shadowOffsetX: true,
+  shadowOffsetY: true,
+  textGradientEnabled: true,
+  textGradientTo: true,
+  textGradientAngle: true,
+  activeGlowMultiplier: true,
+  boxWidth: true,
+  boxAnchor: true,
+  bgColor: true,
+  bgOpacity: true,
+  bgRadius: true,
+  bgPaddingX: true,
+  bgPaddingY: true,
+};
+
+const STYLE_KEYS = Object.keys(STYLE_KEY_MAP) as (keyof SubtitleStyle)[];
 
 describe("PRESETS", () => {
   it("has at least one preset", () => {
