@@ -51,7 +51,7 @@ export const PRESETS: Record<string, StylePreset> = {
     label: "Typewriter",
     style: {
       ...defaultStyle,
-      fontFamily: "'Courier New', monospace",
+      fontFamily: "Roboto Mono",
       fontWeight: 700,
       shadowBlur: 0,
     },
@@ -61,7 +61,7 @@ export const PRESETS: Record<string, StylePreset> = {
     label: "Digital Matrix",
     style: {
       ...defaultStyle,
-      fontFamily: "'Courier New', monospace",
+      fontFamily: "Roboto Mono",
       color: "#00ff00",
       activeColor: "#00ff66",
     },

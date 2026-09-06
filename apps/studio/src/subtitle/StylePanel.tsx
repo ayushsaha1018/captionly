@@ -1,4 +1,12 @@
-import type { SubtitleStyle, SubtitlePosition } from "@captionly/engine";
+import {
+  type SubtitleStyle,
+  type SubtitlePosition,
+  getGoogleFontNames,
+  POPULAR_GOOGLE_FONTS,
+  findGoogleFont,
+  loadGoogleFont,
+} from "@captionly/engine";
+import { VirtualizedCombobox } from "@/components/virtualized-combobox";
 import {
   Select,
   SelectContent,
@@ -29,13 +37,12 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
   </div>
 );
 
-const FONTS = [
-  "Inter, system-ui, -apple-system, sans-serif",
-  "Georgia, serif",
-  "'Courier New', monospace",
-  "Impact, sans-serif",
-  "'Arial Black', sans-serif",
-];
+const GOOGLE_FONTS = (() => {
+  const all = getGoogleFontNames();
+  const popularSet = new Set(POPULAR_GOOGLE_FONTS);
+  const others = all.filter((f) => !popularSet.has(f)).sort((a, b) => a.localeCompare(b));
+  return [...POPULAR_GOOGLE_FONTS, ...others];
+})();
 
 function ColorField({
   label,
@@ -89,18 +96,19 @@ export function StylePanel({ style, onFieldChange, position, onPositionFieldChan
       </div>
 
       <Row label="Font family">
-        <Select value={style.fontFamily} onValueChange={(v) => set("fontFamily", v)}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {FONTS.map((f) => (
-              <SelectItem key={f} value={f}>
-                {f.split(",")[0].replace(/'/g, "")}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <VirtualizedCombobox
+          options={GOOGLE_FONTS}
+          selectedOption={
+            findGoogleFont(style.fontFamily)?.fontFamily || style.fontFamily || "Inter"
+          }
+          onSelectOption={(font) => {
+            set("fontFamily", font);
+            loadGoogleFont(font, { weights: [String(style.fontWeight || 400)] });
+          }}
+          searchPlaceholder="Search 1,800+ Google Fonts..."
+          width="100%"
+          height="280px"
+        />
       </Row>
 
       <div className="grid grid-cols-2 gap-3">

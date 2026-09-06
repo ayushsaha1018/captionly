@@ -52,7 +52,7 @@ export const sampleSubtitles: SubtitleLine[] = [
 ];
 
 export const defaultStyle: SubtitleStyle = {
-  fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+  fontFamily: "Inter",
   fontWeight: 900,
   fontSize: 84,
   color: "#ffffff",

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { renderMediaOnWeb } from "@remotion/web-renderer";
-import { MainComposition } from "@captionly/engine";
+import { MainComposition, loadGoogleFont } from "@captionly/engine";
 import type { SubtitleCompositionProps } from "@captionly/engine";
 import { downloadBlob } from "./downloadBlob";
 import { FPS } from "@/lib/constants";
@@ -85,6 +85,12 @@ export function useVideoExport(): UseVideoExportReturn {
       const startTime = performance.now();
 
       try {
+        if (subtitles.style.fontFamily) {
+          await loadGoogleFont(subtitles.style.fontFamily, {
+            weights: [String(subtitles.style.fontWeight || 400)],
+          });
+        }
+
         const inputProps: SubtitleCompositionProps = {
           videoSrc: videoUrl,
           subtitles,

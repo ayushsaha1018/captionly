@@ -1,14 +1,9 @@
 import React from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
-import { loadFont } from "@remotion/google-fonts/Inter";
 import type { SubtitleOverlayProps } from "../types";
 import { SubtitleAnimationRenderer } from "../animations/registry";
 import { calculateSubtitleLayout } from "../utils/geometry";
-
-loadFont("normal", {
-  weights: ["400", "600", "700", "900"],
-  subsets: ["latin"],
-});
+import { GoogleFontLoader } from "../fonts/googleFonts";
 
 export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
   lines,
@@ -20,12 +15,16 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
   const { fps, width, height } = useVideoConfig();
   const currentTime = frame / fps;
 
+  const fontLoader = (
+    <GoogleFontLoader fontFamily={style.fontFamily} fontWeight={style.fontWeight} />
+  );
+
   const activeLine = lines.find(
     (line) => currentTime >= line.start && currentTime <= line.end,
   );
 
   if (!activeLine) {
-    return null;
+    return fontLoader;
   }
 
   const { scale, maxWidth } = calculateSubtitleLayout(width, height, style.boxWidth);
@@ -60,8 +59,10 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
   };
 
   return (
-    <div
-      style={{
+    <>
+      {fontLoader}
+      <div
+        style={{
         position: "absolute",
         left: posX,
         top: posY,
@@ -96,7 +97,8 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
         />
       </div>
     </div>
-  );
+  </>
+);
 };
 
 function hexToRgba(hex: string, opacity: number): string {

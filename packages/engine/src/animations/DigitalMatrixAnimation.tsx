@@ -30,7 +30,7 @@ export const DigitalMatrixAnimation: React.FC<AnimationProps> = ({
         columnGap: "0.28em",
         rowGap: "0.15em",
         textAlign: "center",
-        fontFamily: "monospace",
+        fontFamily: style.fontFamily || "monospace",
       }}
     >
       {line.words.map((word) => {

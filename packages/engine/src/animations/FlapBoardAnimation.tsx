@@ -32,7 +32,7 @@ export const FlapBoardAnimation: React.FC<AnimationProps> = ({
         justifyContent: "center",
         gap: "0.25rem",
         textAlign: "center",
-        fontFamily: "monospace",
+        fontFamily: style.fontFamily || "monospace",
       }}
     >
       {fullText.split("").map((targetChar, index) => {

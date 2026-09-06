@@ -7,6 +7,7 @@ export * from "./types";
 // Sample & Default Data
 export * from "./sampleData";
 export * from "./presets";
+export * from "./fonts/googleFonts";
 
 // Compositions
 export { MainComposition } from "./compositions/MainComposition";

@@ -1,6 +1,5 @@
 import React from "react";
 import { registerRoot, Composition } from "remotion";
-import { loadFont } from "@remotion/google-fonts/Inter";
 import {
   MainComposition,
   sampleSubtitles,
@@ -8,11 +7,6 @@ import {
   defaultPosition,
   defaultAnimation,
 } from "@captionly/engine";
-
-loadFont("normal", {
-  weights: ["400", "600", "700", "900"],
-  subsets: ["latin"],
-});
 
 export const RemotionRoot: React.FC = () => {
   return (
