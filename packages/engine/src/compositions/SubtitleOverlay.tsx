@@ -49,6 +49,8 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
     fontSize: scaledFontSize,
     strokeWidth: Math.round((style.strokeWidth ?? 0) * scale),
     shadowBlur: Math.round((style.shadowBlur ?? 0) * scale),
+    shadowOffsetX: Math.round((style.shadowOffsetX ?? 0) * scale),
+    shadowOffsetY: Math.round((style.shadowOffsetY ?? 0) * scale),
   };
 
   return (

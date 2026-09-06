@@ -1,6 +1,5 @@
 import {
   ANIMATION_LABELS,
-  defaultOptionsFor,
   type AnimationConfig,
   type AnimationType,
   type ColorFillOptions,
@@ -13,10 +12,19 @@ import {
   type TickerOptions,
   type DigitalMatrixOptions,
 } from "@captionly/engine";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 
 type Props = {
   animation: AnimationConfig;
-  onChange: (a: AnimationConfig) => void;
+  onTypeChange: (type: AnimationType) => void;
+  onOptionChange: (fieldKey: string, options: AnimationConfig["options"]) => void;
 };
 
 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
@@ -40,15 +48,7 @@ const ANIM_TYPES: AnimationType[] = [
   "digitalMatrix",
 ];
 
-export function AnimationPanel({ animation, onChange }: Props) {
-  const setType = (type: AnimationType) => {
-    onChange({ type, options: defaultOptionsFor(type) } as AnimationConfig);
-  };
-
-  const setOptions = <T extends AnimationConfig["options"]>(opts: T) => {
-    onChange({ ...animation, options: opts } as AnimationConfig);
-  };
-
+export function AnimationPanel({ animation, onTypeChange, onOptionChange }: Props) {
   return (
     <aside className="flex flex-col gap-5 rounded-xl border border-border bg-card p-5 shadow-lg h-fit">
       <div>
@@ -59,84 +59,81 @@ export function AnimationPanel({ animation, onChange }: Props) {
       </div>
 
       <Row label="Type">
-        <select
-          value={animation.type}
-          onChange={(e) => setType(e.target.value as AnimationType)}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
-        >
-          {ANIM_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {ANIMATION_LABELS[t]}
-            </option>
-          ))}
-        </select>
+        <Select value={animation.type} onValueChange={(v) => onTypeChange(v as AnimationType)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {ANIM_TYPES.map((t) => (
+              <SelectItem key={t} value={t}>
+                {ANIMATION_LABELS[t]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </Row>
 
       {animation.type === "colorFill" && (
         <Row label="Transition">
-          <select
+          <Select
             value={animation.options.transition}
-            onChange={(e) =>
-              setOptions<ColorFillOptions>({
-                transition: e.target.value as ColorFillOptions["transition"],
+            onValueChange={(v) =>
+              onOptionChange("transition", {
+                transition: v as ColorFillOptions["transition"],
               })
             }
-            className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
           >
-            <option value="hardCut">Hard cut</option>
-            <option value="gradient">Gradient (left-to-right)</option>
-          </select>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="hardCut">Hard cut</SelectItem>
+              <SelectItem value="gradient">Gradient (left-to-right)</SelectItem>
+            </SelectContent>
+          </Select>
         </Row>
       )}
 
       {animation.type === "typewriter" && (
         <>
           <Row label="Cursor">
-            <select
+            <Select
               value={animation.options.cursor}
-              onChange={(e) =>
-                setOptions<TypewriterOptions>({
+              onValueChange={(v) =>
+                onOptionChange("cursor", {
                   ...animation.options,
-                  cursor: e.target.value as TypewriterOptions["cursor"],
+                  cursor: v as TypewriterOptions["cursor"],
                 })
               }
-              className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
             >
-              <option value="|">Line ( | )</option>
-              <option value="_">Underscore ( _ )</option>
-              <option value=".">Dot ( . )</option>
-            </select>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="|">Line ( | )</SelectItem>
+                <SelectItem value="_">Underscore ( _ )</SelectItem>
+                <SelectItem value=".">Dot ( . )</SelectItem>
+              </SelectContent>
+            </Select>
           </Row>
           <Row label={`Blink rate (${animation.options.blinkRate.toFixed(1)} Hz)`}>
-            <input
-              type="range"
+            <Slider
+              value={[animation.options.blinkRate]}
               min={0}
               max={4}
               step={0.1}
-              value={animation.options.blinkRate}
-              onChange={(e) =>
-                setOptions<TypewriterOptions>({
-                  ...animation.options,
-                  blinkRate: +e.target.value,
-                })
+              onValueChange={([v]) =>
+                onOptionChange("blinkRate", { ...animation.options, blinkRate: v })
               }
-              className="w-full accent-[hsl(var(--primary))]"
             />
           </Row>
           <Row label={`Max speed cap (${animation.options.maxCps} chars/s)`}>
-            <input
-              type="range"
+            <Slider
+              value={[animation.options.maxCps]}
               min={10}
               max={80}
               step={1}
-              value={animation.options.maxCps}
-              onChange={(e) =>
-                setOptions<TypewriterOptions>({
-                  ...animation.options,
-                  maxCps: +e.target.value,
-                })
-              }
-              className="w-full accent-[hsl(var(--primary))]"
+              onValueChange={([v]) => onOptionChange("maxCps", { ...animation.options, maxCps: v })}
             />
           </Row>
         </>
@@ -145,50 +142,44 @@ export function AnimationPanel({ animation, onChange }: Props) {
       {animation.type === "rollUp" && (
         <>
           <Row label={`Line limit (${animation.options.lineLimit})`}>
-            <input
-              type="range"
+            <Slider
+              value={[animation.options.lineLimit]}
               min={1}
               max={5}
               step={1}
-              value={animation.options.lineLimit}
-              onChange={(e) =>
-                setOptions<RollUpOptions>({
-                  ...animation.options,
-                  lineLimit: +e.target.value,
-                })
+              onValueChange={([v]) =>
+                onOptionChange("lineLimit", { ...animation.options, lineLimit: v })
               }
-              className="w-full accent-[hsl(var(--primary))]"
             />
           </Row>
           <Row label="Transition">
-            <select
+            <Select
               value={animation.options.transition}
-              onChange={(e) =>
-                setOptions<RollUpOptions>({
+              onValueChange={(v) =>
+                onOptionChange("transition", {
                   ...animation.options,
-                  transition: e.target.value as RollUpOptions["transition"],
+                  transition: v as RollUpOptions["transition"],
                 })
               }
-              className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
             >
-              <option value="hardCut">Hard cut</option>
-              <option value="soft">Soft scroll</option>
-            </select>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="hardCut">Hard cut</SelectItem>
+                <SelectItem value="soft">Soft scroll</SelectItem>
+              </SelectContent>
+            </Select>
           </Row>
           <Row label={`Line spacing (${animation.options.lineSpacing}px)`}>
-            <input
-              type="range"
+            <Slider
+              value={[animation.options.lineSpacing]}
               min={0}
               max={64}
               step={2}
-              value={animation.options.lineSpacing}
-              onChange={(e) =>
-                setOptions<RollUpOptions>({
-                  ...animation.options,
-                  lineSpacing: +e.target.value,
-                })
+              onValueChange={([v]) =>
+                onOptionChange("lineSpacing", { ...animation.options, lineSpacing: v })
               }
-              className="w-full accent-[hsl(var(--primary))]"
             />
           </Row>
         </>
@@ -197,34 +188,31 @@ export function AnimationPanel({ animation, onChange }: Props) {
       {animation.type === "paintOn" && (
         <>
           <Row label="Direction">
-            <select
+            <Select
               value={animation.options.direction}
-              onChange={(e) =>
-                setOptions<PaintOnOptions>({
+              onValueChange={(v) =>
+                onOptionChange("direction", {
                   ...animation.options,
-                  direction: e.target.value as PaintOnOptions["direction"],
+                  direction: v as PaintOnOptions["direction"],
                 })
               }
-              className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
             >
-              <option value="ltr">Left → Right</option>
-              <option value="rtl">Right → Left (Arabic / Hebrew)</option>
-            </select>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ltr">Left → Right</SelectItem>
+                <SelectItem value="rtl">Right → Left (Arabic / Hebrew)</SelectItem>
+              </SelectContent>
+            </Select>
           </Row>
           <Row label={`Max speed cap (${animation.options.maxCps} chars/s)`}>
-            <input
-              type="range"
+            <Slider
+              value={[animation.options.maxCps]}
               min={10}
               max={80}
               step={1}
-              value={animation.options.maxCps}
-              onChange={(e) =>
-                setOptions<PaintOnOptions>({
-                  ...animation.options,
-                  maxCps: +e.target.value,
-                })
-              }
-              className="w-full accent-[hsl(var(--primary))]"
+              onValueChange={([v]) => onOptionChange("maxCps", { ...animation.options, maxCps: v })}
             />
           </Row>
         </>
@@ -233,35 +221,25 @@ export function AnimationPanel({ animation, onChange }: Props) {
       {animation.type === "popOn" && (
         <>
           <Row label={`Pop scale (${animation.options.popScale.toFixed(2)}x)`}>
-            <input
-              type="range"
+            <Slider
+              value={[animation.options.popScale]}
               min={1}
               max={1.6}
               step={0.01}
-              value={animation.options.popScale}
-              onChange={(e) =>
-                setOptions<PopOnOptions>({
-                  ...animation.options,
-                  popScale: +e.target.value,
-                })
+              onValueChange={([v]) =>
+                onOptionChange("popScale", { ...animation.options, popScale: v })
               }
-              className="w-full accent-[hsl(var(--primary))]"
             />
           </Row>
           <Row label={`Pop duration (${animation.options.popDuration.toFixed(2)}s)`}>
-            <input
-              type="range"
+            <Slider
+              value={[animation.options.popDuration]}
               min={0.05}
               max={0.8}
               step={0.01}
-              value={animation.options.popDuration}
-              onChange={(e) =>
-                setOptions<PopOnOptions>({
-                  ...animation.options,
-                  popDuration: +e.target.value,
-                })
+              onValueChange={([v]) =>
+                onOptionChange("popDuration", { ...animation.options, popDuration: v })
               }
-              className="w-full accent-[hsl(var(--primary))]"
             />
           </Row>
         </>
@@ -269,55 +247,53 @@ export function AnimationPanel({ animation, onChange }: Props) {
 
       {animation.type === "wipe" && (
         <Row label="Direction">
-          <select
+          <Select
             value={animation.options.direction}
-            onChange={(e) =>
-              setOptions<WipeOptions>({
-                direction: e.target.value as WipeOptions["direction"],
-              })
+            onValueChange={(v) =>
+              onOptionChange("direction", { direction: v as WipeOptions["direction"] })
             }
-            className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
           >
-            <option value="ltr">Left → Right</option>
-            <option value="rtl">Right → Left</option>
-            <option value="ttb">Top → Bottom</option>
-            <option value="btt">Bottom → Top</option>
-          </select>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ltr">Left → Right</SelectItem>
+              <SelectItem value="rtl">Right → Left</SelectItem>
+              <SelectItem value="ttb">Top → Bottom</SelectItem>
+              <SelectItem value="btt">Bottom → Top</SelectItem>
+            </SelectContent>
+          </Select>
         </Row>
       )}
 
       {animation.type === "flapBoard" && (
         <>
           <Row label={`Flap duration (${animation.options.flapDuration.toFixed(2)}s)`}>
-            <input
-              type="range"
+            <Slider
+              value={[animation.options.flapDuration]}
               min={0.1}
               max={2}
               step={0.05}
-              value={animation.options.flapDuration}
-              onChange={(e) =>
-                setOptions<FlapBoardOptions>({
+              onValueChange={([v]) =>
+                onOptionChange("flapDuration", {
                   ...animation.options,
-                  flapDuration: +e.target.value,
+                  flapDuration: v,
                 })
               }
-              className="w-full accent-[hsl(var(--primary))]"
             />
           </Row>
           <Row label={`Cycles per char (${animation.options.cyclesPerChar})`}>
-            <input
-              type="range"
+            <Slider
+              value={[animation.options.cyclesPerChar]}
               min={2}
               max={20}
               step={1}
-              value={animation.options.cyclesPerChar}
-              onChange={(e) =>
-                setOptions<FlapBoardOptions>({
+              onValueChange={([v]) =>
+                onOptionChange("cyclesPerChar", {
                   ...animation.options,
-                  cyclesPerChar: +e.target.value,
+                  cyclesPerChar: v,
                 })
               }
-              className="w-full accent-[hsl(var(--primary))]"
             />
           </Row>
         </>
@@ -326,35 +302,21 @@ export function AnimationPanel({ animation, onChange }: Props) {
       {animation.type === "ticker" && (
         <>
           <Row label={`Scroll speed (${animation.options.speed} px/s)`}>
-            <input
-              type="range"
+            <Slider
+              value={[animation.options.speed]}
               min={50}
               max={600}
               step={10}
-              value={animation.options.speed}
-              onChange={(e) =>
-                setOptions<TickerOptions>({
-                  ...animation.options,
-                  speed: +e.target.value,
-                })
-              }
-              className="w-full accent-[hsl(var(--primary))]"
+              onValueChange={([v]) => onOptionChange("speed", { ...animation.options, speed: v })}
             />
           </Row>
           <Row label={`Gap (${animation.options.gap}px)`}>
-            <input
-              type="range"
+            <Slider
+              value={[animation.options.gap]}
               min={0}
               max={400}
               step={10}
-              value={animation.options.gap}
-              onChange={(e) =>
-                setOptions<TickerOptions>({
-                  ...animation.options,
-                  gap: +e.target.value,
-                })
-              }
-              className="w-full accent-[hsl(var(--primary))]"
+              onValueChange={([v]) => onOptionChange("gap", { ...animation.options, gap: v })}
             />
           </Row>
         </>
@@ -363,35 +325,31 @@ export function AnimationPanel({ animation, onChange }: Props) {
       {animation.type === "digitalMatrix" && (
         <>
           <Row label={`Glow intensity (${animation.options.glowIntensity.toFixed(2)})`}>
-            <input
-              type="range"
+            <Slider
+              value={[animation.options.glowIntensity]}
               min={0}
               max={1}
               step={0.05}
-              value={animation.options.glowIntensity}
-              onChange={(e) =>
-                setOptions<DigitalMatrixOptions>({
+              onValueChange={([v]) =>
+                onOptionChange("glowIntensity", {
                   ...animation.options,
-                  glowIntensity: +e.target.value,
+                  glowIntensity: v,
                 })
               }
-              className="w-full accent-[hsl(var(--primary))]"
             />
           </Row>
           <Row label={`Glitch jitter (${animation.options.glitchAmplitude}px)`}>
-            <input
-              type="range"
+            <Slider
+              value={[animation.options.glitchAmplitude]}
               min={0}
               max={12}
               step={1}
-              value={animation.options.glitchAmplitude}
-              onChange={(e) =>
-                setOptions<DigitalMatrixOptions>({
+              onValueChange={([v]) =>
+                onOptionChange("glitchAmplitude", {
                   ...animation.options,
-                  glitchAmplitude: +e.target.value,
+                  glitchAmplitude: v,
                 })
               }
-              className="w-full accent-[hsl(var(--primary))]"
             />
           </Row>
         </>

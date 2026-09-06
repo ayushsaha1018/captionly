@@ -61,6 +61,13 @@ export const defaultStyle: SubtitleStyle = {
   strokeWidth: 6,
   activeScale: 1.25,
   shadowBlur: 24,
+  shadowColor: "#000000",
+  shadowOffsetX: 0,
+  shadowOffsetY: 0,
+  textGradientEnabled: false,
+  textGradientTo: "#FFD60A", // matches activeColor above — a visible two-tone default the moment it's enabled
+  textGradientAngle: 90,
+  activeGlowMultiplier: 1,
   boxWidth: 1400,
   boxAnchor: "bottom",
   bgColor: "#000000",

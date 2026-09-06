@@ -1,5 +1,6 @@
 import React from "react";
 import type { SubtitleLine, SubtitleStyle, WipeOptions } from "../types";
+import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -40,29 +41,14 @@ export const WipeAnimation: React.FC<AnimationProps> = ({
 
   const text = line.words.map((w) => w.text).join(" ");
 
-  const strokeStyle =
-    style.strokeWidth > 0
-      ? {
-          WebkitTextStroke: `${style.strokeWidth}px ${style.stroke}`,
-          paintOrder: "stroke fill",
-        }
-      : {};
-
-  const shadowStyle =
-    style.shadowBlur > 0
-      ? {
-          textShadow: `0 0 ${style.shadowBlur}px ${style.activeColor}`,
-        }
-      : {};
-
   return (
     <div className="relative text-center whitespace-pre-wrap">
       {/* Background Dim Layer */}
       <span
         style={{
-          color: style.color,
           opacity: 0.3,
-          ...strokeStyle,
+          ...resolveWordFillCss(style, false),
+          ...resolveWordStrokeCss(style),
         }}
       >
         {text}
@@ -72,10 +58,10 @@ export const WipeAnimation: React.FC<AnimationProps> = ({
       <span
         className="absolute inset-0"
         style={{
-          color: style.activeColor,
           clipPath,
-          ...strokeStyle,
-          ...shadowStyle,
+          ...resolveWordFillCss(style, true),
+          ...resolveWordStrokeCss(style),
+          ...resolveWordShadowCss(style, true),
         }}
       >
         {text}

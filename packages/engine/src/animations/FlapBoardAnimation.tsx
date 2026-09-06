@@ -1,5 +1,6 @@
 import React from "react";
 import type { SubtitleLine, SubtitleStyle, FlapBoardOptions } from "../types";
+import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -21,14 +22,6 @@ export const FlapBoardAnimation: React.FC<AnimationProps> = ({
   const fullText = line.words.map((w) => w.text).join(" ").toUpperCase();
   const duration = Math.max(0.1, line.end - line.start);
   const progress = Math.max(0, Math.min(1, (currentTime - line.start) / duration));
-
-  const strokeStyle =
-    style.strokeWidth > 0
-      ? {
-          WebkitTextStroke: `${style.strokeWidth}px ${style.stroke}`,
-          paintOrder: "stroke fill",
-        }
-      : {};
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-1 text-center font-mono">
@@ -53,10 +46,11 @@ export const FlapBoardAnimation: React.FC<AnimationProps> = ({
             key={index}
             className="inline-flex items-center justify-center rounded px-1"
             style={{
-              color: isSettled ? style.activeColor : style.color,
               backgroundColor: isSettled ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.4)",
               minWidth: "1.1em",
-              ...strokeStyle,
+              ...resolveWordFillCss(style, isSettled),
+              ...resolveWordStrokeCss(style),
+              ...resolveWordShadowCss(style, isSettled),
             }}
           >
             {displayChar}

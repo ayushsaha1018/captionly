@@ -1,7 +1,7 @@
 # Frontend Revamp — Program Roadmap
 
 **Created:** 2026-09-02
-**Status:** sub-projects 1 & 2 complete; 3 specced (line editor, in progress); 4 not yet specced
+**Status:** sub-projects 1-4 complete (style system implemented)
 **Scope:** `apps/studio` (with narrow, named exceptions in `packages/engine`)
 
 This is the program-level document for the frontend revamp. Each sub-project gets its
@@ -138,21 +138,36 @@ style scaling, safe zones, and empty states with demo mode.
 - PR: Ready to open to `feat/studio-video-in` (PR 3)
 - All exit criteria met (52 passing studio unit tests, 0 lint errors, browser-verified via DevTools MCP).
 
-### SP4 — Style system
+### SP4 — Style system ✅ COMPLETE
 
 **Goal:** "style them extensively" delivered.
 
 - Rework `StylePanel` and `AnimationPanel` onto shadcn components. They are currently raw
   `<select>`, `<input type=range>`, and `<input type=color>` despite the full library being
   installed.
-- Presets.
-- The expanded style surface the global-only decision bought us — gradients, per-word
-  emphasis treatments, outline/glow/shadow stacks.
+- Built-in curated presets (style + animation bundles); no save/custom-preset feature.
+- The expanded style surface the global-only decision bought us — text-fill gradients, a
+  richer active-word glow (`activeGlowMultiplier`), and a fuller outline/glow/shadow control
+  set (`shadowColor`/`shadowOffsetX`/`shadowOffsetY` alongside the existing `shadowBlur`).
+  "Per-word emphasis" resolved to *richer active-word treatment*, not per-word manual
+  overrides — styling stays global-only.
+- Per-field undo coalescing (see entry note) and export-path gating/labeling for the
+  client WebCodecs renderer, which already mis-renders 8 of 9 animation types today
+  (pre-existing debt, widened by this sub-project — see §6).
 
-**Entry note:** SP1 wired `commit()` into the style handlers with a single coalesce key per
-surface (`"style"`, `"animation"`), so a slider drag collapses into one undo entry. Once the
-panels are reworked, key per-property instead, so two deliberate tweaks inside 600ms stop
-merging.
+**Entry note (resolved by this spec):** SP1 wired `commit()` into the style handlers with a
+single coalesce key per surface (`"style"`, `"animation"`), so a slider drag collapses into
+one undo entry. The panel rework keys per-property instead, so two deliberate tweaks inside
+600ms stop merging.
+
+- Spec: `specs/2026-09-06-style-system-design.md`
+- Plan: `plans/2026-09-06-style-system.md`
+- Branch: `feat/studio-style-system` (branches from `feat/studio-line-editor`)
+- PR: Not yet opened — will be PR 4 (see "Branching & Delivery" above)
+- **Outstanding:** manual browser verification was not performed for this branch's
+  implementation. The implementing session had no browser-automation tooling available, so
+  the style panel, presets, and export-gating UI have been verified by reading code, never
+  by watching them run — the same disclosure SP1 recorded for its re-render architecture.
 
 ---
 

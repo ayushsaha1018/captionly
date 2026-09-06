@@ -21,6 +21,7 @@ import { Progress } from "@/components/ui/progress";
 import { useVideoExport, type UseVideoExportReturn } from "./useVideoExport";
 import { useServerVideoExport } from "./useServerVideoExport";
 import { downloadBlob } from "./downloadBlob";
+import { isClientExportSupported } from "./exportCapability";
 import type { SubtitleExportData } from "./types";
 import type { VideoMeta } from "@/store/types";
 
@@ -88,6 +89,8 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
 
   const percent = Math.round((progress?.progress ?? 0) * 100);
   const clientBlocked = mode === "client" && !isSupported;
+  const fidelity = isClientExportSupported(subtitles.style, subtitles.animation);
+  const clientFidelityWarning = mode === "client" && !clientBlocked && !fidelity.supported;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -246,6 +249,12 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
                     ? "Video frames and subtitle animations are rendered directly in your browser via WebCodecs. No video is uploaded to external servers."
                     : "Your video is uploaded temporarily to a render service, processed there, and the finished file is sent back to you."}
                 </p>
+                {clientFidelityWarning && (
+                  <p className="mt-1.5 flex items-start gap-1.5 border-t border-border/60 pt-1.5 text-[11px] font-medium leading-relaxed text-foreground">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-muted-foreground" />
+                    <span>{fidelity.reason}</span>
+                  </p>
+                )}
               </div>
             )}
           </div>

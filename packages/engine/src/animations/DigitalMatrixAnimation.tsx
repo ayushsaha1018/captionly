@@ -1,5 +1,6 @@
 import React from "react";
 import type { SubtitleLine, SubtitleStyle, DigitalMatrixOptions } from "../types";
+import { resolveWordStrokeCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -18,14 +19,6 @@ export const DigitalMatrixAnimation: React.FC<AnimationProps> = ({
 }) => {
   const glitchAmp = options.glitchAmplitude ?? 3;
   const glow = options.glowIntensity ?? 0.8;
-
-  const strokeStyle =
-    style.strokeWidth > 0
-      ? {
-          WebkitTextStroke: `${style.strokeWidth}px ${style.stroke}`,
-          paintOrder: "stroke fill",
-        }
-      : {};
 
   return (
     <div
@@ -57,7 +50,7 @@ export const DigitalMatrixAnimation: React.FC<AnimationProps> = ({
                 : "none",
               display: "inline-block",
               margin: "0 0.12em",
-              ...strokeStyle,
+              ...resolveWordStrokeCss(style),
             }}
           >
             {word.text}

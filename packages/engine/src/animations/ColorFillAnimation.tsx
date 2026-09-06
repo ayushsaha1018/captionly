@@ -1,6 +1,7 @@
 import React from "react";
 import { spring } from "remotion";
 import type { SubtitleLine, SubtitleStyle, ColorFillOptions } from "../types";
+import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -47,39 +48,18 @@ export const ColorFillAnimation: React.FC<AnimationProps> = ({
           scale = 1 + (style.activeScale - 1) * pop;
         }
 
-        const color = isActive
-          ? style.activeColor
-          : isPast
-            ? style.activeColor
-            : style.color;
-
-        const strokeStyle =
-          style.strokeWidth > 0
-            ? {
-                WebkitTextStroke: `${style.strokeWidth}px ${style.stroke}`,
-                paintOrder: "stroke fill",
-              }
-            : {};
-
-        const shadowStyle =
-          style.shadowBlur > 0
-            ? {
-                textShadow: `0 0 ${style.shadowBlur}px ${isActive ? style.activeColor : "rgba(0,0,0,0.8)"}`,
-              }
-            : {};
-
         return (
           <span
             key={word.id}
             style={{
-              color,
               transform: `scale(${scale})`,
               transformOrigin: "center bottom",
               display: "inline-block",
               margin: "0 0.12em",
               transition: "color 0.1s ease",
-              ...strokeStyle,
-              ...shadowStyle,
+              ...resolveWordFillCss(style, isActive || isPast),
+              ...resolveWordStrokeCss(style),
+              ...resolveWordShadowCss(style, isActive),
             }}
           >
             {word.text}
