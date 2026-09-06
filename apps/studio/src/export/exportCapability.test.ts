@@ -21,9 +21,14 @@ test("colorFill with a gradient transition is unsupported", () => {
     options: { transition: "gradient" },
   });
   expect(result.supported).toBe(false);
+  expect(result.reason).toBeDefined();
+  expect(result.reason!.length).toBeGreaterThan(0);
 });
 
 test("enabled text gradient is unsupported even with colorFill hardCut", () => {
   const style = { ...defaultStyle, textGradientEnabled: true };
-  expect(isClientExportSupported(style, defaultAnimation).supported).toBe(false);
+  const result = isClientExportSupported(style, defaultAnimation);
+  expect(result.supported).toBe(false);
+  expect(result.reason).toBeDefined();
+  expect(result.reason!.length).toBeGreaterThan(0);
 });
