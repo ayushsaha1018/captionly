@@ -26,7 +26,8 @@ export function isClientExportSupported(
   if (style.textGradientEnabled) {
     return {
       supported: false,
-      reason: "The client export can't draw gradient text yet. Use server export for an accurate result.",
+      reason:
+        "The client export can't draw gradient text yet. Use server export for an accurate result.",
     };
   }
   return { supported: true };
