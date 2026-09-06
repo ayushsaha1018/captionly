@@ -1,10 +1,14 @@
 import type { PlayerRef } from "@remotion/player";
+import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useStudioStore } from "@/store";
 import { StylePanel } from "@/subtitle/StylePanel";
 import { AnimationPanel } from "@/subtitle/AnimationPanel";
+import { PresetPicker } from "@/subtitle/PresetPicker";
 import { LineList } from "@/lines/LineList";
-import type { SafeZonePreset, SubtitleStyle, AnimationConfig } from "@captionly/engine";
+import { cn } from "@/lib/utils";
+import { defaultOptionsFor, type StylePreset } from "@captionly/engine";
+import type { SafeZonePreset, SubtitleStyle, AnimationConfig, AnimationType } from "@captionly/engine";
 
 export function WorkSurface({
   playerRef,
@@ -24,20 +28,35 @@ export function WorkSurface({
   const commit = useStudioStore((s) => s.commit);
   const lineCount = useStudioStore((s) => s.lines.length);
 
+  const [pulsing, setPulsing] = useState(false);
+
   // commit() snapshots the CURRENT state, so it must run BEFORE the mutation
   // it is meant to undo. Committing after would record the post-change state
   // and undo would land a step short.
   //
-  // Both carry a coalesceKey: a slider drag fires dozens of changes, and
-  // without one each would become its own undo entry.
-  const changeStyle = (next: SubtitleStyle) => {
-    commit("Change style", { coalesceKey: "style" });
-    setStyle(next);
+  // Coalesce keys are per-field (`style:${key}`, `animation:${type}:${key}`)
+  // so two different sliders touched within the coalesce window don't merge
+  // into one undo step.
+  const changeStyleField = <K extends keyof SubtitleStyle>(key: K, value: SubtitleStyle[K]) => {
+    commit("Change style", { coalesceKey: `style:${String(key)}` });
+    setStyle({ [key]: value } as Partial<SubtitleStyle>);
   };
 
-  const changeAnimation = (next: AnimationConfig) => {
-    commit("Change animation", { coalesceKey: "animation" });
-    setAnimation(next);
+  const changeAnimationType = (type: AnimationType) => {
+    commit("Change animation");
+    setAnimation({ type, options: defaultOptionsFor(type) } as AnimationConfig);
+  };
+
+  const changeAnimationOption = (fieldKey: string, options: AnimationConfig["options"]) => {
+    commit("Change animation", { coalesceKey: `animation:${animation.type}:${fieldKey}` });
+    setAnimation({ ...animation, options } as AnimationConfig);
+  };
+
+  const applyPreset = (preset: StylePreset) => {
+    commit("Apply preset");
+    setStyle(preset.style);
+    setAnimation(preset.animation);
+    setPulsing(true);
   };
 
   return (
@@ -61,12 +80,21 @@ export function WorkSurface({
 
       <TabsContent
         value="style"
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1"
+        className={cn(
+          "flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1",
+          pulsing && "animate-in fade-in duration-150 motion-reduce:animate-none",
+        )}
+        onAnimationEnd={() => setPulsing(false)}
       >
-        <AnimationPanel animation={animation} onChange={changeAnimation} />
+        <PresetPicker onApply={applyPreset} />
+        <AnimationPanel
+          animation={animation}
+          onTypeChange={changeAnimationType}
+          onOptionChange={changeAnimationOption}
+        />
         <StylePanel
           style={style}
-          onStyleChange={changeStyle}
+          onFieldChange={changeStyleField}
           safeZone={safeZone}
           onSafeZoneChange={onSafeZoneChange}
         />
