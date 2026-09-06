@@ -8,7 +8,12 @@ import { PresetPicker } from "@/subtitle/PresetPicker";
 import { LineList } from "@/lines/LineList";
 import { cn } from "@/lib/utils";
 import { defaultOptionsFor, type StylePreset } from "@captionly/engine";
-import type { SafeZonePreset, SubtitleStyle, AnimationConfig, AnimationType } from "@captionly/engine";
+import type {
+  SafeZonePreset,
+  SubtitleStyle,
+  AnimationConfig,
+  AnimationType,
+} from "@captionly/engine";
 
 export function WorkSurface({
   playerRef,
