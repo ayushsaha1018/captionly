@@ -14,6 +14,7 @@
     "dev:frontend": "turbo run dev --filter=@captionly/studio",
     "build": "turbo run build",
     "build:frontend": "turbo run build --filter=@captionly/studio",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "test": "turbo run test"
   }
 }
