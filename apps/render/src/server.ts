@@ -190,7 +190,7 @@ async function processJob(job: Job): Promise<void> {
       composition: { ...composition, durationInFrames, fps, width, height },
       serveUrl: bundleLocation,
       codec: "h264",
-      // crf: 18,
+      crf: 18,
       // "faster" trades encode speed for compression efficiency at the same
       // CRF — same visual quality, slightly larger file, quicker encode.
       x264Preset: "faster",
@@ -199,7 +199,6 @@ async function processJob(job: Job): Promise<void> {
       inputProps,
       licenseKey: "free-license",
       puppeteerInstance: await getBrowser(),
-      hardwareAcceleration: "if-possible",
       onProgress: ({ progress, renderedFrames }) => {
         updateJob(job.id, { progress, rendered_frames: renderedFrames });
       },
