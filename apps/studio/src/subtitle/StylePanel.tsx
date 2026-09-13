@@ -62,7 +62,7 @@ function ColorField({
           <button
             type="button"
             aria-label={label}
-            className="h-10 w-full rounded-md border border-border shadow-sm transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring motion-reduce:transition-none motion-reduce:hover:scale-100"
+            className="h-10 w-full rounded-md border border-border shadow-sm transition-transform focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             style={{ backgroundColor: value }}
           />
         </PopoverTrigger>
