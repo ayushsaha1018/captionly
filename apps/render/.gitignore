@@ -10,6 +10,9 @@ output/
 # user-provided video files
 files/input.mp4
 
+# render job queue (bun:sqlite)
+jobs.sqlite*
+
 # code coverage
 coverage
 *.lcov

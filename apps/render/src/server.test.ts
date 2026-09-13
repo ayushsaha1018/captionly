@@ -3,12 +3,14 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createRenderServer } from "./server";
+import { closeBrowser } from "./browserPool";
 import { defaultStyle, defaultPosition, defaultAnimation, sampleSubtitles } from "@captionly/engine";
 
 const server = createRenderServer(0);
 
-afterAll(() => {
+afterAll(async () => {
   server.stop(true);
+  await closeBrowser();
 });
 
 async function makeFixtureVideo(dir: string): Promise<string> {
@@ -74,11 +76,23 @@ describe("POST /render", () => {
         }),
       );
 
-      const res = await fetch(`http://localhost:${server.port}/render`, {
+      const submitRes = await fetch(`http://localhost:${server.port}/render`, {
         method: "POST",
         body: form,
       });
+      expect(submitRes.status).toBe(202);
+      const { jobId } = (await submitRes.json()) as { jobId: string };
 
+      let status: { status: string; error: string | null } | null = null;
+      for (let i = 0; i < 150; i++) {
+        const statusRes = await fetch(`http://localhost:${server.port}/render/${jobId}`);
+        status = await statusRes.json();
+        if (status?.status === "complete" || status?.status === "error") break;
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      }
+      expect(status?.status).toBe("complete");
+
+      const res = await fetch(`http://localhost:${server.port}/render/${jobId}/output`);
       expect(res.status).toBe(200);
       expect(res.headers.get("content-type")).toBe("video/mp4");
 
@@ -123,5 +137,12 @@ describe("POST /render", () => {
     });
 
     expect(res.status).toBe(400);
+  });
+});
+
+describe("GET /render/:id", () => {
+  test("404s for an unknown job id", async () => {
+    const res = await fetch(`http://localhost:${server.port}/render/does-not-exist`);
+    expect(res.status).toBe(404);
   });
 });

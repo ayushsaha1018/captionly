@@ -92,7 +92,8 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
     }
   };
 
-  const percent = Math.round((progress?.progress ?? 0) * 100);
+  const activeProgress = mode === "client" ? progress : serverExport.progress;
+  const percent = Math.round((activeProgress?.progress ?? 0) * 100);
   const clientBlocked = mode === "client" && !isSupported;
 
   return (
@@ -159,12 +160,41 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
                 <span>Rendering with @remotion/web-renderer</span>
               </div>
             </div>
+          ) : serverExport.phase === "rendering" && serverExport.progress ? (
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-medium">
+                  <span className="text-foreground">Rendering on server…</span>
+                  <span className="tabular-nums font-semibold text-primary">{percent}%</span>
+                </div>
+                <Progress value={percent} className="h-2" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 rounded-lg border border-border bg-secondary/30 p-2.5 text-center text-xs">
+                <div>
+                  <p className="text-[10px] text-muted-foreground">Frames</p>
+                  <p className="font-semibold tabular-nums text-foreground mt-0.5">
+                    {serverExport.progress.totalFrames
+                      ? `${serverExport.progress.currentFrame} / ${serverExport.progress.totalFrames}`
+                      : "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground">Est. Remaining</p>
+                  <p className="font-semibold tabular-nums text-foreground mt-0.5">
+                    {serverExport.progress.estimatedRemainingSec !== undefined
+                      ? `${serverExport.progress.estimatedRemainingSec}s`
+                      : "—"}
+                  </p>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="space-y-4 py-6 text-center">
               <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
               <div className="space-y-1">
                 <p className="text-sm font-medium text-foreground">
-                  {serverExport.phase === "uploading" ? "Uploading video…" : "Rendering on server…"}
+                  {serverExport.phase === "uploading" ? "Uploading video…" : "Waiting in queue…"}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   This may take a moment depending on video length.
