@@ -10,7 +10,7 @@ import {
 export interface NormalizedWord {
   text: string;
   start: number; // in seconds
-  end: number;   // in seconds
+  end: number; // in seconds
 }
 
 /**
@@ -23,7 +23,7 @@ export function normalizeWords(rawWords: RawTranscribeWord[]): NormalizedWord[] 
 
   for (const raw of rawWords) {
     // Support text, punctuated_word, word
-    const anyRaw = raw as Record<string, unknown>;
+    const anyRaw = raw as unknown as Record<string, unknown>;
     const rawText =
       (typeof raw.text === "string" ? raw.text : undefined) ||
       (typeof anyRaw.punctuated_word === "string" ? anyRaw.punctuated_word : undefined) ||
@@ -244,7 +244,10 @@ export function mapTikTokPagesToSubtitleLines(pages: TikTokPage[]): SubtitleLine
 
     const start = page.startMs / 1000;
     const lastWordEnd = words[words.length - 1].end;
-    const end = Math.max(start, Math.min((page.startMs + page.durationMs) / 1000, lastWordEnd + 0.15));
+    const end = Math.max(
+      start,
+      Math.min((page.startMs + page.durationMs) / 1000, lastWordEnd + 0.15),
+    );
 
     lines.push({
       id: crypto.randomUUID(),

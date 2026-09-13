@@ -50,13 +50,16 @@ export const PACING_CONFIG: Record<
 };
 
 export interface RawTranscribeWord {
-  text: string;
+  text?: string;
+  word?: string;
+  punctuated_word?: string;
   start?: number;
   end?: number;
   startInSeconds?: number;
   endInSeconds?: number;
   startMs?: number;
   endMs?: number;
+  [key: string]: unknown;
 }
 
 export interface SegmentationOptions {

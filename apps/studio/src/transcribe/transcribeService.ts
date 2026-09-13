@@ -6,20 +6,19 @@ import {
   isWhisperModelCached,
 } from "@remotion/whisper-webgpu";
 import { segmentWordsToSubtitleLines } from "./captionConverter";
-import {
-  type WhisperModelOption,
-  type PacingOption,
-  type TranscribeProgress,
-} from "./types";
+import { type WhisperModelOption, type PacingOption, type TranscribeProgress } from "./types";
 import type { SubtitleLine } from "@captionly/engine";
 
 export async function checkWebGpuSupport(): Promise<{ supported: boolean; reason?: string }> {
   try {
     const res = await canUseWhisperWebGpu();
-    return {
-      supported: res.supported,
-      reason: res.detailedReason || res.reason,
-    };
+    if (!res.supported) {
+      return {
+        supported: false,
+        reason: res.detailedReason || res.reason,
+      };
+    }
+    return { supported: true };
   } catch (err) {
     return {
       supported: false,
@@ -30,7 +29,7 @@ export async function checkWebGpuSupport(): Promise<{ supported: boolean; reason
 
 export async function checkModelCached(model: WhisperModelOption): Promise<boolean> {
   try {
-    return await isWhisperModelCached(model);
+    return await isWhisperModelCached({ model });
   } catch {
     return false;
   }
@@ -74,7 +73,7 @@ export async function runTranscriptionPipeline(
   await loadWhisperModel({
     model,
     onProgress: ({ progress }) =>
-      onProgress?.({ stage: "downloading-model", modelProgress: progress }),
+      onProgress?.({ stage: "downloading-model", modelProgress: progress ?? undefined }),
   });
 
   // 4. Transcribe with WebGPU
