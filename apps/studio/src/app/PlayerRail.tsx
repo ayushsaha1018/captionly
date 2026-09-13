@@ -102,7 +102,7 @@ export function PlayerRail({
 
   if (!video) {
     return (
-      <aside className="flex w-full max-w-[480px] shrink-0 flex-col gap-4 self-start">
+      <aside className="flex w-full max-w-120 shrink-0 flex-col gap-4 self-start">
         <input
           type="file"
           ref={fileInputRef}
@@ -207,8 +207,8 @@ export function PlayerRail({
     // `sticky` is gone: the page no longer scrolls, so the rail is already
     // fixed. It scrolls itself only if the viewport is too short for it.
     <aside
-      className="flex max-h-full shrink-0 flex-col gap-4 self-start overflow-y-auto"
-      style={{ width: `clamp(280px, ${aspect >= 1 ? "42vw" : "24vw"}, 640px)` }}
+      className="flex max-h-full shrink-0 flex-col gap-4 self-start overflow-y-auto pl-2"
+      style={{ width: "clamp(280px, 42vw, 640px)" }}
     >
       <input
         type="file"
@@ -229,17 +229,19 @@ export function PlayerRail({
         </div>
       )}
 
-      <div style={{ aspectRatio: String(aspect) }}>
-        <StudioPlayer
-          videoSrc={video.src}
-          subtitles={{ lines, style, position, animation }}
-          safeZone={safeZone}
-          durationInFrames={Math.round(video.durationSec * FPS)}
-          compositionWidth={video.width}
-          compositionHeight={video.height}
-          fps={FPS}
-          playerRef={playerRef}
-        />
+      <div className="flex items-center justify-center" style={{ aspectRatio: "16 / 9" }}>
+        <div style={{ aspectRatio: String(aspect), height: "100%", maxWidth: "100%" }}>
+          <StudioPlayer
+            videoSrc={video.src}
+            subtitles={{ lines, style, position, animation }}
+            safeZone={safeZone}
+            durationInFrames={Math.round(video.durationSec * FPS)}
+            compositionWidth={video.width}
+            compositionHeight={video.height}
+            fps={FPS}
+            playerRef={playerRef}
+          />
+        </div>
       </div>
 
       <PlayerScrubber playerRef={playerRef} durationSec={video.durationSec} />
