@@ -1,17 +1,19 @@
-name: Deploy Studio
+name: Deploy Studio Preview
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   deploy:
-    name: Build and deploy to Cloudflare Pages
+    name: Build and deploy PR preview to Cloudflare Pages
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -32,9 +34,16 @@ jobs:
         env:
           VITE_RENDER_SERVER_URL: ${{ vars.VITE_RENDER_SERVER_URL }}
 
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy preview to Cloudflare Pages
+        id: deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/studio/dist --project-name=captionly-studio
+          command: pages deploy apps/studio/dist --project-name=captionly-studio --branch=pr-${{ github.event.pull_request.number }}
+
+      - name: Comment preview URL on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          message: |
+            🚀 Deployed studio preview: ${{ steps.deploy.outputs.deployment-url }}
