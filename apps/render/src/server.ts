@@ -151,6 +151,7 @@ async function handleRender(req: Request): Promise<Response> {
 export function createRenderServer(port = 4000) {
   return Bun.serve({
     port,
+    maxRequestBodySize: 1024 * 1024 * 1024, // 1GB, default 128MB is too small for source video uploads
     routes: {
       "/render": {
         POST: handleRender,
