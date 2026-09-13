@@ -234,7 +234,9 @@ export function TranscribeModal({
               disabled={isTranscribing || !webGpuStatus.supported}
             >
               <SelectTrigger className="w-full bg-zinc-900/80 border-zinc-800 text-xs h-9">
-                <SelectValue placeholder="Select model" />
+                <SelectValue placeholder="Select model">
+                  {MODEL_OPTIONS.find((opt) => opt.id === model)?.name}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
                 {MODEL_OPTIONS.map((opt) => (
@@ -261,17 +263,25 @@ export function TranscribeModal({
               disabled={isTranscribing || !webGpuStatus.supported}
             >
               <SelectTrigger className="w-full bg-zinc-900/80 border-zinc-800 text-xs h-9">
-                <SelectValue placeholder="Select pacing" />
+                <SelectValue placeholder="Select pacing">
+                  {PACING_CONFIG[pacing]?.label}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
                 <SelectItem value="reel" className="text-xs">
-                  <div className="font-medium">{PACING_CONFIG.reel.label}</div>
-                  <div className="text-[10px] text-zinc-500">{PACING_CONFIG.reel.description}</div>
+                  <div className="flex flex-col text-left">
+                    <span className="font-medium">{PACING_CONFIG.reel.label}</span>
+                    <span className="text-[10px] text-zinc-500">
+                      {PACING_CONFIG.reel.description}
+                    </span>
+                  </div>
                 </SelectItem>
                 <SelectItem value="standard" className="text-xs">
-                  <div className="font-medium">{PACING_CONFIG.standard.label}</div>
-                  <div className="text-[10px] text-zinc-500">
-                    {PACING_CONFIG.standard.description}
+                  <div className="flex flex-col text-left">
+                    <span className="font-medium">{PACING_CONFIG.standard.label}</span>
+                    <span className="text-[10px] text-zinc-500">
+                      {PACING_CONFIG.standard.description}
+                    </span>
                   </div>
                 </SelectItem>
               </SelectContent>
