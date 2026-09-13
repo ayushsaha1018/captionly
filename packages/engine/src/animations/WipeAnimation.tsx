@@ -1,6 +1,6 @@
 import React from "react";
 import type { SubtitleLine, SubtitleStyle, WipeOptions } from "../types";
-import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
+import { resolveWordFillCss, resolveWordOutlineCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -54,7 +54,7 @@ export const WipeAnimation: React.FC<AnimationProps> = ({
         style={{
           opacity: 0.3,
           ...resolveWordFillCss(style, false),
-          ...resolveWordStrokeCss(style),
+          ...resolveWordOutlineCss(style, false),
         }}
       >
         {text}
@@ -70,8 +70,7 @@ export const WipeAnimation: React.FC<AnimationProps> = ({
           bottom: 0,
           clipPath,
           ...resolveWordFillCss(style, true),
-          ...resolveWordStrokeCss(style),
-          ...resolveWordShadowCss(style, true),
+          ...resolveWordOutlineCss(style, true),
         }}
       >
         {text}

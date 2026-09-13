@@ -1,6 +1,6 @@
 import React from "react";
 import type { SubtitleLine, SubtitleStyle, FlapBoardOptions } from "../types";
-import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
+import { resolveWordFillCss, resolveWordOutlineCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -64,8 +64,7 @@ export const FlapBoardAnimation: React.FC<AnimationProps> = ({
               backgroundColor: isSettled ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.4)",
               minWidth: "1.1em",
               ...resolveWordFillCss(style, isSettled),
-              ...resolveWordStrokeCss(style),
-              ...resolveWordShadowCss(style, isSettled),
+              ...resolveWordOutlineCss(style, isSettled),
             }}
           >
             {displayChar}

@@ -1,6 +1,6 @@
 import React from "react";
 import type { SubtitleLine, SubtitleStyle, PaintOnOptions } from "../types";
-import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
+import { resolveWordFillCss, resolveWordOutlineCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -43,8 +43,7 @@ export const PaintOnAnimation: React.FC<AnimationProps> = ({
               filter: isVisible ? "none" : "blur(4px)",
               transition: "filter 0.1s ease, opacity 0.1s ease",
               ...resolveWordFillCss(style, isVisible),
-              ...resolveWordStrokeCss(style),
-              ...resolveWordShadowCss(style, isVisible),
+              ...resolveWordOutlineCss(style, isVisible),
             }}
           >
             {char === " " ? " " : char}

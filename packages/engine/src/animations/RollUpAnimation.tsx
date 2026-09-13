@@ -1,6 +1,6 @@
 import React from "react";
 import type { SubtitleLine, SubtitleStyle, RollUpOptions } from "../types";
-import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
+import { resolveWordFillCss, resolveWordOutlineCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -40,8 +40,7 @@ export const RollUpAnimation: React.FC<AnimationProps> = ({
               margin: "0 0.12em",
               transition: "all 0.15s ease-out",
               ...resolveWordFillCss(style, isActive),
-              ...resolveWordStrokeCss(style),
-              ...resolveWordShadowCss(style, isActive),
+              ...resolveWordOutlineCss(style, isActive),
             }}
           >
             {word.text}

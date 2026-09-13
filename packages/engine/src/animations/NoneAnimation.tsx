@@ -1,6 +1,6 @@
 import React from "react";
 import type { SubtitleLine, SubtitleStyle } from "../types";
-import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
+import { resolveWordFillCss, resolveWordOutlineCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -28,8 +28,7 @@ export const NoneAnimation: React.FC<AnimationProps> = ({ line, style }) => {
         rowGap: "0.15em",
         textAlign: "center",
         ...resolveWordFillCss(style, false),
-        ...resolveWordStrokeCss(style),
-        ...resolveWordShadowCss(style, false),
+        ...resolveWordOutlineCss(style, false),
       }}
     >
       {line.words.map((word) => (

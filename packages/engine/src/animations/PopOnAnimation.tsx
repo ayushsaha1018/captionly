@@ -1,7 +1,7 @@
 import React from "react";
 import { spring } from "remotion";
 import type { SubtitleLine, SubtitleStyle, PopOnOptions } from "../types";
-import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
+import { resolveWordFillCss, resolveWordOutlineCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -74,8 +74,7 @@ export const PopOnAnimation: React.FC<AnimationProps> = ({
               display: "inline-block",
               margin: "0 0.12em",
               ...resolveWordFillCss(style, isActive),
-              ...resolveWordStrokeCss(style),
-              ...resolveWordShadowCss(style, isActive),
+              ...resolveWordOutlineCss(style, isActive),
             }}
           >
             {word.text}

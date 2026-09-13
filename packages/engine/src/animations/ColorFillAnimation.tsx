@@ -1,7 +1,7 @@
 import React from "react";
 import { spring } from "remotion";
 import type { SubtitleLine, SubtitleStyle, ColorFillOptions } from "../types";
-import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
+import { resolveWordFillCss, resolveWordOutlineCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -58,8 +58,7 @@ export const ColorFillAnimation: React.FC<AnimationProps> = ({
               margin: "0 0.12em",
               transition: "color 0.1s ease",
               ...resolveWordFillCss(style, isActive || isPast),
-              ...resolveWordStrokeCss(style),
-              ...resolveWordShadowCss(style, isActive),
+              ...resolveWordOutlineCss(style, isActive),
             }}
           >
             {word.text}

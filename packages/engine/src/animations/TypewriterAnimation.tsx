@@ -1,6 +1,6 @@
 import React from "react";
 import type { SubtitleLine, SubtitleStyle, TypewriterOptions } from "../types";
-import { resolveWordFillCss, resolveWordShadowCss, resolveWordStrokeCss } from "../utils/textStyle";
+import { resolveWordFillCss, resolveWordOutlineCss } from "../utils/textStyle";
 
 interface AnimationProps {
   line: SubtitleLine;
@@ -38,8 +38,7 @@ export const TypewriterAnimation: React.FC<AnimationProps> = ({
         fontFamily: style.fontFamily || "monospace",
         whiteSpace: "pre-wrap",
         ...resolveWordFillCss(style, false),
-        ...resolveWordStrokeCss(style),
-        ...resolveWordShadowCss(style, false),
+        ...resolveWordOutlineCss(style, false),
       }}
     >
       <span>{visibleText}</span>
