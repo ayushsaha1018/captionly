@@ -20,3 +20,5 @@ apps/renderer/files/*.mp4
 .DS_Store
 
 .superpowers/
+.vercel
+.env*
