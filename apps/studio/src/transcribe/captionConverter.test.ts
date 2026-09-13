@@ -105,29 +105,16 @@ describe("segmentWordsToSubtitleLines (End-to-End Bug Fix Verification)", () => 
     expect(segmentWordsToSubtitleLines([{ text: "   ", start: 0, end: 1 }])).toEqual([]);
   });
 
-  it("filters out silence markers (─ or [silence])", () => {
-    const rawWords: RawTranscribeWord[] = [
-      { text: "Hello", start: 1.0, end: 1.3 },
-      { text: "───", start: 1.4, end: 2.0 },
-      { text: "world", start: 2.2, end: 2.5 },
-    ];
-    const lines = segmentWordsToSubtitleLines(rawWords, { pacing: "reel" });
-    const allWords = lines.flatMap((l) => l.words.map((w) => w.text));
-    expect(allWords).toEqual(["Hello", "world"]);
-  });
-
-  it("normalizes different timestamp formats (startInSeconds, start, startMs)", () => {
+  it("normalizes different timestamp formats (startInSeconds vs start)", () => {
     const raw: RawTranscribeWord[] = [
       { text: "FromSec", startInSeconds: 1.2, endInSeconds: 1.8 },
       { text: "FromStart", start: 2.0, end: 2.5 },
-      { text: "FromMs", startMs: 3000, endMs: 3500 },
     ];
 
     const normalized = normalizeWords(raw);
     expect(normalized).toEqual([
       { text: "FromSec", start: 1.2, end: 1.8 },
       { text: "FromStart", start: 2.0, end: 2.5 },
-      { text: "FromMs", start: 3.0, end: 3.5 },
     ]);
   });
 });

@@ -82,6 +82,7 @@ export async function runTranscriptionPipeline(
     channelWaveform,
     model,
   });
+  console.log(transcription);
 
   // 5. Segment words into subtitle lines using gap-only utterance grouping & pacing
   const lines = segmentWordsToSubtitleLines(transcription.words || [], { pacing });

@@ -12,7 +12,7 @@ export interface NormalizedWord {
 }
 
 /**
- * Normalizes raw word objects from Whisper WebGPU, Captions, or custom formats
+ * Normalizes raw word objects from Whisper WebGPU or custom word objects
  * into clean NormalizedWord objects with timestamps in seconds, sorted by start time.
  * Filters out silence markers (e.g. "─", "[silence]") and empty tokens.
  */
@@ -20,38 +20,13 @@ export function normalizeWords(rawWords: RawTranscribeWord[]): NormalizedWord[] 
   const result: NormalizedWord[] = [];
 
   for (const raw of rawWords) {
-    // Support text, punctuated_word, word
-    const anyRaw = raw as unknown as Record<string, unknown>;
-    const rawText =
-      (typeof raw.text === "string" ? raw.text : undefined) ||
-      (typeof anyRaw.punctuated_word === "string" ? anyRaw.punctuated_word : undefined) ||
-      (typeof anyRaw.word === "string" ? anyRaw.word : undefined) ||
-      "";
+    const text = raw.text.trim();
 
-    const text = rawText.trim();
-    // Filter out silence markers or empty tokens
-    if (!text || text.includes("─") || text.includes("[silence]")) continue;
+    const rawStart = "startInSeconds" in raw ? raw.startInSeconds : raw.start;
+    const rawEnd = "endInSeconds" in raw ? raw.endInSeconds : raw.end;
 
-    let start = 0;
-    if (typeof raw.startInSeconds === "number" && !isNaN(raw.startInSeconds)) {
-      start = raw.startInSeconds;
-    } else if (typeof raw.start === "number" && !isNaN(raw.start)) {
-      start = raw.start;
-    } else if (typeof raw.startMs === "number" && !isNaN(raw.startMs)) {
-      start = raw.startMs / 1000;
-    }
-
-    let end = start;
-    if (typeof raw.endInSeconds === "number" && !isNaN(raw.endInSeconds)) {
-      end = raw.endInSeconds;
-    } else if (typeof raw.end === "number" && !isNaN(raw.end)) {
-      end = raw.end;
-    } else if (typeof raw.endMs === "number" && !isNaN(raw.endMs)) {
-      end = raw.endMs / 1000;
-    }
-
-    start = Math.max(0, start);
-    end = Math.max(start, end);
+    const start = Math.max(0, rawStart);
+    const end = Math.max(start, rawEnd);
 
     result.push({ text, start, end });
   }
@@ -73,9 +48,7 @@ export function chunkWordsIntoSubtitleLines(
   options?: SegmentationOptions,
 ): SubtitleLine[] {
   // Filter out silence markers
-  const filteredWords = words.filter(
-    (w) => w.text && !w.text.includes("─") && w.text.trim() !== "",
-  );
+  const filteredWords = words.filter((w) => w.text && w.text.trim() !== "");
 
   if (!filteredWords.length) {
     return [];

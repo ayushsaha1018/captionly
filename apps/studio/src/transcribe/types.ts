@@ -1,3 +1,5 @@
+import type { WhisperWebGpuWord } from "@remotion/whisper-webgpu";
+
 export type WhisperModelOption = "base.en" | "tiny.en" | "small.en";
 
 export type PacingOption = "reel" | "standard";
@@ -26,9 +28,9 @@ export const PACING_SETTINGS: Record<PacingOption, PacingSettings> = {
   standard: {
     label: "Long-form / YouTube (Standard)",
     description: "Full sentences and lines (~3-4s), ideal for horizontal & landscape videos",
-    maxWordsPerLine: 8,
+    maxWordsPerLine: 10,
     targetDurationSec: 3.2,
-    maxDurationSec: 4.2,
+    maxDurationSec: 6,
     maxCharsPerLine: 42,
   },
 };
@@ -49,18 +51,7 @@ export const PACING_CONFIG: Record<
   },
 };
 
-export interface RawTranscribeWord {
-  text?: string;
-  word?: string;
-  punctuated_word?: string;
-  start?: number;
-  end?: number;
-  startInSeconds?: number;
-  endInSeconds?: number;
-  startMs?: number;
-  endMs?: number;
-  [key: string]: unknown;
-}
+export type RawTranscribeWord = WhisperWebGpuWord | { text: string; start: number; end: number };
 
 export interface SegmentationOptions {
   pacing?: PacingOption;
