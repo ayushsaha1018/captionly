@@ -4,5 +4,13 @@ export {
   checkModelCached,
   runTranscriptionPipeline,
 } from "./transcribeService";
-export { mapTikTokPagesToSubtitleLines } from "./captionConverter";
+export {
+  mapTikTokPagesToSubtitleLines,
+  segmentWordsToSubtitleLines,
+  chunkWordsIntoSubtitleLines,
+  groupWordsIntoSentences,
+  splitSentenceIntoLines,
+  normalizeWords,
+  type NormalizedWord,
+} from "./captionConverter";
 export * from "./types";

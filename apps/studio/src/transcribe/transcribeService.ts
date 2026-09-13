@@ -3,13 +3,10 @@ import {
   resampleTo16Khz,
   loadWhisperModel,
   transcribe,
-  toCaptions,
   isWhisperModelCached,
 } from "@remotion/whisper-webgpu";
-import { createTikTokStyleCaptions } from "@remotion/captions";
-import { mapTikTokPagesToSubtitleLines } from "./captionConverter";
+import { segmentWordsToSubtitleLines } from "./captionConverter";
 import {
-  PACING_CONFIG,
   type WhisperModelOption,
   type PacingOption,
   type TranscribeProgress,
@@ -87,23 +84,8 @@ export async function runTranscriptionPipeline(
     model,
   });
 
-  // 5. Convert to Captions
-  const { captions } = toCaptions({ whisperWebGpuOutput: transcription });
-
-  if (!captions || captions.length === 0) {
-    onProgress?.({ stage: "done" });
-    return [];
-  }
-
-  // 6. Segment into TikTok style pages based on chosen pacing
-  const { combineTokensWithinMilliseconds } = PACING_CONFIG[pacing];
-  const { pages } = createTikTokStyleCaptions({
-    captions,
-    combineTokensWithinMilliseconds,
-  });
-
-  // 7. Map to SubtitleLine[]
-  const lines = mapTikTokPagesToSubtitleLines(pages);
+  // 5. Segment words into subtitle lines using gap-only utterance grouping & pacing
+  const lines = segmentWordsToSubtitleLines(transcription.words || [], { pacing });
 
   onProgress?.({ stage: "done" });
   return lines;
