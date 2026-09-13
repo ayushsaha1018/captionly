@@ -1,8 +1,6 @@
-import type { TikTokPage } from "@remotion/captions";
-import type { SubtitleLine, Word } from "@captionly/engine";
+import type { SubtitleLine } from "@captionly/engine";
 import {
   DEFAULT_MAX_WORD_GAP_SEC,
-  type PacingOption,
   type RawTranscribeWord,
   type SegmentationOptions,
 } from "./types";
@@ -87,8 +85,8 @@ export function chunkWordsIntoSubtitleLines(
   const isTikTok = pacing === "reel";
 
   const MAX_PAUSE_BETWEEN_WORDS = options?.maxSilenceGapSec ?? DEFAULT_MAX_WORD_GAP_SEC;
-  const MAX_WORDS_PER_CHUNK = isTikTok ? 3 : 8;
-  const MAX_CHUNK_DURATION = isTikTok ? 1.8 : 4.5;
+  const MAX_WORDS_PER_CHUNK = isTikTok ? 3 : 10;
+  const MAX_CHUNK_DURATION = isTikTok ? 1.8 : 6;
 
   // Build chunks based on natural speech boundaries
   const chunks: NormalizedWord[][] = [];
@@ -168,94 +166,4 @@ export function segmentWordsToSubtitleLines(
 ): SubtitleLine[] {
   const normalized = normalizeWords(rawWords);
   return chunkWordsIntoSubtitleLines(normalized, options);
-}
-
-/**
- * Helper: groups words into continuous sentence groups based purely on gap.
- * Provided for backwards compatibility with tests and callers.
- */
-export function groupWordsIntoSentences(
-  words: NormalizedWord[],
-  maxSilenceGapSec: number = DEFAULT_MAX_WORD_GAP_SEC,
-): NormalizedWord[][] {
-  if (words.length === 0) return [];
-
-  const sentences: NormalizedWord[][] = [];
-  let currentSentence: NormalizedWord[] = [words[0]];
-
-  for (let i = 1; i < words.length; i++) {
-    const prevWord = words[i - 1];
-    const currWord = words[i];
-    const gap = Math.max(0, currWord.start - prevWord.end);
-
-    if (gap > maxSilenceGapSec) {
-      sentences.push(currentSentence);
-      currentSentence = [currWord];
-    } else {
-      currentSentence.push(currWord);
-    }
-  }
-
-  if (currentSentence.length > 0) {
-    sentences.push(currentSentence);
-  }
-
-  return sentences;
-}
-
-/**
- * Helper: splits a sentence into lines based on pacing.
- * Provided for backwards compatibility with tests and callers.
- */
-export function splitSentenceIntoLines(
-  sentenceWords: NormalizedWord[],
-  pacing: PacingOption = "reel",
-): SubtitleLine[] {
-  return chunkWordsIntoSubtitleLines(sentenceWords, { pacing });
-}
-
-/**
- * Converts Remotion TikTokPage objects (segmented caption pages)
- * into Captionly's SubtitleLine and Word structures with timestamps in seconds.
- * Preserved for backwards compatibility.
- */
-export function mapTikTokPagesToSubtitleLines(pages: TikTokPage[]): SubtitleLine[] {
-  const lines: SubtitleLine[] = [];
-
-  for (const page of pages) {
-    const words: Word[] = [];
-
-    for (const token of page.tokens) {
-      const trimmed = token.text.trim();
-      if (!trimmed) continue;
-
-      const wordStart = token.fromMs / 1000;
-      const wordEnd = Math.max(wordStart, token.toMs / 1000);
-
-      words.push({
-        id: crypto.randomUUID(),
-        text: trimmed,
-        start: wordStart,
-        end: wordEnd,
-      });
-    }
-
-    if (words.length === 0) continue;
-
-    const start = page.startMs / 1000;
-    const lastWordEnd = words[words.length - 1].end;
-    const end = Math.max(
-      start,
-      Math.min((page.startMs + page.durationMs) / 1000, lastWordEnd + 0.15),
-    );
-
-    lines.push({
-      id: crypto.randomUUID(),
-      start,
-      end,
-      words,
-    });
-  }
-
-  return lines;
 }

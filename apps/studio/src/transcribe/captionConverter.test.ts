@@ -1,59 +1,12 @@
 import { describe, it, expect } from "bun:test";
 import {
-  mapTikTokPagesToSubtitleLines,
   normalizeWords,
-  groupWordsIntoSentences,
-  splitSentenceIntoLines,
+  chunkWordsIntoSubtitleLines,
   segmentWordsToSubtitleLines,
 } from "./captionConverter";
-import type { TikTokPage } from "@remotion/captions";
 import type { RawTranscribeWord } from "./types";
 
-describe("groupWordsIntoSentences (gap-only grouping)", () => {
-  it("pairs words with small time differences (diff <= 0.25s) into the same sentence", () => {
-    const words = [
-      { text: "Hello", start: 1.0, end: 1.3 },
-      { text: "there", start: 1.4, end: 1.7 }, // gap = 0.1s
-      { text: "everyone", start: 1.85, end: 2.3 }, // gap = 0.15s
-    ];
-
-    const sentences = groupWordsIntoSentences(words, 0.25);
-    expect(sentences).toHaveLength(1);
-    expect(sentences[0]).toHaveLength(3);
-    expect(sentences[0].map((w) => w.text)).toEqual(["Hello", "there", "everyone"]);
-  });
-
-  it("splits into a new sentence when gap > maxSilenceGapSec", () => {
-    const words = [
-      { text: "Hello", start: 1.0, end: 1.3 },
-      { text: "there", start: 1.4, end: 1.8 },
-      // 4.0 second silence gap!
-      { text: "Welcome", start: 5.8, end: 6.2 },
-      { text: "back", start: 6.3, end: 6.7 },
-    ];
-
-    const sentences = groupWordsIntoSentences(words, 0.25);
-    expect(sentences).toHaveLength(2);
-    expect(sentences[0].map((w) => w.text)).toEqual(["Hello", "there"]);
-    expect(sentences[1].map((w) => w.text)).toEqual(["Welcome", "back"]);
-  });
-
-  it("does NOT split on terminal punctuation (. ? !) when gap is small (gap-only)", () => {
-    const words = [
-      { text: "Done.", start: 1.0, end: 1.3 },
-      { text: "Next", start: 1.45, end: 1.7 }, // gap = 0.15s <= 0.25s
-      { text: "step?", start: 1.8, end: 2.1 },
-      { text: "Yes!", start: 2.2, end: 2.5 },
-    ];
-
-    const sentences = groupWordsIntoSentences(words, 0.25);
-    // Punctuation is ignored for sentence boundaries; all kept in one continuous sentence
-    expect(sentences).toHaveLength(1);
-    expect(sentences[0].map((w) => w.text)).toEqual(["Done.", "Next", "step?", "Yes!"]);
-  });
-});
-
-describe("splitSentenceIntoLines (TikTok vs Long-form)", () => {
+describe("chunkWordsIntoSubtitleLines (TikTok vs Long-form)", () => {
   const continuousSentence = [
     { text: "Welcome", start: 1.0, end: 1.4 },
     { text: "to", start: 1.45, end: 1.6 },
@@ -66,7 +19,7 @@ describe("splitSentenceIntoLines (TikTok vs Long-form)", () => {
   ];
 
   it("splits into snappy 2-3 word lines in TikTok ('reel') mode", () => {
-    const lines = splitSentenceIntoLines(continuousSentence, "reel");
+    const lines = chunkWordsIntoSubtitleLines(continuousSentence, { pacing: "reel" });
 
     // 8 words should be split into ~3 lines of 2-3 words, avoiding 1-word orphans
     expect(lines.length).toBeGreaterThanOrEqual(3);
@@ -80,7 +33,7 @@ describe("splitSentenceIntoLines (TikTok vs Long-form)", () => {
   });
 
   it("keeps full lines (up to 8 words) in Long-form ('standard') mode", () => {
-    const lines = splitSentenceIntoLines(continuousSentence, "standard");
+    const lines = chunkWordsIntoSubtitleLines(continuousSentence, { pacing: "standard" });
 
     // 8 words fit comfortably in 1 standard line (duration 2.6s, max words 8)
     expect(lines).toHaveLength(1);
@@ -90,7 +43,7 @@ describe("splitSentenceIntoLines (TikTok vs Long-form)", () => {
   });
 
   it("seamlessly connects consecutive lines within the same sentence (no 1-frame blink)", () => {
-    const lines = splitSentenceIntoLines(continuousSentence, "reel");
+    const lines = chunkWordsIntoSubtitleLines(continuousSentence, { pacing: "reel" });
 
     for (let i = 0; i < lines.length - 1; i++) {
       // Line i end equals Line i+1 start within continuous speech
@@ -176,83 +129,5 @@ describe("segmentWordsToSubtitleLines (End-to-End Bug Fix Verification)", () => 
       { text: "FromStart", start: 2.0, end: 2.5 },
       { text: "FromMs", start: 3.0, end: 3.5 },
     ]);
-  });
-});
-
-describe("mapTikTokPagesToSubtitleLines (Backwards Compatibility)", () => {
-  it("converts TikTokPage[] to SubtitleLine[] with seconds timestamps", () => {
-    const pages: TikTokPage[] = [
-      {
-        text: "Hello world",
-        startMs: 500,
-        durationMs: 1500,
-        tokens: [
-          { text: "Hello", fromMs: 500, toMs: 1000 },
-          { text: " world", fromMs: 1000, toMs: 2000 },
-        ],
-      },
-      {
-        text: " welcome here",
-        startMs: 2500,
-        durationMs: 1200,
-        tokens: [
-          { text: " welcome", fromMs: 2500, toMs: 3100 },
-          { text: " here", fromMs: 3100, toMs: 3700 },
-        ],
-      },
-    ];
-
-    const lines = mapTikTokPagesToSubtitleLines(pages);
-
-    expect(lines).toHaveLength(2);
-    expect(lines[0].start).toBe(0.5);
-    expect(lines[0].end).toBe(2);
-    expect(lines[0].words).toHaveLength(2);
-    expect(lines[0].words[0].text).toBe("Hello");
-    expect(lines[0].words[1].text).toBe("world");
-
-    expect(lines[1].start).toBe(2.5);
-    expect(lines[1].end).toBe(3.7);
-    expect(lines[1].words).toHaveLength(2);
-    expect(lines[1].words[0].text).toBe("welcome");
-    expect(lines[1].words[1].text).toBe("here");
-  });
-
-  it("handles empty pages array", () => {
-    const lines = mapTikTokPagesToSubtitleLines([]);
-    expect(lines).toEqual([]);
-  });
-
-  it("filters out empty tokens or pages without words", () => {
-    const pages: TikTokPage[] = [
-      {
-        text: "",
-        startMs: 0,
-        durationMs: 1000,
-        tokens: [],
-      },
-      {
-        text: "   ",
-        startMs: 1000,
-        durationMs: 500,
-        tokens: [{ text: "   ", fromMs: 1000, toMs: 1500 }],
-      },
-      {
-        text: "Valid line",
-        startMs: 2000,
-        durationMs: 1000,
-        tokens: [
-          { text: "", fromMs: 2000, toMs: 2100 },
-          { text: "Valid", fromMs: 2100, toMs: 2500 },
-          { text: " line", fromMs: 2500, toMs: 3000 },
-        ],
-      },
-    ];
-
-    const lines = mapTikTokPagesToSubtitleLines(pages);
-    expect(lines).toHaveLength(1);
-    expect(lines[0].words).toHaveLength(2);
-    expect(lines[0].words[0].text).toBe("Valid");
-    expect(lines[0].words[1].text).toBe("line");
   });
 });

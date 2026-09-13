@@ -46,7 +46,7 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
 
   const bgRgba =
     style.bgOpacity > 0
-      ? hexToRgba(style.bgColor || "#000000", style.bgOpacity)
+      ? `color-mix(in srgb, ${style.bgColor || "#000000"} ${Math.round(style.bgOpacity * 100)}%, transparent)`
       : "transparent";
 
   const scaledStyle = {
@@ -63,62 +63,40 @@ export const SubtitleOverlay: React.FC<SubtitleOverlayProps> = ({
       {fontLoader}
       <div
         style={{
-        position: "absolute",
-        left: posX,
-        top: posY,
-        transform: anchorTransform,
-        maxWidth: `${maxWidth}px`,
-        width: "max-content",
-        fontFamily: style.fontFamily,
-        fontWeight: style.fontWeight,
-        fontSize: `${scaledFontSize}px`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        pointerEvents: "none",
-        userSelect: "none",
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: bgRgba,
-          borderRadius: `${scaledRadius}px`,
-          padding: `${scaledPadY}px ${scaledPadX}px`,
-          backdropFilter: style.bgOpacity > 0 ? "blur(4px)" : "none",
+          position: "absolute",
+          left: posX,
+          top: posY,
+          transform: anchorTransform,
+          maxWidth: `${maxWidth}px`,
+          width: "max-content",
+          fontFamily: style.fontFamily,
+          fontWeight: style.fontWeight,
+          fontSize: `${scaledFontSize}px`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          pointerEvents: "none",
+          userSelect: "none",
         }}
       >
-        <SubtitleAnimationRenderer
-          line={activeLine}
-          style={scaledStyle}
-          animation={animation}
-          currentTime={currentTime}
-          frame={frame}
-          fps={fps}
-        />
+        <div
+          style={{
+            backgroundColor: bgRgba,
+            borderRadius: `${scaledRadius}px`,
+            padding: `${scaledPadY}px ${scaledPadX}px`,
+            backdropFilter: style.bgOpacity > 0 ? "blur(4px)" : "none",
+          }}
+        >
+          <SubtitleAnimationRenderer
+            line={activeLine}
+            style={scaledStyle}
+            animation={animation}
+            currentTime={currentTime}
+            frame={frame}
+            fps={fps}
+          />
+        </div>
       </div>
-    </div>
-  </>
-);
+    </>
+  );
 };
-
-function hexToRgba(hex: string, opacity: number): string {
-  const cleanHex = hex.replace("#", "");
-  let r = 0;
-  let g = 0;
-  let b = 0;
-
-  if (cleanHex.length === 3) {
-    const c0 = cleanHex.charAt(0);
-    const c1 = cleanHex.charAt(1);
-    const c2 = cleanHex.charAt(2);
-    r = parseInt(c0 + c0, 16);
-    g = parseInt(c1 + c1, 16);
-    b = parseInt(c2 + c2, 16);
-  } else if (cleanHex.length === 6) {
-    r = parseInt(cleanHex.substring(0, 2), 16);
-    g = parseInt(cleanHex.substring(2, 4), 16);
-    b = parseInt(cleanHex.substring(4, 6), 16);
-  }
-
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-}

@@ -1,5 +1,5 @@
 import React from "react";
-import type { SubtitleLine, SubtitleStyle, AnimationConfig } from "../types";
+import type { SubtitleLine, SubtitleStyle, AnimationConfig, AnimationType } from "../types";
 import { NoneAnimation } from "./NoneAnimation";
 import { ColorFillAnimation } from "./ColorFillAnimation";
 import { PopOnAnimation } from "./PopOnAnimation";
@@ -19,6 +19,20 @@ interface SubtitleAnimationRendererProps {
   fps: number;
 }
 
+// Map each animation type to its renderer component
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ANIMATION_COMPONENTS: Record<AnimationType, React.ComponentType<any>> = {
+  none: NoneAnimation,
+  colorFill: ColorFillAnimation,
+  popOn: PopOnAnimation,
+  typewriter: TypewriterAnimation,
+  wipe: WipeAnimation,
+  rollUp: RollUpAnimation,
+  paintOn: PaintOnAnimation,
+  flapBoard: FlapBoardAnimation,
+  digitalMatrix: DigitalMatrixAnimation,
+};
+
 export const SubtitleAnimationRenderer: React.FC<SubtitleAnimationRendererProps> = ({
   line,
   style,
@@ -27,115 +41,18 @@ export const SubtitleAnimationRenderer: React.FC<SubtitleAnimationRendererProps>
   frame,
   fps,
 }) => {
-  switch (animation.type) {
-    case "none":
-      return (
-        <NoneAnimation
-          line={line}
-          style={style}
-          options={animation.options}
-          currentTime={currentTime}
-          frame={frame}
-          fps={fps}
-        />
-      );
-    case "colorFill":
-      return (
-        <ColorFillAnimation
-          line={line}
-          style={style}
-          options={animation.options}
-          currentTime={currentTime}
-          frame={frame}
-          fps={fps}
-        />
-      );
-    case "popOn":
-      return (
-        <PopOnAnimation
-          line={line}
-          style={style}
-          options={animation.options}
-          currentTime={currentTime}
-          frame={frame}
-          fps={fps}
-        />
-      );
-    case "typewriter":
-      return (
-        <TypewriterAnimation
-          line={line}
-          style={style}
-          options={animation.options}
-          currentTime={currentTime}
-          frame={frame}
-          fps={fps}
-        />
-      );
-    case "wipe":
-      return (
-        <WipeAnimation
-          line={line}
-          style={style}
-          options={animation.options}
-          currentTime={currentTime}
-          frame={frame}
-          fps={fps}
-        />
-      );
-    case "rollUp":
-      return (
-        <RollUpAnimation
-          line={line}
-          style={style}
-          options={animation.options}
-          currentTime={currentTime}
-          frame={frame}
-          fps={fps}
-        />
-      );
-    case "paintOn":
-      return (
-        <PaintOnAnimation
-          line={line}
-          style={style}
-          options={animation.options}
-          currentTime={currentTime}
-          frame={frame}
-          fps={fps}
-        />
-      );
-    case "flapBoard":
-      return (
-        <FlapBoardAnimation
-          line={line}
-          style={style}
-          options={animation.options}
-          currentTime={currentTime}
-          frame={frame}
-          fps={fps}
-        />
-      );
-    case "digitalMatrix":
-      return (
-        <DigitalMatrixAnimation
-          line={line}
-          style={style}
-          options={animation.options}
-          currentTime={currentTime}
-          frame={frame}
-        />
-      );
-    default:
-      return (
-        <ColorFillAnimation
-          line={line}
-          style={style}
-          options={{ transition: "hardCut" }}
-          currentTime={currentTime}
-          frame={frame}
-          fps={fps}
-        />
-      );
-  }
+  const Component = ANIMATION_COMPONENTS[animation.type] ?? ColorFillAnimation;
+  const options =
+    animation.options ?? (animation.type === "colorFill" ? { transition: "hardCut" } : {});
+
+  return (
+    <Component
+      line={line}
+      style={style}
+      options={options}
+      currentTime={currentTime}
+      frame={frame}
+      fps={fps}
+    />
+  );
 };
