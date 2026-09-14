@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import { SNAPSHOT_CAP } from "./snapshots";
 
 const testEnv = {
-  DATABASE_URL: process.env.DATABASE_URL ?? "postgres://captionly:captionly@localhost:5433/captionly",
+  DATABASE_URL: process.env.DATABASE_URL ?? "",
   GOOGLE_CLIENT_ID: "test",
   GOOGLE_CLIENT_SECRET: "test",
   BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret",
@@ -44,7 +44,7 @@ async function deleteTestUser(userId: string) {
   await db.delete(user).where(eq(user.id, userId));
 }
 
-describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("snapshots routes", () => {
+describe.skipIf(!process.env.DATABASE_URL)("snapshots routes", () => {
   test("enforces the retention cap, keeping only the most recent SNAPSHOT_CAP rows", async () => {
     const app = createApp();
     const db = createDb(testEnv);

@@ -3,13 +3,11 @@ import { eq } from "drizzle-orm";
 import { createDb } from "./client";
 import { projects, user } from "./schema";
 
-const TEST_DATABASE_URL =
-  process.env.DATABASE_URL ?? "postgres://captionly:captionly@localhost:5433/captionly";
+const TEST_DATABASE_URL = process.env.DATABASE_URL ?? "";
 
-// CI has no Neon Local stack (docker compose) running — this needs `bun run db:local`
-// against a real local Postgres, so it only runs when DATABASE_URL is set explicitly
-// (i.e. never in CI) or outside CI where `bun run db:local` is expected to be up.
-describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("createDb", () => {
+// Needs a real Neon database (e.g. a dev branch via `neon checkout` + `neon env pull`) —
+// skips whenever DATABASE_URL isn't set, both in CI and locally.
+describe.skipIf(!process.env.DATABASE_URL)("createDb", () => {
   test("can insert and read back a project row", async () => {
     const db = createDb({
       DATABASE_URL: TEST_DATABASE_URL,

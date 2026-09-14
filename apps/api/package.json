@@ -8,7 +8,6 @@
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "deploy": "wrangler deploy",
-    "db:local": "docker compose up -d",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {

@@ -4,7 +4,7 @@ import { requireAuth, type AuthVariables } from "./middleware";
 import type { Env } from "../types";
 
 const testEnv: Env = {
-  DATABASE_URL: process.env.DATABASE_URL ?? "postgres://captionly:captionly@localhost:5433/captionly",
+  DATABASE_URL: process.env.DATABASE_URL ?? "",
   GOOGLE_CLIENT_ID: "test",
   GOOGLE_CLIENT_SECRET: "test",
   BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret",
@@ -23,7 +23,7 @@ function buildTestApp() {
   return app;
 }
 
-describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("requireAuth", () => {
+describe.skipIf(!process.env.DATABASE_URL)("requireAuth", () => {
   test("rejects requests with no Authorization header", async () => {
     const app = buildTestApp();
     const res = await app.request("/protected", {}, testEnv);

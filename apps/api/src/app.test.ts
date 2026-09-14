@@ -5,7 +5,7 @@ import { projects, user, session } from "./db/schema";
 import { eq } from "drizzle-orm";
 
 const testEnvFullFlow = {
-  DATABASE_URL: process.env.DATABASE_URL ?? "postgres://captionly:captionly@localhost:5433/captionly",
+  DATABASE_URL: process.env.DATABASE_URL ?? "",
   GOOGLE_CLIENT_ID: "test",
   GOOGLE_CLIENT_SECRET: "test",
   BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret",
@@ -43,7 +43,7 @@ async function deleteTestUser(userId: string) {
   await db.delete(user).where(eq(user.id, userId));
 }
 
-describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("health check", () => {
+describe.skipIf(!process.env.DATABASE_URL)("health check", () => {
   test("GET /health returns ok", async () => {
     const app = createApp();
     const res = await app.request("/health", {}, testEnvFullFlow);
@@ -52,14 +52,14 @@ describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("health check", (
   });
 });
 
-describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("auth", () => {
+describe.skipIf(!process.env.DATABASE_URL)("auth", () => {
   test("GET /auth/get-session with no token returns no session", async () => {
     const app = createApp();
     const res = await app.request(
       "/auth/get-session",
       {},
       {
-        DATABASE_URL: process.env.DATABASE_URL ?? "postgres://captionly:captionly@localhost:5433/captionly",
+        DATABASE_URL: process.env.DATABASE_URL ?? "",
         GOOGLE_CLIENT_ID: "test",
         GOOGLE_CLIENT_SECRET: "test",
         BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret",
@@ -72,7 +72,7 @@ describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("auth", () => {
   });
 });
 
-describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("full flow", () => {
+describe.skipIf(!process.env.DATABASE_URL)("full flow", () => {
   test("create project, save a snapshot, restore it", async () => {
     const app = createApp();
     const db = createDb(testEnvFullFlow);
