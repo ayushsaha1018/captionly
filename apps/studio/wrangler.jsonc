@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "captionly-studio-spike",
+  "name": "captionly-studio",
   "compatibility_date": "2026-09-12",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
@@ -9,13 +9,5 @@
   },
   "observability": {
     "enabled": true
-  },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      // Spike: filled in locally after `wrangler d1 create captionly-studio-spike`
-      "database_name": "captionly-studio-spike",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
-    }
-  ]
+  }
 }

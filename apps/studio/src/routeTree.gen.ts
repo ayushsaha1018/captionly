@@ -10,43 +10,33 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as SpikeD1RouteImport } from './routes/spike-d1'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SpikeD1Route = SpikeD1RouteImport.update({
-  id: '/spike-d1',
-  path: '/spike-d1',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/spike-d1': typeof SpikeD1Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/spike-d1': typeof SpikeD1Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/spike-d1': typeof SpikeD1Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/spike-d1'
+  fullPaths: '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/spike-d1'
-  id: '__root__' | '/' | '/spike-d1'
+  to: '/'
+  id: '__root__' | '/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  SpikeD1Route: typeof SpikeD1Route
 }
 
 declare module '@tanstack/react-router' {
@@ -58,19 +48,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/spike-d1': {
-      id: '/spike-d1'
-      path: '/spike-d1'
-      fullPath: '/spike-d1'
-      preLoaderRoute: typeof SpikeD1RouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  SpikeD1Route: SpikeD1Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
