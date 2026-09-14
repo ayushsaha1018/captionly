@@ -1,0 +1,6 @@
+# App runtime (createDb / neon-http driver) talks to the Neon Local HTTP proxy on 5433.
+DATABASE_URL=postgres://captionly:captionly@localhost:5433/captionly
+
+# `bun run db:push` (drizzle-kit push) needs a real Postgres wire-protocol connection,
+# so point it at the postgres container directly on 5434, not the proxy above, e.g.:
+#   DATABASE_URL=postgres://captionly:captionly@localhost:5434/captionly bun run db:push

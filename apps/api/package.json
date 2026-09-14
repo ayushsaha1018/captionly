@@ -11,12 +11,16 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "drizzle-orm": "^0.45.2",
     "hono": "^4.6.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250101.0",
     "@types/bun": "latest",
+    "@types/pg": "^8.23.1",
     "drizzle-kit": "^0.30.0",
+    "pg": "^8.23.0",
     "wrangler": "^3.100.0"
   },
   "peerDependencies": {
