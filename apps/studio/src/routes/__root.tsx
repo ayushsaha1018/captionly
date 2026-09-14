@@ -8,6 +8,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import appCss from "@/styles.css?url";
 
 function NotFoundComponent() {
   return (
@@ -82,7 +83,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Type subtitle lines against your video, spot their timings, and style animated captions.",
       },
     ],
-    links: [{ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+    ],
   }),
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
