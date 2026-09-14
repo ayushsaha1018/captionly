@@ -4,3 +4,8 @@ DATABASE_URL=postgres://captionly:captionly@localhost:5433/captionly
 # `bun run db:push` (drizzle-kit push) needs a real Postgres wire-protocol connection,
 # so point it at the postgres container directly on 5434, not the proxy above, e.g.:
 #   DATABASE_URL=postgres://captionly:captionly@localhost:5434/captionly bun run db:push
+
+GOOGLE_CLIENT_ID=replace-with-real-value
+GOOGLE_CLIENT_SECRET=replace-with-real-value
+BETTER_AUTH_SECRET=replace-with-a-random-32-byte-hex-string
+STUDIO_ORIGIN=http://localhost:5173
