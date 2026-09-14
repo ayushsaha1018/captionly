@@ -5,7 +5,14 @@ import { projects } from "../db/schema";
 import { requireAuth, type AuthVariables } from "../auth/middleware";
 import type { Env } from "../types";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function loadOwnedProject(db: Db, userId: string, projectId: string) {
+  // projects.id is a Postgres uuid column — a malformed id would otherwise make the
+  // query below throw (500) instead of behaving like any other not-found/not-owned case.
+  if (!UUID_RE.test(projectId)) {
+    return null;
+  }
   const [project] = await db
     .select()
     .from(projects)

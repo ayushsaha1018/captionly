@@ -84,4 +84,53 @@ describe("projects routes", () => {
     await deleteTestUser(ownerId);
     await deleteTestUser(otherId);
   });
+
+  test("PATCH ignores userId in the body (mass-assignment guard)", async () => {
+    const app = createApp();
+    const ownerId = `owner-${crypto.randomUUID()}`;
+    const ownerToken = await createTestSession(ownerId);
+
+    const createRes = await app.request(
+      "/projects",
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${ownerToken}`, "content-type": "application/json" },
+        body: JSON.stringify({ name: "original" }),
+      },
+      testEnv,
+    );
+    const created = await createRes.json();
+
+    const patchRes = await app.request(
+      `/projects/${created.id}`,
+      {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${ownerToken}`, "content-type": "application/json" },
+        body: JSON.stringify({ name: "updated", userId: "some-other-user-id" }),
+      },
+      testEnv,
+    );
+    const patched = await patchRes.json();
+    expect(patched.userId).toBe(ownerId);
+    expect(patched.name).toBe("updated");
+
+    const db = createDb(testEnv);
+    await db.delete(projects).where(eq(projects.id, created.id));
+    await deleteTestUser(ownerId);
+  });
+
+  test("GET with a malformed id returns 404, not 500", async () => {
+    const app = createApp();
+    const ownerId = `owner-${crypto.randomUUID()}`;
+    const ownerToken = await createTestSession(ownerId);
+
+    const res = await app.request(
+      "/projects/not-a-uuid",
+      { headers: { Authorization: `Bearer ${ownerToken}` } },
+      testEnv,
+    );
+    expect(res.status).toBe(404);
+
+    await deleteTestUser(ownerId);
+  });
 });
