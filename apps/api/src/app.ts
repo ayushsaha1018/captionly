@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { createAuth } from "./auth/auth";
 import { projectsRoutes } from "./routes/projects";
 import { snapshotsRoutes } from "./routes/snapshots";
@@ -6,6 +7,13 @@ import type { Env } from "./types";
 
 export function createApp() {
   const app = new Hono<{ Bindings: Env }>();
+
+  app.use("*", (c, next) =>
+    cors({
+      origin: c.env.STUDIO_ORIGIN,
+      allowHeaders: ["Authorization", "Content-Type"],
+    })(c, next),
+  );
 
   app.get("/health", (c) => c.json({ ok: true }));
 
