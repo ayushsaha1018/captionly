@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Build and deploy to Cloudflare Pages
+    name: Build and deploy to Cloudflare Workers
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -32,9 +32,10 @@ jobs:
         env:
           VITE_RENDER_SERVER_URL: ${{ vars.VITE_RENDER_SERVER_URL }}
 
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/studio/dist --project-name=captionly-studio
+          workingDirectory: apps/studio
+          command: deploy
