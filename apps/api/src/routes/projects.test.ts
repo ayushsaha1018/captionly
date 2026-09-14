@@ -32,6 +32,12 @@ async function createTestSession(userId: string) {
   return token;
 }
 
+async function deleteTestUser(userId: string) {
+  const db = createDb(testEnv);
+  // session rows cascade-delete with the user (see schema.auth.ts onDelete: "cascade").
+  await db.delete(user).where(eq(user.id, userId));
+}
+
 describe("projects routes", () => {
   test("requires auth", async () => {
     const app = createApp();
@@ -41,8 +47,10 @@ describe("projects routes", () => {
 
   test("create then list returns the created project for its owner only", async () => {
     const app = createApp();
-    const ownerToken = await createTestSession(`owner-${crypto.randomUUID()}`);
-    const otherToken = await createTestSession(`other-${crypto.randomUUID()}`);
+    const ownerId = `owner-${crypto.randomUUID()}`;
+    const otherId = `other-${crypto.randomUUID()}`;
+    const ownerToken = await createTestSession(ownerId);
+    const otherToken = await createTestSession(otherId);
 
     const createRes = await app.request(
       "/projects",
@@ -73,5 +81,7 @@ describe("projects routes", () => {
 
     const db = createDb(testEnv);
     await db.delete(projects).where(eq(projects.id, created.id));
+    await deleteTestUser(ownerId);
+    await deleteTestUser(otherId);
   });
 });

@@ -54,9 +54,16 @@ projectsRoutes.patch("/:id", async (c) => {
     videoKey?: string;
     videoMeta?: typeof existing.videoMeta;
   }>();
+  // Whitelist fields explicitly — spreading the raw body would let a caller set
+  // userId/id and reassign or clobber the row (mass assignment).
+  const patch: Partial<typeof projects.$inferInsert> = {};
+  if (body.name !== undefined) patch.name = body.name;
+  if (body.videoKey !== undefined) patch.videoKey = body.videoKey;
+  if (body.videoMeta !== undefined) patch.videoMeta = body.videoMeta;
+
   const [updated] = await db
     .update(projects)
-    .set({ ...body, updatedAt: new Date() })
+    .set({ ...patch, updatedAt: new Date() })
     .where(eq(projects.id, projectId))
     .returning();
   return c.json(updated);
