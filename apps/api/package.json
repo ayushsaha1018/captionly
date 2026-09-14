@@ -8,14 +8,15 @@
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "deploy": "wrangler deploy",
-    "db:push": "drizzle-kit push"
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
     "aws4fetch": "^1.0.20",
     "better-auth": "^1.7.4",
     "drizzle-orm": "^0.45.2",
-    "hono": "^4.6.0"
+    "hono": "^4.13.7"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250101.0",

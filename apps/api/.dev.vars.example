@@ -1,6 +1,8 @@
 # Real Neon connection string (e.g. a personal dev branch: `neon checkout <branch>`
 # pulls this automatically into .env/.env.local — copy it here, or run tests with it
 # exported directly). Tests that need a DB skip automatically when this isn't set.
+# `bun run db:migrate` needs the DIRECT (unpooled) connection string, not the
+# "-pooler" one — a pooled connection can error out mid-migration.
 DATABASE_URL=postgres://user:password@ep-example-123456.region.aws.neon.tech/dbname?sslmode=require
 
 GOOGLE_CLIENT_ID=replace-with-real-value
