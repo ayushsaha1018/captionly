@@ -1,12 +1,32 @@
 import { Hono } from "hono";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 import { createDb, type Db } from "../db/client";
 import { projects } from "../db/schema";
 import { requireAuth, type AuthVariables } from "../auth/middleware";
 import type { Env } from "../types";
 import { presignUploadUrl, presignDownloadUrl } from "../storage/b2";
+import { jsonValidator } from "../lib/validation";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const createProjectSchema = z.object({ name: z.string().min(1) });
+
+const videoMetaSchema = z
+  .object({
+    width: z.number(),
+    height: z.number(),
+    durationSec: z.number(),
+    fps: z.number(),
+    mimeType: z.string(),
+  })
+  .nullable();
+
+const patchProjectSchema = z.object({
+  name: z.string().min(1).optional(),
+  videoKey: z.string().optional(),
+  videoMeta: videoMetaSchema.optional(),
+});
 
 export async function loadOwnedProject(db: Db, userId: string, projectId: string) {
   // projects.id is a Postgres uuid column — a malformed id would otherwise make the
@@ -35,14 +55,11 @@ projectsRoutes.get("/", async (c) => {
   return c.json(rows);
 });
 
-projectsRoutes.post("/", async (c) => {
+projectsRoutes.post("/", jsonValidator(createProjectSchema, "name is required"), async (c) => {
   const db = createDb(c.env);
   const userId = c.get("userId");
-  const body = await c.req.json<{ name?: string }>();
-  if (typeof body?.name !== "string" || body.name.length === 0) {
-    return c.json({ error: "name is required" }, 400);
-  }
-  const [created] = await db.insert(projects).values({ userId, name: body.name }).returning();
+  const { name } = c.req.valid("json");
+  const [created] = await db.insert(projects).values({ userId, name }).returning();
   return c.json(created, 201);
 });
 
@@ -53,37 +70,37 @@ projectsRoutes.get("/:id", async (c) => {
   return c.json(project);
 });
 
-projectsRoutes.patch("/:id", async (c) => {
-  const db = createDb(c.env);
-  const userId = c.get("userId");
-  const projectId = c.req.param("id");
-  const existing = await loadOwnedProject(db, userId, projectId);
-  if (!existing) return c.json({ error: "not found" }, 404);
+projectsRoutes.patch(
+  "/:id",
+  jsonValidator(patchProjectSchema, "invalid request body"),
+  async (c) => {
+    const db = createDb(c.env);
+    const userId = c.get("userId");
+    const projectId = c.req.param("id");
+    const existing = await loadOwnedProject(db, userId, projectId);
+    if (!existing) return c.json({ error: "not found" }, 404);
 
-  const body = await c.req.json<{
-    name?: string;
-    videoKey?: string;
-    videoMeta?: typeof existing.videoMeta;
-  }>();
-  // Whitelist fields explicitly — spreading the raw body would let a caller set
-  // userId/id and reassign or clobber the row (mass assignment).
-  const patch: Partial<typeof projects.$inferInsert> = {};
-  if (body.name !== undefined) patch.name = body.name;
-  if (body.videoKey !== undefined) {
-    if (!body.videoKey.startsWith(`${projectId}/`)) {
-      return c.json({ error: "videoKey does not belong to this project" }, 400);
+    const body = c.req.valid("json");
+    // Whitelist fields explicitly — spreading the raw body would let a caller set
+    // userId/id and reassign or clobber the row (mass assignment).
+    const patch: Partial<typeof projects.$inferInsert> = {};
+    if (body.name !== undefined) patch.name = body.name;
+    if (body.videoKey !== undefined) {
+      if (!body.videoKey.startsWith(`${projectId}/`)) {
+        return c.json({ error: "videoKey does not belong to this project" }, 400);
+      }
+      patch.videoKey = body.videoKey;
     }
-    patch.videoKey = body.videoKey;
-  }
-  if (body.videoMeta !== undefined) patch.videoMeta = body.videoMeta;
+    if (body.videoMeta !== undefined) patch.videoMeta = body.videoMeta;
 
-  const [updated] = await db
-    .update(projects)
-    .set({ ...patch, updatedAt: new Date() })
-    .where(eq(projects.id, projectId))
-    .returning();
-  return c.json(updated);
-});
+    const [updated] = await db
+      .update(projects)
+      .set({ ...patch, updatedAt: new Date() })
+      .where(eq(projects.id, projectId))
+      .returning();
+    return c.json(updated);
+  },
+);
 
 projectsRoutes.delete("/:id", async (c) => {
   const db = createDb(c.env);
