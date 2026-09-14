@@ -4,6 +4,7 @@ import { createDb, type Db } from "../db/client";
 import { projects } from "../db/schema";
 import { requireAuth, type AuthVariables } from "../auth/middleware";
 import type { Env } from "../types";
+import { presignUploadUrl, presignDownloadUrl } from "../storage/b2";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -85,4 +86,24 @@ projectsRoutes.delete("/:id", async (c) => {
 
   await db.delete(projects).where(eq(projects.id, projectId));
   return c.body(null, 204);
+});
+
+projectsRoutes.post("/:id/video-upload-url", async (c) => {
+  const db = createDb(c.env);
+  const project = await loadOwnedProject(db, c.get("userId"), c.req.param("id"));
+  if (!project) return c.json({ error: "not found" }, 404);
+
+  const key = `${project.id}/${crypto.randomUUID()}`;
+  const uploadUrl = await presignUploadUrl(c.env, key);
+  return c.json({ uploadUrl, key });
+});
+
+projectsRoutes.get("/:id/video-url", async (c) => {
+  const db = createDb(c.env);
+  const project = await loadOwnedProject(db, c.get("userId"), c.req.param("id"));
+  if (!project) return c.json({ error: "not found" }, 404);
+  if (!project.videoKey) return c.json({ error: "no video uploaded" }, 404);
+
+  const downloadUrl = await presignDownloadUrl(c.env, project.videoKey);
+  return c.json({ downloadUrl });
 });
