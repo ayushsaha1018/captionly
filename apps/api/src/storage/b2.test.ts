@@ -6,6 +6,7 @@ const testEnv = {
   GOOGLE_CLIENT_ID: "unused",
   GOOGLE_CLIENT_SECRET: "unused",
   BETTER_AUTH_SECRET: "unused",
+  BETTER_AUTH_URL: "http://localhost:8787",
   STUDIO_ORIGIN: "unused",
   B2_ENDPOINT: "https://s3.us-west-004.backblazeb2.com",
   B2_REGION: "us-west-004",

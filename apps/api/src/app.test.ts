@@ -9,6 +9,7 @@ const testEnvFullFlow = {
   GOOGLE_CLIENT_ID: "test",
   GOOGLE_CLIENT_SECRET: "test",
   BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret",
+  BETTER_AUTH_URL: "http://localhost:8787",
   STUDIO_ORIGIN: "http://localhost:5173",
   B2_ENDPOINT: "https://s3.us-west-004.backblazeb2.com",
   B2_REGION: "us-west-004",
@@ -42,16 +43,16 @@ async function deleteTestUser(userId: string) {
   await db.delete(user).where(eq(user.id, userId));
 }
 
-describe("health check", () => {
+describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("health check", () => {
   test("GET /health returns ok", async () => {
     const app = createApp();
     const res = await app.request("/health", {}, testEnvFullFlow);
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ ok: true });
+    expect((await res.json()) as { ok: boolean }).toEqual({ ok: true });
   });
 });
 
-describe("auth", () => {
+describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("auth", () => {
   test("GET /auth/get-session with no token returns no session", async () => {
     const app = createApp();
     const res = await app.request(
@@ -62,6 +63,7 @@ describe("auth", () => {
         GOOGLE_CLIENT_ID: "test",
         GOOGLE_CLIENT_SECRET: "test",
         BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret",
+        BETTER_AUTH_URL: "http://localhost:8787",
         STUDIO_ORIGIN: "http://localhost:5173",
       },
     );
@@ -70,7 +72,7 @@ describe("auth", () => {
   });
 });
 
-describe("full flow", () => {
+describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("full flow", () => {
   test("create project, save a snapshot, restore it", async () => {
     const app = createApp();
     const db = createDb(testEnvFullFlow);
@@ -83,7 +85,7 @@ describe("full flow", () => {
       { method: "POST", headers: authHeaders, body: JSON.stringify({ name: "Flow Test" }) },
       testEnvFullFlow,
     );
-    const project = await createRes.json();
+    const project = (await createRes.json()) as { id: string };
 
     const snapshotRes = await app.request(
       `/projects/${project.id}/snapshots`,
@@ -95,14 +97,14 @@ describe("full flow", () => {
       testEnvFullFlow,
     );
     expect(snapshotRes.status).toBe(201);
-    const snapshotSummary = await snapshotRes.json();
+    const snapshotSummary = (await snapshotRes.json()) as { id: string };
 
     const restoreRes = await app.request(
       `/projects/${project.id}/snapshots/${snapshotSummary.id}`,
       { headers: authHeaders },
       testEnvFullFlow,
     );
-    const restored = await restoreRes.json();
+    const restored = (await restoreRes.json()) as { document: unknown };
     expect(restored.document).toEqual({ lines: [], style: {} });
 
     await db.delete(projects).where(eq(projects.id, project.id));

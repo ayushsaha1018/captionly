@@ -8,7 +8,13 @@ const testEnv: Env = {
   GOOGLE_CLIENT_ID: "test",
   GOOGLE_CLIENT_SECRET: "test",
   BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret",
+  BETTER_AUTH_URL: "http://localhost:8787",
   STUDIO_ORIGIN: "http://localhost:5173",
+  B2_ENDPOINT: "https://s3.us-west-004.backblazeb2.com",
+  B2_REGION: "us-west-004",
+  B2_BUCKET: "test-bucket",
+  B2_KEY_ID: "test-key-id",
+  B2_APPLICATION_KEY: "test-application-key",
 };
 
 function buildTestApp() {
@@ -17,7 +23,7 @@ function buildTestApp() {
   return app;
 }
 
-describe("requireAuth", () => {
+describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("requireAuth", () => {
   test("rejects requests with no Authorization header", async () => {
     const app = buildTestApp();
     const res = await app.request("/protected", {}, testEnv);

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import { createDb } from "./client";
-import { projects } from "./schema";
+import { projects, user } from "./schema";
 
 const TEST_DATABASE_URL =
   process.env.DATABASE_URL ?? "postgres://captionly:captionly@localhost:5433/captionly";
@@ -11,11 +11,26 @@ const TEST_DATABASE_URL =
 // (i.e. never in CI) or outside CI where `bun run db:local` is expected to be up.
 describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("createDb", () => {
   test("can insert and read back a project row", async () => {
-    const db = createDb({ DATABASE_URL: TEST_DATABASE_URL });
+    const db = createDb({
+      DATABASE_URL: TEST_DATABASE_URL,
+      GOOGLE_CLIENT_ID: "test",
+      GOOGLE_CLIENT_SECRET: "test",
+      BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret",
+      BETTER_AUTH_URL: "http://localhost:8787",
+      STUDIO_ORIGIN: "http://localhost:5173",
+      B2_ENDPOINT: "https://s3.us-west-004.backblazeb2.com",
+      B2_REGION: "us-west-004",
+      B2_BUCKET: "test-bucket",
+      B2_KEY_ID: "test-key-id",
+      B2_APPLICATION_KEY: "test-application-key",
+    });
+
+    const userId = `test-user-${crypto.randomUUID()}`;
+    await db.insert(user).values({ id: userId, email: `${userId}@example.com`, name: userId, emailVerified: true });
 
     const [inserted] = await db
       .insert(projects)
-      .values({ userId: "test-user", name: "Test Project" })
+      .values({ userId, name: "Test Project" })
       .returning();
 
     expect(inserted.name).toBe("Test Project");
@@ -25,5 +40,6 @@ describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("createDb", () =>
     expect(fetched?.id).toBe(inserted.id);
 
     await db.delete(projects).where(eq(projects.id, inserted.id));
+    await db.delete(user).where(eq(user.id, userId));
   });
 });

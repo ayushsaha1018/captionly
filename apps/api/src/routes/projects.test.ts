@@ -9,7 +9,13 @@ const testEnv = {
   GOOGLE_CLIENT_ID: "test",
   GOOGLE_CLIENT_SECRET: "test",
   BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret",
+  BETTER_AUTH_URL: "http://localhost:8787",
   STUDIO_ORIGIN: "http://localhost:5173",
+  B2_ENDPOINT: "https://s3.us-west-004.backblazeb2.com",
+  B2_REGION: "us-west-004",
+  B2_BUCKET: "test-bucket",
+  B2_KEY_ID: "test-key-id",
+  B2_APPLICATION_KEY: "test-application-key",
 };
 
 // requireAuth checks a real better-auth session, which route-level tests can't cheaply
@@ -38,7 +44,7 @@ async function deleteTestUser(userId: string) {
   await db.delete(user).where(eq(user.id, userId));
 }
 
-describe("projects routes", () => {
+describe.skipIf(!!process.env.CI && !process.env.DATABASE_URL)("projects routes", () => {
   test("requires auth", async () => {
     const app = createApp();
     const res = await app.request("/projects", {}, testEnv);
@@ -62,7 +68,7 @@ describe("projects routes", () => {
       testEnv,
     );
     expect(createRes.status).toBe(201);
-    const created = await createRes.json();
+    const created = (await createRes.json()) as { id: string; name: string };
     expect(created.name).toBe("My Video");
 
     const ownerList = await app.request(
@@ -70,7 +76,8 @@ describe("projects routes", () => {
       { headers: { Authorization: `Bearer ${ownerToken}` } },
       testEnv,
     );
-    expect((await ownerList.json()).some((p: { id: string }) => p.id === created.id)).toBe(true);
+    const ownerListBody = (await ownerList.json()) as { id: string }[];
+    expect(ownerListBody.some((p) => p.id === created.id)).toBe(true);
 
     const otherGet = await app.request(
       `/projects/${created.id}`,
@@ -99,7 +106,7 @@ describe("projects routes", () => {
       },
       testEnv,
     );
-    const created = await createRes.json();
+    const created = (await createRes.json()) as { id: string };
 
     const patchRes = await app.request(
       `/projects/${created.id}`,
@@ -110,12 +117,32 @@ describe("projects routes", () => {
       },
       testEnv,
     );
-    const patched = await patchRes.json();
+    const patched = (await patchRes.json()) as { userId: string; name: string };
     expect(patched.userId).toBe(ownerId);
     expect(patched.name).toBe("updated");
 
     const db = createDb(testEnv);
     await db.delete(projects).where(eq(projects.id, created.id));
+    await deleteTestUser(ownerId);
+  });
+
+  test("POST with a missing name returns 400, not 500", async () => {
+    const app = createApp();
+    const ownerId = `owner-${crypto.randomUUID()}`;
+    const ownerToken = await createTestSession(ownerId);
+
+    const res = await app.request(
+      "/projects",
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${ownerToken}`, "content-type": "application/json" },
+        body: JSON.stringify({}),
+      },
+      testEnv,
+    );
+    expect(res.status).toBe(400);
+    expect((await res.json()) as { error: string }).toEqual({ error: "name is required" });
+
     await deleteTestUser(ownerId);
   });
 
