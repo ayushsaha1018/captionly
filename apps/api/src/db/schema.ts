@@ -1,10 +1,13 @@
 import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { user } from "./schema.auth";
 
 export * from "./schema.auth";
 
 export const projects = pgTable("projects", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: text("user_id").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   videoKey: text("video_key"),
   videoMeta: jsonb("video_meta").$type<{
