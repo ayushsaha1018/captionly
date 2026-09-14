@@ -1,5 +1,13 @@
+import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Outlet, Link, createRootRouteWithContext, useRouter } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link,
+  createRootRouteWithContext,
+  useRouter,
+  HeadContent,
+  Scripts,
+} from "@tanstack/react-router";
 
 function NotFoundComponent() {
   return (
@@ -59,9 +67,27 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // Spike: this app is client-driven (WebGPU transcription, canvas/video work at
+  // module scope), so keep it a pure SPA shell — server functions are used as RPC
+  // calls, not for rendering. Revisit if we decide to prerender specific routes.
+  ssr: false,
+  head: () => ({
+    meta: [
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "Captionly — Subtitle Spotting Studio" },
+      {
+        name: "description",
+        content:
+          "Type subtitle lines against your video, spot their timings, and style animated captions.",
+      },
+    ],
+    links: [{ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
+  }),
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
+  shellComponent: RootDocument,
 });
 
 function RootComponent() {
@@ -71,5 +97,19 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <Outlet />
     </QueryClientProvider>
+  );
+}
+
+function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+  return (
+    <html lang="en" className="dark">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <div id="root">{children}</div>
+        <Scripts />
+      </body>
+    </html>
   );
 }
