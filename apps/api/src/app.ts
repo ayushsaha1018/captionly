@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { createAuth } from "./auth/auth";
 import { projectsRoutes } from "./routes/projects";
+import { snapshotsRoutes } from "./routes/snapshots";
 import type { Env } from "./types";
 
 export function createApp() {
@@ -11,6 +12,7 @@ export function createApp() {
   app.on(["GET", "POST"], "/auth/*", (c) => createAuth(c.env).handler(c.req.raw));
 
   app.route("/projects", projectsRoutes);
+  app.route("/projects/:projectId/snapshots", snapshotsRoutes);
 
   return app;
 }
