@@ -78,6 +78,21 @@ describe("snapshots routes", () => {
     expect(list.length).toBe(SNAPSHOT_CAP);
     expect(list[0].label).toBe(`Snapshot ${SNAPSHOT_CAP + 4}`); // newest first
 
+    const getRes = await app.request(
+      `/projects/${project.id}/snapshots/${list[0].id}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+      testEnv,
+    );
+    expect(getRes.status).toBe(200);
+    expect((await getRes.json()).label).toBe(list[0].label);
+
+    const deleteRes = await app.request(
+      `/projects/${project.id}/snapshots/${list[0].id}`,
+      { method: "DELETE", headers: { Authorization: `Bearer ${token}` } },
+      testEnv,
+    );
+    expect(deleteRes.status).toBe(204);
+
     await db.delete(projects).where(eq(projects.id, project.id));
     await deleteTestUser(ownerId);
   }, 60000); // SNAPSHOT_CAP + 5 sequential HTTP round trips through the local neon proxy exceed bun's 5s default.
