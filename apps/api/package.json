@@ -1,0 +1,25 @@
+{
+  "name": "@captionly/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "test": "bun test",
+    "deploy": "wrangler deploy",
+    "db:local": "docker compose up -d",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "hono": "^4.6.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250101.0",
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.30.0",
+    "wrangler": "^3.100.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
