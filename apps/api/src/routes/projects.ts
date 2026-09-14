@@ -38,7 +38,10 @@ projectsRoutes.get("/", async (c) => {
 projectsRoutes.post("/", async (c) => {
   const db = createDb(c.env);
   const userId = c.get("userId");
-  const body = await c.req.json<{ name: string }>();
+  const body = await c.req.json<{ name?: string }>();
+  if (typeof body?.name !== "string" || body.name.length === 0) {
+    return c.json({ error: "name is required" }, 400);
+  }
   const [created] = await db.insert(projects).values({ userId, name: body.name }).returning();
   return c.json(created, 201);
 });
@@ -66,7 +69,12 @@ projectsRoutes.patch("/:id", async (c) => {
   // userId/id and reassign or clobber the row (mass assignment).
   const patch: Partial<typeof projects.$inferInsert> = {};
   if (body.name !== undefined) patch.name = body.name;
-  if (body.videoKey !== undefined) patch.videoKey = body.videoKey;
+  if (body.videoKey !== undefined) {
+    if (!body.videoKey.startsWith(`${projectId}/`)) {
+      return c.json({ error: "videoKey does not belong to this project" }, 400);
+    }
+    patch.videoKey = body.videoKey;
+  }
   if (body.videoMeta !== undefined) patch.videoMeta = body.videoMeta;
 
   const [updated] = await db

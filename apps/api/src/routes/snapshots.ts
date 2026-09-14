@@ -16,7 +16,9 @@ snapshotsRoutes.use("*", requireAuth);
 
 snapshotsRoutes.get("/", async (c) => {
   const db = createDb(c.env);
-  const project = await loadOwnedProject(db, c.get("userId"), c.req.param("projectId"));
+  const projectId = c.req.param("projectId");
+  if (!projectId) return c.json({ error: "not found" }, 404);
+  const project = await loadOwnedProject(db, c.get("userId"), projectId);
   if (!project) return c.json({ error: "not found" }, 404);
 
   const rows = await db
@@ -29,10 +31,15 @@ snapshotsRoutes.get("/", async (c) => {
 
 snapshotsRoutes.post("/", async (c) => {
   const db = createDb(c.env);
-  const project = await loadOwnedProject(db, c.get("userId"), c.req.param("projectId"));
+  const projectId = c.req.param("projectId");
+  if (!projectId) return c.json({ error: "not found" }, 404);
+  const project = await loadOwnedProject(db, c.get("userId"), projectId);
   if (!project) return c.json({ error: "not found" }, 404);
 
   const body = await c.req.json<{ label: string; document: unknown }>();
+  if (typeof body?.label !== "string" || body.label.length === 0 || body.document === undefined) {
+    return c.json({ error: "label and document are required" }, 400);
+  }
   const [created] = await db
     .insert(snapshots)
     .values({ projectId: project.id, label: body.label, document: body.document })
@@ -59,7 +66,9 @@ snapshotsRoutes.post("/", async (c) => {
 
 snapshotsRoutes.get("/:snapshotId", async (c) => {
   const db = createDb(c.env);
-  const project = await loadOwnedProject(db, c.get("userId"), c.req.param("projectId"));
+  const projectId = c.req.param("projectId");
+  if (!projectId) return c.json({ error: "not found" }, 404);
+  const project = await loadOwnedProject(db, c.get("userId"), projectId);
   if (!project) return c.json({ error: "not found" }, 404);
 
   const snapshotId = c.req.param("snapshotId");
@@ -77,7 +86,9 @@ snapshotsRoutes.get("/:snapshotId", async (c) => {
 
 snapshotsRoutes.delete("/:snapshotId", async (c) => {
   const db = createDb(c.env);
-  const project = await loadOwnedProject(db, c.get("userId"), c.req.param("projectId"));
+  const projectId = c.req.param("projectId");
+  if (!projectId) return c.json({ error: "not found" }, 404);
+  const project = await loadOwnedProject(db, c.get("userId"), projectId);
   if (!project) return c.json({ error: "not found" }, 404);
 
   const snapshotId = c.req.param("snapshotId");

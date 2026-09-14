@@ -8,6 +8,8 @@ import type { Env } from "./types";
 export function createApp() {
   const app = new Hono<{ Bindings: Env }>();
 
+  app.onError((err, c) => c.json({ error: "internal server error" }, 500));
+
   app.use("*", (c, next) =>
     cors({
       origin: c.env.STUDIO_ORIGIN,
