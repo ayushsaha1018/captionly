@@ -33,6 +33,7 @@ jobs:
         run: bun run build:frontend
         env:
           VITE_RENDER_SERVER_URL: ${{ vars.VITE_RENDER_SERVER_URL }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
 
       - name: Deploy preview to Cloudflare Pages
         id: deploy
