@@ -5,7 +5,7 @@ import { createDb, type Db } from "../db/client";
 import { projects } from "../db/schema";
 import { requireAuth, type AuthVariables } from "../auth/middleware";
 import type { Env } from "../types";
-import { presignUploadUrl, publicUrl } from "../storage/b2";
+import { keyFromPublicUrl, presignDownloadUrl, presignUploadUrl, publicUrl } from "../storage/b2";
 import { jsonValidator } from "../lib/validation";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -44,6 +44,18 @@ export async function loadOwnedProject(db: Db, userId: string, projectId: string
   return project;
 }
 
+// The bucket is private, so the URL stored in the DB is not directly fetchable —
+// swap it for a short-lived presigned GET URL on every response that leaves the server.
+async function withPresignedVideoUrl<T extends { videoUrl: string | null }>(
+  env: Env,
+  project: T,
+): Promise<T> {
+  if (!project.videoUrl) return project;
+  const key = keyFromPublicUrl(env, project.videoUrl);
+  if (!key) return project;
+  return { ...project, videoUrl: await presignDownloadUrl(env, key) };
+}
+
 export const projectsRoutes = new Hono<{ Bindings: Env; Variables: AuthVariables }>();
 
 projectsRoutes.use("*", requireAuth);
@@ -52,7 +64,8 @@ projectsRoutes.get("/", async (c) => {
   const db = createDb(c.env);
   const userId = c.get("userId");
   const rows = await db.select().from(projects).where(eq(projects.userId, userId));
-  return c.json(rows);
+  const withUrls = await Promise.all(rows.map((row) => withPresignedVideoUrl(c.env, row)));
+  return c.json(withUrls);
 });
 
 projectsRoutes.post("/", jsonValidator(createProjectSchema, "name is required"), async (c) => {
@@ -67,7 +80,7 @@ projectsRoutes.get("/:id", async (c) => {
   const db = createDb(c.env);
   const project = await loadOwnedProject(db, c.get("userId"), c.req.param("id"));
   if (!project) return c.json({ error: "not found" }, 404);
-  return c.json(project);
+  return c.json(await withPresignedVideoUrl(c.env, project));
 });
 
 projectsRoutes.patch(
@@ -98,7 +111,7 @@ projectsRoutes.patch(
       .set({ ...patch, updatedAt: new Date() })
       .where(eq(projects.id, projectId))
       .returning();
-    return c.json(updated);
+    return c.json(await withPresignedVideoUrl(c.env, updated));
   },
 );
 
