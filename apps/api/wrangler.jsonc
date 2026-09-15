@@ -9,5 +9,11 @@
     "B2_ENDPOINT": "https://s3.eu-central-003.backblazeb2.com",
     "B2_REGION": "eu-central-003",
     "B2_BUCKET": "captionaly"
+  },
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
   }
 }
