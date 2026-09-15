@@ -22,4 +22,3 @@ apps/renderer/files/*.mp4
 
 .superpowers/
 .vercel
-.env*

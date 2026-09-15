@@ -14,6 +14,7 @@ export function createApp() {
     cors({
       origin: c.env.STUDIO_ORIGIN,
       allowHeaders: ["Authorization", "Content-Type"],
+      credentials: true,
     })(c, next),
   );
 

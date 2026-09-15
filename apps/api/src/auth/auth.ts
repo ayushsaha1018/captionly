@@ -17,6 +17,9 @@ export function createAuth(env: Env) {
         clientSecret: env.GOOGLE_CLIENT_SECRET,
       },
     },
+    advanced: {
+      defaultCookieAttributes: { sameSite: "none", secure: true },
+    },
     plugins: [bearer()],
   });
 }

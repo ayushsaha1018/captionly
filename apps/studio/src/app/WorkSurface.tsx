@@ -18,9 +18,11 @@ import type {
 export function WorkSurface({
   playerRef,
   onOpenTranscribe,
+  isPreparingTranscribe,
 }: {
   playerRef: React.RefObject<PlayerRef | null>;
   onOpenTranscribe?: () => void;
+  isPreparingTranscribe?: boolean;
 }) {
   const activeTab = useStudioStore((s) => s.activeTab);
   const setTab = useStudioStore((s) => s.setTab);
@@ -91,7 +93,11 @@ export function WorkSurface({
       </div>
 
       <TabsContent value="lines" className="min-h-0 flex-1 overflow-y-auto pr-1">
-        <LineList playerRef={playerRef} onOpenTranscribe={onOpenTranscribe} />
+        <LineList
+          playerRef={playerRef}
+          onOpenTranscribe={onOpenTranscribe}
+          isPreparingTranscribe={isPreparingTranscribe}
+        />
       </TabsContent>
 
       <TabsContent

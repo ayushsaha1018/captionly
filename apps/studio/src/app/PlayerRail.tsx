@@ -10,6 +10,9 @@ import { sampleSubtitles } from "@captionly/engine";
 import { extractVideoMetadata } from "@/lib/videoMeta";
 import { SAFE_ZONES } from "@/subtitle/SafeZones";
 import { PlayerScrubber } from "./PlayerScrubber";
+import { putVideoFile, useRequestVideoUploadUrl, useUpdateProject } from "@/api/projects";
+import { UploadProgressDialog } from "./UploadProgressDialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Select,
   SelectContent,
@@ -41,10 +44,14 @@ export function PlayerRail({
     })),
   );
   const loadVideo = useStudioStore((s) => s.loadVideo);
+  const projectId = useStudioStore((s) => s.projectId);
+  const requestUploadUrl = useRequestVideoUploadUrl(projectId ?? "");
+  const updateProject = useUpdateProject(projectId ?? "");
 
   const [playing, setPlaying] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -56,11 +63,29 @@ export function PlayerRail({
       playerRef.current?.pause();
       playerRef.current?.seekTo(0);
       loadVideo(meta);
+
+      if (projectId) {
+        setUploadProgress(0);
+        const { uploadUrl, videoUrl } = await requestUploadUrl.mutateAsync();
+        await putVideoFile(uploadUrl, file, setUploadProgress);
+        await updateProject.mutateAsync({
+          videoUrl,
+          videoMeta: {
+            width: meta.width,
+            height: meta.height,
+            durationSec: meta.durationSec,
+            fps: FPS,
+            mimeType: file.type,
+          },
+        });
+      }
+
       onOpenTranscribe?.();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to load video");
     } finally {
       setIsLoading(false);
+      setUploadProgress(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -229,6 +254,8 @@ export function PlayerRail({
         </div>
       )}
 
+      <UploadProgressDialog progress={uploadProgress} />
+
       <div className="flex items-center justify-center" style={{ aspectRatio: "16 / 9" }}>
         <div style={{ aspectRatio: String(aspect), height: "100%", maxWidth: "100%" }}>
           <StudioPlayer
@@ -247,15 +274,20 @@ export function PlayerRail({
       <PlayerScrubber playerRef={playerRef} durationSec={video.durationSec} />
 
       <div className="flex items-center justify-between gap-3">
-        <button
-          onClick={toggle}
-          aria-label={playing ? "Pause" : "Play"}
-          className="grid h-9 w-9 place-items-center rounded-full bg-edit text-void
-                     transition-transform hover:scale-105 active:scale-95
-                     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-edit"
-        >
-          {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={toggle}
+              aria-label={playing ? "Pause" : "Play"}
+              className="grid h-9 w-9 place-items-center rounded-full bg-edit text-void
+                         transition-transform hover:scale-105 active:scale-95
+                         focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-edit"
+            >
+              {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>{playing ? "Pause" : "Play"}</TooltipContent>
+        </Tooltip>
 
         <button
           type="button"
