@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { presignUploadUrl, presignDownloadUrl } from "./b2";
+import { presignUploadUrl, publicUrl } from "./b2";
 
 const testEnv = {
   DATABASE_URL: "unused",
@@ -23,9 +23,9 @@ describe("b2 presigned URLs", () => {
     expect(url).toContain("X-Amz-Credential=");
   });
 
-  test("presignDownloadUrl produces a signed GET URL for the given key", async () => {
-    const url = await presignDownloadUrl(testEnv, "project-1/video.mp4");
-    expect(url).toContain("/test-bucket/project-1/video.mp4");
-    expect(url).toContain("X-Amz-Signature=");
+  test("publicUrl builds the public URL for the given key", () => {
+    expect(publicUrl(testEnv, "project-1/video.mp4")).toBe(
+      "https://s3.us-west-004.backblazeb2.com/test-bucket/project-1/video.mp4",
+    );
   });
 });

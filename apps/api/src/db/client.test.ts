@@ -32,7 +32,7 @@ describe.skipIf(!process.env.DATABASE_URL)("createDb", () => {
       .returning();
 
     expect(inserted.name).toBe("Test Project");
-    expect(inserted.videoKey).toBeNull();
+    expect(inserted.videoUrl).toBeNull();
 
     const [fetched] = await db.select().from(projects).where(eq(projects.id, inserted.id));
     expect(fetched?.id).toBe(inserted.id);

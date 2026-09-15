@@ -5,7 +5,7 @@ import { createDb, type Db } from "../db/client";
 import { projects } from "../db/schema";
 import { requireAuth, type AuthVariables } from "../auth/middleware";
 import type { Env } from "../types";
-import { presignUploadUrl, presignDownloadUrl } from "../storage/b2";
+import { presignUploadUrl, publicUrl } from "../storage/b2";
 import { jsonValidator } from "../lib/validation";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -24,7 +24,7 @@ const videoMetaSchema = z
 
 const patchProjectSchema = z.object({
   name: z.string().min(1).optional(),
-  videoKey: z.string().optional(),
+  videoUrl: z.string().url().optional(),
   videoMeta: videoMetaSchema.optional(),
 });
 
@@ -85,11 +85,11 @@ projectsRoutes.patch(
     // userId/id and reassign or clobber the row (mass assignment).
     const patch: Partial<typeof projects.$inferInsert> = {};
     if (body.name !== undefined) patch.name = body.name;
-    if (body.videoKey !== undefined) {
-      if (!body.videoKey.startsWith(`${projectId}/`)) {
-        return c.json({ error: "videoKey does not belong to this project" }, 400);
+    if (body.videoUrl !== undefined) {
+      if (!body.videoUrl.startsWith(publicUrl(c.env, `${projectId}/`))) {
+        return c.json({ error: "videoUrl does not belong to this project" }, 400);
       }
-      patch.videoKey = body.videoKey;
+      patch.videoUrl = body.videoUrl;
     }
     if (body.videoMeta !== undefined) patch.videoMeta = body.videoMeta;
 
@@ -120,15 +120,5 @@ projectsRoutes.post("/:id/video-upload-url", async (c) => {
 
   const key = `${project.id}/${crypto.randomUUID()}`;
   const uploadUrl = await presignUploadUrl(c.env, key);
-  return c.json({ uploadUrl, key });
-});
-
-projectsRoutes.get("/:id/video-url", async (c) => {
-  const db = createDb(c.env);
-  const project = await loadOwnedProject(db, c.get("userId"), c.req.param("id"));
-  if (!project) return c.json({ error: "not found" }, 404);
-  if (!project.videoKey) return c.json({ error: "no video uploaded" }, 404);
-
-  const downloadUrl = await presignDownloadUrl(c.env, project.videoKey);
-  return c.json({ downloadUrl });
+  return c.json({ uploadUrl, videoUrl: publicUrl(c.env, key) });
 });

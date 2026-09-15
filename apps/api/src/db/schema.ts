@@ -9,7 +9,7 @@ export const projects = pgTable("projects", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  videoKey: text("video_key"),
+  videoUrl: text("video_url"),
   videoMeta: jsonb("video_meta").$type<{
     width: number;
     height: number;

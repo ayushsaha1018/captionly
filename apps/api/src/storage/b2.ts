@@ -10,21 +10,15 @@ function b2Client(env: Env) {
   });
 }
 
-export async function presignUploadUrl(env: Env, key: string): Promise<string> {
-  const client = b2Client(env);
-  const url = new URL(`${env.B2_ENDPOINT}/${env.B2_BUCKET}/${key}`);
-  url.searchParams.set("X-Amz-Expires", "3600");
-  const signed = await client.sign(new Request(url, { method: "PUT" }), {
-    aws: { signQuery: true },
-  });
-  return signed.url;
+export function publicUrl(env: Env, key: string): string {
+  return `${env.B2_ENDPOINT}/${env.B2_BUCKET}/${key}`;
 }
 
-export async function presignDownloadUrl(env: Env, key: string): Promise<string> {
+export async function presignUploadUrl(env: Env, key: string): Promise<string> {
   const client = b2Client(env);
-  const url = new URL(`${env.B2_ENDPOINT}/${env.B2_BUCKET}/${key}`);
+  const url = new URL(publicUrl(env, key));
   url.searchParams.set("X-Amz-Expires", "3600");
-  const signed = await client.sign(new Request(url, { method: "GET" }), {
+  const signed = await client.sign(new Request(url, { method: "PUT" }), {
     aws: { signQuery: true },
   });
   return signed.url;
