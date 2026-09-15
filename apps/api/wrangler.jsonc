@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "GOOGLE_CLIENT_ID": "281859648607-00sbk58sjacah4j1a6sp6i64lmu7hrss.apps.googleusercontent.com",
+    "B2_ENDPOINT": "s3.eu-central-003.backblazeb2.com",
+    "B2_REGION": "eu-central-003",
+    "B2_BUCKET": "captionaly"
+  }
+}

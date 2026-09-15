@@ -5,6 +5,7 @@ dist
 .env
 .env.*
 !.env.example
+.dev.vars
 
 # renderer sample media / output
 apps/renderer/output/
