@@ -33,6 +33,8 @@ export const createHistorySlice: StateCreator<StudioState, [], [], HistorySlice>
       top?.coalesceKey === entry.coalesceKey &&
       entry.at - top.at < COALESCE_MS;
 
+    state.markDirty();
+
     if (coalesces) {
       // Keep the OLDER snapshot; refresh only the timestamp so a continuous
       // burst of typing keeps extending the same window.
@@ -56,6 +58,7 @@ export const createHistorySlice: StateCreator<StudioState, [], [], HistorySlice>
       future: [...state.future, { snapshot: snapshot(state), label: top.label, at: Date.now() }],
     });
     state.replaceDocument(top.snapshot);
+    state.markDirty();
   },
 
   redo: () => {
@@ -67,5 +70,8 @@ export const createHistorySlice: StateCreator<StudioState, [], [], HistorySlice>
       past: [...state.past, { snapshot: snapshot(state), label: top.label, at: Date.now() }],
     });
     state.replaceDocument(top.snapshot);
+    state.markDirty();
   },
+
+  resetHistory: () => set({ past: [], future: [] }),
 });

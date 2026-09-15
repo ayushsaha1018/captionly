@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useSession } from "@/auth/authClient";
-import { LandingGate } from "@/app/LandingGate";
+import { ProjectDashboard } from "@/app/ProjectDashboard";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/projects/")({
   component: RouteComponent,
 });
 
@@ -12,10 +12,10 @@ function RouteComponent() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (session) navigate({ to: "/projects" });
-  }, [session, navigate]);
+    if (!isPending && !session) navigate({ to: "/" });
+  }, [isPending, session, navigate]);
 
-  if (isPending || session) return null;
+  if (isPending || !session) return null;
 
-  return <LandingGate />;
+  return <ProjectDashboard />;
 }

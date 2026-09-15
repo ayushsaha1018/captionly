@@ -49,10 +49,17 @@ export interface EditorSlice {
   selectedLineId: string | null;
   editingLineId: string | null;
   activeTab: WorkTab;
+  /** Set once a project is loaded; null in local/demo mode. */
+  projectId: string | null;
+  dirty: boolean;
+  lastSavedAt: number | null;
   select: (id: string | null) => void;
   beginEdit: (id: string) => void;
   endEdit: () => void;
   setTab: (t: WorkTab) => void;
+  setProjectId: (id: string | null) => void;
+  markDirty: () => void;
+  markSaved: () => void;
 }
 
 export interface HistoryEntry {
@@ -69,6 +76,8 @@ export interface HistorySlice {
   commit: (label: string, opts?: { coalesceKey?: string }) => void;
   undo: () => void;
   redo: () => void;
+  /** Clears undo/redo stacks. Call when loading a different project/snapshot. */
+  resetHistory: () => void;
 }
 
 export type StudioState = DocumentSlice & EditorSlice & HistorySlice;

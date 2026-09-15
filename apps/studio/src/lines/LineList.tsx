@@ -10,13 +10,15 @@ function Rows({
   playerRef,
   onSelect,
   onOpenTranscribe,
+  isPreparingTranscribe,
 }: {
   playerRef: React.RefObject<PlayerRef | null>;
   onSelect: (id: string) => void;
   onOpenTranscribe?: () => void;
+  isPreparingTranscribe?: boolean;
 }) {
   const lines = useStudioStore((s) => s.lines);
-  const videoFile = useStudioStore((s) => s.video?.file);
+  const hasVideo = useStudioStore((s) => !!s.video);
   const selectedLineId = useStudioStore((s) => s.selectedLineId);
   const editingLineId = useStudioStore((s) => s.editingLineId);
   const select = useStudioStore((s) => s.select);
@@ -45,14 +47,15 @@ function Rows({
           Add your first subtitle line or auto-transcribe from video with local AI.
         </p>
         <div className="mt-4 flex items-center gap-2">
-          {videoFile && onOpenTranscribe && (
+          {hasVideo && onOpenTranscribe && (
             <button
               type="button"
               onClick={onOpenTranscribe}
-              className="flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-400 transition-colors hover:bg-emerald-500/25 hover:text-emerald-300"
+              disabled={isPreparingTranscribe}
+              className="flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-400 transition-colors hover:bg-emerald-500/25 hover:text-emerald-300 disabled:opacity-50"
             >
               <Sparkles className="h-3.5 w-3.5" />
-              Auto-transcribe
+              {isPreparingTranscribe ? "Preparing…" : "Auto-transcribe"}
             </button>
           )}
           <button
@@ -92,9 +95,11 @@ function Rows({
 export function LineList({
   playerRef,
   onOpenTranscribe,
+  isPreparingTranscribe,
 }: {
   playerRef: React.RefObject<PlayerRef | null>;
   onOpenTranscribe?: () => void;
+  isPreparingTranscribe?: boolean;
 }) {
   const video = useStudioStore((s) => s.video);
   const beginEdit = useStudioStore((s) => s.beginEdit);
@@ -123,7 +128,12 @@ export function LineList({
 
   return (
     <div className="relative pt-2 pb-6">
-      <Rows playerRef={playerRef} onSelect={onSelect} onOpenTranscribe={onOpenTranscribe} />
+      <Rows
+        playerRef={playerRef}
+        onSelect={onSelect}
+        onOpenTranscribe={onOpenTranscribe}
+        isPreparingTranscribe={isPreparingTranscribe}
+      />
     </div>
   );
 }
