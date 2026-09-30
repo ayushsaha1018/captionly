@@ -149,6 +149,9 @@ export function loadGoogleFont(
       if (res?.waitUntilDone) {
         await res.waitUntilDone();
       }
+      if (typeof document !== "undefined" && document.fonts?.ready) {
+        await document.fonts.ready;
+      }
     } catch (err) {
       console.warn(`Failed to load Google Font "${fontFamily}":`, err);
     }

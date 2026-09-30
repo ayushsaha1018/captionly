@@ -74,7 +74,7 @@ export function PlayerRail({
             width: meta.width,
             height: meta.height,
             durationSec: meta.durationSec,
-            fps: FPS,
+            fps: meta.fps ?? FPS,
             mimeType: file.type,
           },
         });
@@ -262,16 +262,20 @@ export function PlayerRail({
             videoSrc={video.src}
             subtitles={{ lines, style, position, animation }}
             safeZone={safeZone}
-            durationInFrames={Math.round(video.durationSec * FPS)}
+            durationInFrames={Math.round(video.durationSec * (video.fps ?? FPS))}
             compositionWidth={video.width}
             compositionHeight={video.height}
-            fps={FPS}
+            fps={video.fps ?? FPS}
             playerRef={playerRef}
           />
         </div>
       </div>
 
-      <PlayerScrubber playerRef={playerRef} durationSec={video.durationSec} />
+      <PlayerScrubber
+        playerRef={playerRef}
+        durationSec={video.durationSec}
+        fps={video.fps ?? FPS}
+      />
 
       <div className="flex items-center justify-between gap-3">
         <Tooltip>

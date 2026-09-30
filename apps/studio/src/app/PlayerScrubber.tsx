@@ -7,21 +7,22 @@ import { FPS } from "@/lib/constants";
 interface PlayerScrubberProps {
   playerRef: React.RefObject<PlayerRef | null>;
   durationSec: number;
+  fps?: number;
 }
 
 /**
- * Leaf component that subscribes to the player's frame updates at 30 fps
+ * Leaf component that subscribes to the player's frame updates
  * to render a scrub bar and elapsed timecode without re-rendering the parent rail.
  */
-export function PlayerScrubber({ playerRef, durationSec }: PlayerScrubberProps) {
+export function PlayerScrubber({ playerRef, durationSec, fps = FPS }: PlayerScrubberProps) {
   const frame = useCurrentPlayerFrame(playerRef);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const totalFrames = Math.max(1, Math.round(durationSec * FPS));
+  const totalFrames = Math.max(1, Math.round(durationSec * fps));
   const currentFrame = Math.min(totalFrames, Math.max(0, frame));
   const progressPercent = (currentFrame / totalFrames) * 100;
-  const currentTimeSec = currentFrame / FPS;
+  const currentTimeSec = currentFrame / fps;
 
   const seekFromPointer = useCallback(
     (clientX: number) => {
@@ -59,7 +60,7 @@ export function PlayerScrubber({ playerRef, durationSec }: PlayerScrubberProps) 
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (!playerRef.current) return;
-    const step = e.shiftKey ? FPS * 5 : FPS; // 1s default, 5s with Shift
+    const step = e.shiftKey ? fps * 5 : fps; // 1s default, 5s with Shift
     if (e.key === "ArrowLeft") {
       e.preventDefault();
       playerRef.current.seekTo(Math.max(0, currentFrame - step));
