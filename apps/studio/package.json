@@ -37,6 +37,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "lucide-react": "^0.575.0",
+    "mediabunny": "1.55.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "remotion": "4.0.521",
