@@ -4,7 +4,8 @@ import { MainComposition, loadGoogleFont } from "@captionly/engine";
 import type { SubtitleCompositionProps } from "@captionly/engine";
 import { downloadBlob } from "./downloadBlob";
 import { FPS } from "@/lib/constants";
-import type { SubtitleExportData, ExportProgress } from "./types";
+import type { SubtitleExportData, ExportProgress, VideoExportOptions } from "./types";
+import { isHtmlInCanvasSupported } from "./types";
 
 export interface UseVideoExportReturn {
   isSupported: boolean;
@@ -17,6 +18,7 @@ export interface UseVideoExportReturn {
     durationSec: number,
     width: number,
     height: number,
+    options: VideoExportOptions,
   ) => Promise<Blob | null>;
   cancelExport: () => void;
   downloadBlob: (blob: Blob, filename?: string) => void;
@@ -47,6 +49,7 @@ export function useVideoExport(): UseVideoExportReturn {
       durationSec: number,
       width: number,
       height: number,
+      options: VideoExportOptions,
     ): Promise<Blob | null> => {
       if (!isSupported) {
         const msg =
@@ -67,7 +70,8 @@ export function useVideoExport(): UseVideoExportReturn {
         blobUrlToRevoke = videoUrl;
       }
 
-      const durationInFrames = Math.max(1, Math.ceil(durationSec * FPS));
+      const exportFps = options.fps ?? FPS;
+      const durationInFrames = Math.max(1, Math.ceil(durationSec * exportFps));
       const abort = new AbortController();
       abortRef.current = abort;
 
@@ -91,6 +95,16 @@ export function useVideoExport(): UseVideoExportReturn {
           });
         }
 
+        // Ensure canvas font engine has complete metrics before frame rasterization
+        await document.fonts.ready;
+
+        const targetBitrate = options.bitrate;
+        const htmlInCanvasActive = isHtmlInCanvasSupported();
+
+        console.info(
+          `[Captionly Export] Starting in-browser render: codec=h264, bitrate=${(targetBitrate / 1_000_000).toFixed(1)}Mbps, fps=${exportFps}, resolution=${width}x${height}, htmlInCanvas=${htmlInCanvasActive ? "NATIVE (drawElementImage)" : "FALLBACK (DOM Composer)"}`,
+        );
+
         const inputProps: SubtitleCompositionProps = {
           videoSrc: videoUrl,
           subtitles,
@@ -101,11 +115,19 @@ export function useVideoExport(): UseVideoExportReturn {
             component: MainComposition as unknown as React.ComponentType<Record<string, unknown>>,
             id: "MainComposition",
             durationInFrames,
-            fps: FPS,
+            fps: exportFps,
             width,
             height,
           },
-          videoBitrate: "high",
+          videoCodec: "h264",
+          // renderMediaOnWeb doesn't pass the track frameRate to the encoder, so WebCodecs budgets
+          // bits per frame as if 30fps: 60fps exports came out at exactly 2x the requested bitrate.
+          // ponytail: assumes the encoder's 30fps default; drop this if Remotion starts passing fps.
+          videoBitrate: Math.round((targetBitrate * 30) / exportFps),
+          audioBitrate: "very-high",
+          keyframeIntervalInSeconds: 2,
+          allowHtmlInCanvas: true,
+          licenseKey: "free-license",
           hardwareAcceleration: "prefer-hardware",
           inputProps: inputProps as unknown as Record<string, unknown>,
           signal: abort.signal,

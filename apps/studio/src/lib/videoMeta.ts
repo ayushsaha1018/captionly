@@ -1,4 +1,5 @@
 import type { VideoMeta } from "@/store/types";
+import { Input, ALL_FORMATS, BlobSource, UrlSource } from "mediabunny";
 
 const SUPPORTED_MIME_TYPES = new Set(["video/mp4", "video/webm", "video/quicktime"]);
 
@@ -7,7 +8,49 @@ export function isValidVideoType(mimeType: string): boolean {
 }
 
 /**
- * Reads video duration, width, and height via an offscreen video element.
+ * Probes the video container for exact native frame rate metrics using mediabunny.
+ * Returns the rounded best-guess fps (e.g. 24, 25, 30, 60), or undefined if unavailable.
+ */
+export async function extractVideoFps(
+  fileOrUrl: File | Blob | string,
+): Promise<number | undefined> {
+  try {
+    const source =
+      typeof fileOrUrl === "string"
+        ? new UrlSource(
+            typeof window !== "undefined"
+              ? new URL(fileOrUrl, window.location.href).href
+              : fileOrUrl,
+          )
+        : new BlobSource(fileOrUrl);
+
+    const input = new Input({
+      source,
+      formats: ALL_FORMATS,
+    });
+
+    try {
+      const track = await input.getPrimaryVideoTrack();
+      if (!track) return undefined;
+      const metrics = await track.computeFrameRateMetrics();
+      if (
+        metrics &&
+        Number.isFinite(metrics.bestGuessFrameRate) &&
+        metrics.bestGuessFrameRate > 0
+      ) {
+        return Math.round(metrics.bestGuessFrameRate);
+      }
+    } finally {
+      input.dispose();
+    }
+  } catch (err) {
+    console.warn("Could not determine video frame rate with mediabunny:", err);
+  }
+  return undefined;
+}
+
+/**
+ * Reads video duration, width, height, and native fps via offscreen video element and mediabunny.
  */
 export async function extractVideoMetadata(fileOrUrl: File | string): Promise<VideoMeta> {
   if (typeof document === "undefined") {
@@ -46,7 +89,7 @@ export async function extractVideoMetadata(fileOrUrl: File | string): Promise<Vi
       video.load();
     };
 
-    const onLoaded = () => {
+    const onLoaded = async () => {
       const durationSec = video.duration;
       const width = video.videoWidth;
       const height = video.videoHeight;
@@ -58,11 +101,19 @@ export async function extractVideoMetadata(fileOrUrl: File | string): Promise<Vi
         return;
       }
 
+      let fps: number | undefined;
+      try {
+        fps = await extractVideoFps(fileOrUrl);
+      } catch {
+        // Non-fatal, fallback to default FPS
+      }
+
       resolve({
         src,
         durationSec,
         width,
         height,
+        fps,
         file: isFile ? fileOrUrl : undefined,
         isDemo: !isFile,
       } as VideoMeta);

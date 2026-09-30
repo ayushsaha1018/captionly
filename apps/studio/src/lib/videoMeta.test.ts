@@ -1,5 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { isValidVideoType, extractVideoMetadata } from "./videoMeta";
+import { isValidVideoType, extractVideoMetadata, extractVideoFps } from "./videoMeta";
+import fs from "node:fs";
+import path from "node:path";
 
 describe("isValidVideoType", () => {
   it("accepts mp4, webm, and quicktime/mov", () => {
@@ -26,5 +28,23 @@ describe("extractVideoMetadata", () => {
     } catch (e: unknown) {
       expect((e as Error).message).toBeTruthy();
     }
+  });
+});
+
+describe("extractVideoFps", () => {
+  it("extracts native frame rate from valid mp4 file", async () => {
+    const samplePath = path.resolve(__dirname, "../../public/test1.mp4");
+    if (fs.existsSync(samplePath)) {
+      const buf = fs.readFileSync(samplePath);
+      const blob = new Blob([buf], { type: "video/mp4" });
+      const fps = await extractVideoFps(blob);
+      expect(fps).toBe(25);
+    }
+  });
+
+  it("gracefully returns undefined for invalid/corrupt data", async () => {
+    const dummyBlob = new Blob(["not-a-video"], { type: "video/mp4" });
+    const fps = await extractVideoFps(dummyBlob);
+    expect(fps).toBeUndefined();
   });
 });

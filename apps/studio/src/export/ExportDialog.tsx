@@ -8,6 +8,7 @@ import {
   Zap,
   HardDrive,
   Server as ServerIcon,
+  Info,
 } from "lucide-react";
 import {
   Dialog,
@@ -22,6 +23,7 @@ import { useVideoExport, type UseVideoExportReturn } from "./useVideoExport";
 import { useServerVideoExport } from "./useServerVideoExport";
 import { downloadBlob } from "./downloadBlob";
 import type { SubtitleExportData } from "./types";
+import { calculateVideoBitrate, isHtmlInCanvasSupported } from "./types";
 import type { VideoMeta } from "@/store/types";
 
 interface ExportDialogProps {
@@ -33,6 +35,7 @@ interface ExportDialogProps {
 
 export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDialogProps) {
   const [mode, setMode] = useState<"client" | "server">("client");
+  const htmlInCanvasActive = isHtmlInCanvasSupported();
 
   const {
     isSupported,
@@ -51,6 +54,11 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
 
   const [exportedBlob, setExportedBlob] = useState<Blob | null>(null);
 
+  // ponytail: file size incl. audio ≈ source video bitrate; probe the track bitrate if this misleads
+  const sourceBitrate = video.file ? (video.file.size * 8) / video.durationSec : undefined;
+  const bitrate = calculateVideoBitrate(video.width, video.height, sourceBitrate);
+  const estimatedBitrateMbps = (bitrate / 1_000_000).toFixed(1);
+
   const handleStartExport = async () => {
     setExportedBlob(null);
 
@@ -59,7 +67,17 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
     try {
       const blob =
         mode === "client"
-          ? await clientExportVideo(source, subtitles, video.durationSec, video.width, video.height)
+          ? await clientExportVideo(
+              source,
+              subtitles,
+              video.durationSec,
+              video.width,
+              video.height,
+              {
+                bitrate,
+                fps: video.fps,
+              },
+            )
           : await serverExport.exportVideo(
               source,
               subtitles,
@@ -247,6 +265,40 @@ export function ExportDialog({ open, onOpenChange, video, subtitles }: ExportDia
                 Server
               </button>
             </div>
+
+            {mode === "client" && !clientBlocked && (
+              <>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium text-foreground">Bitrate (auto)</span>
+                  <span className="text-[11px] text-muted-foreground tabular-nums">
+                    ~{estimatedBitrateMbps} Mbps · {video.width}×{video.height}
+                    {video.fps ? ` @ ${video.fps}fps` : ""}
+                  </span>
+                </div>
+
+                {htmlInCanvasActive ? (
+                  <div className="flex items-center gap-1.5 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1.5 text-[11px] text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                    <span>
+                      <strong>Native GPU capture active</strong> (Chromium drawElementImage).
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-1.5 rounded-md border border-border bg-secondary/30 px-2.5 py-1.5 text-[11px] text-muted-foreground">
+                    <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-sky-500" />
+                    <div className="leading-tight">
+                      <span>
+                        2D DOM Composer active. For native GPU capture, enable{" "}
+                        <code className="rounded bg-muted px-1 py-0.5 text-[10px] font-mono text-foreground">
+                          chrome://flags/#canvas-draw-element
+                        </code>{" "}
+                        in Chrome.
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
 
             {clientBlocked ? (
               <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-xs text-destructive flex items-start gap-2.5">

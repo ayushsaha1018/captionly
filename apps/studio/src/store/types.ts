@@ -10,6 +10,7 @@ export interface VideoMeta {
   durationSec: number;
   width: number;
   height: number;
+  fps?: number;
   file?: File;
   isDemo?: boolean;
 }
